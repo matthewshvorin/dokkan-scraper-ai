@@ -1,0 +1,28 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python tooling
+*.egg-info/
+dist/
+build/
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
