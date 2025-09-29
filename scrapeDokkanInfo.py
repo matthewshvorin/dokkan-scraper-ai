@@ -1,49 +1,54 @@
-# scrape_card_assets_playwright.py
-# Non-headless with detailed logging and optional Playwright trace
+# collect_dokkan_debug_bundle_v2.py
+# One-shot diagnostic bundle for DokkanInfo cards (first link on "Newest" page).
+# Always saves:
+#   - page.html, PAGE_TEXT.txt
+#   - screenshot.png
+#   - debug.json (rich: sections, parsing steps, anchors, stats, images, env)
+#   - console.json, network.json
+#   - trace.zip (Playwright trace) [compatible with older/newer versions]
+#   - network.har (if your Playwright supports HAR)
 #
-# Setup (Windows, PowerShell):
+# Setup:
 #   python -m venv .venv
 #   . .\.venv\Scripts\Activate.ps1
 #   pip install playwright requests
 #   python -m playwright install chromium
 #
 # Run:
-#   python scrape_card_assets_playwright.py
+#   python collect_dokkan_debug_bundle_v2.py
+#
+# It will print:
+#   DEBUG_BUNDLE: output\debug\dokkan_debug-YYYYmmdd-HHMMSS.zip
+# Send me that ZIP.
 
 import json
-import re
-import time
 import logging
+import platform
+import sys
+import zipfile
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple
-from urllib.parse import urljoin, urlparse
+from typing import Dict, List, Optional
+from urllib.parse import urljoin
 
-import requests
-from playwright.sync_api import sync_playwright, TimeoutError as PWTimeoutError
+from playwright.sync_api import TimeoutError as PWTimeoutError, sync_playwright
 
 BASE = "https://dokkaninfo.com"
 INDEX_URL = f"{BASE}/cards?sort=open_at"
-OUTROOT = Path("output/cards")
-LOGDIR = Path("output/logs")
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/124.0.0.0 Safari/537.36"
 )
-HEADERS_DL = {"User-Agent": USER_AGENT, "Referer": BASE}
+
+HEADLESS = False
+SLOW_MO_MS = 200
 TIMEOUT = 60_000
-LIMIT_CARDS = 1
-SLEEP_BETWEEN_CARDS = 1.0
 
-# Playwright UI behavior
-HEADLESS = False        # << non-headless
-SLOW_MO_MS = 200        # slow motion so you can see it work
+OUTROOT = Path("output/debug")
+OUTROOT.mkdir(parents=True, exist_ok=True)
 
-# Collect a Playwright trace.zip you can send me (set to True if helpful)
-ENABLE_TRACE = True
-
-# Exact labels as rendered on the page
 HEADERS = [
     "Leader Skill",
     "Super Attack",
@@ -56,493 +61,558 @@ HEADERS = [
     "Stats",
 ]
 
-def setup_logging() -> Path:
-    LOGDIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    log_path = LOGDIR / f"run-{stamp}.log"
+@dataclass
+class EnvInfo:
+    python: str
+    system: str
+    release: str
+    machine: str
+    playwright: str
 
+def get_env_info() -> EnvInfo:
+    try:
+        import playwright  # type: ignore
+        pw_ver = getattr(playwright, "__version__", "unknown")
+    except Exception:
+        pw_ver = "unavailable"
+    return EnvInfo(
+        python=sys.version.replace("\n", " "),
+        system=platform.system(),
+        release=platform.release(),
+        machine=platform.machine(),
+        playwright=pw_ver,
+    )
+
+def css_path_js() -> str:
+    # returns a JS function as string
+    return r"""
+    (function(el){
+      if (!el) return null;
+      const parts = [];
+      while (el && el.nodeType === Node.ELEMENT_NODE && el !== document.body) {
+        let selector = el.nodeName.toLowerCase();
+        if (el.id) { selector += '#' + el.id; parts.unshift(selector); break; }
+        let sib = 1, prev = el;
+        while ((prev = prev.previousElementSibling) != null) {
+          if (prev.nodeName === el.nodeName) sib++;
+        }
+        selector += `:nth-of-type(${sib})`;
+        parts.unshift(selector);
+        el = el.parentElement;
+      }
+      return parts.join(' > ') || null;
+    })
+    """
+
+def setup_logging(log_dir: Path) -> Path:
+    log_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_path = log_dir / f"debug-run-{stamp}.log"
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-
-    # file handler
     fh = logging.FileHandler(log_path, encoding="utf-8")
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
-
-    # console handler (concise)
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
     ch.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
-
-    # reset handlers if re-run in same session
     for h in list(logger.handlers):
         logger.removeHandler(h)
-
     logger.addHandler(fh)
     logger.addHandler(ch)
-
     logging.info("Logging to %s", log_path)
     return log_path
 
-def sanitize_filename(name: str) -> str:
-    name = (
-        name.replace(":", " -")
-        .replace("/", "-")
-        .replace("\\", "-")
-        .replace("|", "-")
-        .replace("*", "x")
-        .replace("?", "")
-        .replace('"', "'")
-        .strip()
-    )
-    name = re.sub(r"\s+", " ", name)
-    return name.rstrip(" .")
+def safe_write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True
+                      )
+    path.write_text(text or "", encoding="utf-8")
 
-def detect_rarity_and_type_from_images(image_urls: List[str]) -> Tuple[Optional[str], Optional[str]]:
-    rarity = None
-    patterns = {
-        "LR": ["cha_rare_sm_lr", "cha_rare_lr", "/lr."],
-        "UR": ["cha_rare_sm_ur", "cha_rare_ur"],
-        "SSR": ["cha_rare_sm_ssr", "cha_rare_ssr"],
-        "SR": ["cha_rare_sm_sr", "cha_rare_sr"],
-        "R": ["cha_rare_sm_r", "cha_rare_r"],
-        "N": ["cha_rare_sm_n", "cha_rare_n"],
-    }
-    for url in image_urls:
-        low = url.lower()
-        for label, needles in patterns.items():
-            if any(n in low for n in needles):
-                rarity = label
-                break
-        if rarity:
-            break
-
-    type_icon = None
-    for url in image_urls:
-        if "cha_type_icon_" in url:
-            type_icon = Path(urlparse(url).path).name
-            break
-
-    logging.debug("Rarity detected: %s, type icon: %s", rarity, type_icon)
-    return rarity, type_icon
-
-def download_assets(urls: List[str], dest_dir: Path) -> List[str]:
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    saved: List[str] = []
-    for url in urls:
-        try:
-            parsed = urlparse(url)
-            path = Path(parsed.path)
-            subdir = dest_dir / Path(*[p for p in path.parts[:-1] if p not in ("/", "")])
-            subdir.mkdir(parents=True, exist_ok=True)
-            target = subdir / path.name
-
-            if target.exists() and target.stat().st_size > 0:
-                saved.append(str(target))
-                continue
-
-            with requests.get(url, headers=HEADERS_DL, stream=True, timeout=30) as r:
-                r.raise_for_status()
-                with open(target, "wb") as f:
-                    for chunk in r.iter_content(65536):
-                        if chunk:
-                            f.write(chunk)
-            saved.append(str(target))
-        except Exception as e:
-            logging.warning("Asset failed: %s -> %s", url, e)
-    return saved
+def safe_dump_json(path: Path, obj: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 def main():
-    log_path = setup_logging()
-    logging.info("Starting DokkanInfo scraper (non-headless)")
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    run_dir = OUTROOT / f"dokkan_debug-{stamp}"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    log_dir = run_dir / "logs"
+    setup_logging(log_dir)
 
-    OUTROOT.mkdir(parents=True, exist_ok=True)
+    env = get_env_info()
+    logging.info(
+        "Env: Python=%s | Playwright=%s | OS=%s %s (%s)",
+        env.python.split()[0], env.playwright, env.system, env.release, env.machine
+    )
+
+    console_events: List[Dict[str, str]] = []
+    responses: List[Dict[str, str]] = []
+    failures: List[Dict[str, str]] = []
 
     with sync_playwright() as p:
-        logging.info("Launching Chromium (headless=%s, slow_mo=%sms)", HEADLESS, SLOW_MO_MS)
-        browser = p.chromium.launch(headless=HEADLESS, slow_mo=SLOW_MO_MS)
-        context = browser.new_context(user_agent=USER_AGENT, locale="en-US", viewport={"width": 1400, "height": 900})
+        # HAR support (if available on your version)
+        context_kwargs = dict(
+            user_agent=USER_AGENT,
+            locale="en-US",
+            viewport={"width": 1400, "height": 900},
+        )
+        har_path: Optional[Path] = run_dir / "network.har"
+        try:
+            browser = p.chromium.launch(headless=HEADLESS, slow_mo=SLOW_MO_MS)
+            context = browser.new_context(**context_kwargs, record_har_path=str(har_path), record_har_content="embed")
+            logging.info("HAR recording enabled -> %s", har_path)
+        except TypeError:
+            browser = p.chromium.launch(headless=HEADLESS, slow_mo=SLOW_MO_MS)
+            context = browser.new_context(**context_kwargs)
+            har_path = None
+            logging.info("HAR recording not supported on this Playwright; continuing without it.")
+
         page = context.new_page()
 
-        # capture console logs from the page
-        def _browser_console(msg):
+        # listeners
+        def on_console(msg):
             try:
-                # In Playwright Python, .type and .text are attributes, not callables
+                console_events.append({
+                    "type": str(getattr(msg, "type", None)),
+                    "text": str(getattr(msg, "text", None)),
+                })
                 logging.debug("BROWSER %s: %s", getattr(msg, "type", None), getattr(msg, "text", None))
-            except Exception as e:
-                logging.debug("BROWSER console log skipped (%s)", e)
+            except Exception:
+                pass
 
-        page.on("console", _browser_console)
+        def on_response(resp):
+            try:
+                req = resp.request
+                url = resp.url
+                status = resp.status
+                rtype = getattr(req, "resource_type", lambda: "unknown")()
+                ct = resp.headers.get("content-type", "")
+                if "dokkaninfo.com" in url or status >= 400:
+                    responses.append({
+                        "url": url, "status": str(status), "type": rtype, "content_type": ct
+                    })
+            except Exception:
+                pass
 
-        trace_path = None
+        def on_failed(req):
+            try:
+                failures.append({"url": req.url, "method": req.method, "type": req.resource_type})
+                logging.debug("REQUEST FAILED: %s", req.url)
+            except Exception:
+                pass
+
+        page.on("console", on_console)
+        page.on("response", on_response)
+        page.on("requestfailed", on_failed)
+
+        # tracing (compatible with multiple Playwright versions)
+        trace_zip = run_dir / "trace.zip"
+        tracing_started = False
         try:
-            if ENABLE_TRACE:
-                trace_path = LOGDIR / f"trace-{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip"
-                logging.info("Tracing enabled -> %s", trace_path)
-                context.tracing.start(screenshots=True, snapshots=True, sources=False)
+            context.tracing.start(screenshots=True, snapshots=True, sources=False)
+            tracing_started = True
+            logging.info("Tracing started.")
+        except Exception as e:
+            logging.info("Tracing not started (%s)", e)
 
+        page_html_text = ""
+        page_plain_text = ""
+        debug_obj: dict = {}
+
+        try:
+            # Index
             logging.info("Opening index: %s", INDEX_URL)
             page.goto(INDEX_URL, wait_until="domcontentloaded", timeout=TIMEOUT)
             page.wait_for_timeout(1200)
-
             hrefs = page.eval_on_selector_all(
                 'a.col-auto[href^="/cards/"]',
                 "els => els.map(e => e.getAttribute('href')).filter(Boolean)",
             )
             links = [urljoin(BASE, h) for h in hrefs if h.startswith("/cards/")]
-
             logging.info("Found %d card links on screen", len(links))
-            logging.debug("First 10 links: %s", links[:10])
-
             if not links:
                 raise RuntimeError("No card anchors found matching a.col-auto[href^='/cards/'] on the index.")
 
-            for i, card_url in enumerate(links[:LIMIT_CARDS], start=1):
-                logging.info("Processing card %d/%d -> %s", i, min(LIMIT_CARDS, len(links)), card_url)
-                page.goto(card_url, wait_until="domcontentloaded", timeout=TIMEOUT)
-                page.wait_for_timeout(1500)
+            # First card
+            target = links[0]
+            logging.info("Opening first card: %s", target)
+            page.goto(target, wait_until="domcontentloaded", timeout=TIMEOUT)
+            page.wait_for_timeout(1500)
 
-                shot_dir = LOGDIR / "screens"
-                shot_dir.mkdir(parents=True, exist_ok=True)
-                shot_file = shot_dir / f"card-{i}.png"
-                try:
-                    # Return bytes and write them ourselves (avoids kwarg `path=`)
-                    img_bytes = page.screenshot(full_page=True)
-                    shot_file.write_bytes(img_bytes)
-                    logging.info("Saved page screenshot: %s", shot_file)
-                except Exception as e:
-                    logging.warning("Screenshot failed (writing bytes fallback already tried): %s", e)
+            # Screenshot ASAP
+            try:
+                (run_dir / "screenshot.png").write_bytes(page.screenshot(full_page=True))
+                logging.info("Saved screenshot: %s", run_dir / "screenshot.png")
+            except Exception as e:
+                logging.warning("Screenshot failed: %s", e)
 
-                # ---- DOM-ORDER SECTION SLICER (browser context) ----
-                logging.debug("Evaluating DOM to extract sections...")
-                data = page.evaluate(
-                    """(headers) => {
-                        const isVisible = (el) => {
-                          const style = window.getComputedStyle(el);
-                          return style.display !== 'none' &&
-                                 style.visibility !== 'hidden' &&
-                                 (el.offsetParent !== null || style.position === 'fixed');
-                        };
+            # HTML + Text ASAP
+            try:
+                page_html_text = page.evaluate("() => document.documentElement.outerHTML") or ""
+            except Exception:
+                page_html_text = page.content()
+            try:
+                page_plain_text = page.evaluate("() => document.body.innerText") or ""
+            except Exception:
+                page_plain_text = ""
+            safe_write_text(run_dir / "page.html", page_html_text)
+            safe_write_text(run_dir / "PAGE_TEXT.txt", page_plain_text)
 
-                        const all = Array.from(document.querySelectorAll('body *')).filter(isVisible);
-                        const page_title   = document.title.trim();
-                        const display_name = (document.querySelector('h1')?.textContent || page_title || '').trim();
+            # ===== FIXED evaluate: pass ONE object argument =====
+            debug_obj = page.evaluate(
+                """({ headers, cssPathFn }) => {
+                  const cssPath = eval(cssPathFn);
 
-                        const headerPos = [];
-                        all.forEach((el, idx) => {
-                          const t = el.textContent.trim();
-                          if (headers.includes(t)) headerPos.push({label: t, index: idx});
-                        });
+                  const isVisible = (el) => {
+                    const s = getComputedStyle(el);
+                    return s.display !== 'none' && s.visibility !== 'hidden' &&
+                           (el.offsetParent !== null || s.position === 'fixed');
+                  };
+                  const depthOf = (el) => { let d=0; for(let n=el; n && n !== document.body; n=n.parentElement) d++; return d; };
+                  const isHeadingish = (el) => {
+                    if (!isVisible(el)) return false;
+                    const tn = el.tagName ? el.tagName.toUpperCase() : '';
+                    if (/^H[1-6]$/.test(tn)) return true;
+                    const role = el.getAttribute('role') || '';
+                    if (/^heading$/i.test(role)) return true;
+                    const cls = el.className ? String(el.className) : '';
+                    if (/(title|header|heading)/i.test(cls)) return true;
+                    return false;
+                  };
 
-                        function sliceBetween(aIdx, bIdx){
-                          const els = all.slice(aIdx + 1, bIdx === -1 ? undefined : bIdx);
-                          const frag = document.createElement('div');
-                          els.forEach(e => frag.appendChild(e.cloneNode(true)));
-                          return {
-                            text: frag.innerText.replace(/\\n{2,}/g,'\\n').trim(),
-                            html: frag.innerHTML
-                          };
-                        }
+                  const page_title = document.title.trim();
+                  const display_name = (document.querySelector('h1')?.textContent || page_title || '').trim();
 
-                        const sections = {};
-                        for (let i=0; i<headerPos.length; i++){
-                          const cur = headerPos[i];
-                          const next = headerPos[i+1];
-                          const endIdx = next ? next.index : -1;
-                          sections[cur.label] = sliceBetween(cur.index, endIdx);
-                        }
+                  const allEls = Array.from(document.querySelectorAll('body *')).filter(isVisible);
+                  const headerNodes = [];
+                  for (const el of allEls) {
+                    const txt = el.textContent.trim();
+                    if (!headers.includes(txt)) continue;
+                    if (!isHeadingish(el)) continue;
+                    headerNodes.push({
+                      label: txt, depth: depthOf(el),
+                      tag: el.tagName.toLowerCase(),
+                      css_path: cssPath(el),
+                      el
+                    });
+                  }
+                  if (headerNodes.length === 0) {
+                    for (const el of allEls) {
+                      const txt = el.textContent.trim();
+                      if (headers.includes(txt)) headerNodes.push({
+                        label: txt, depth: depthOf(el),
+                        tag: el.tagName.toLowerCase(), css_path: cssPath(el), el
+                      });
+                    }
+                  }
 
-                        const G = (k) => sections[k] ? sections[k].text : null;
-                        const H = (k) => sections[k] ? sections[k].html : "";
+                  function nextHeaderIndex(i) {
+                    const curDepth = headerNodes[i].depth;
+                    for (let j=i+1; j<headerNodes.length; j++){
+                      if (headerNodes[j].depth <= curDepth) return j;
+                    }
+                    return -1;
+                  }
 
-                        function splitNameDetails(text){
-                          if (!text) return {name:null, details:null};
-                          const lines = text.split('\\n').map(s => s.trim()).filter(Boolean);
-                          if (lines.length === 0) return {name:null, details:null};
-                          const name = lines[0];
-                          const details = lines.slice(1).join(' ').replace(/\\s+/g,' ').trim() || null;
-                          return {name, details};
-                        }
+                  function collectBetween(startEl, endElExclusive){
+                    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, {
+                      acceptNode(node){
+                        const s = getComputedStyle(node);
+                        if (s.display === 'none' || s.visibility === 'hidden') return NodeFilter.FILTER_REJECT;
+                        if (node.offsetParent === null && s.position !== 'fixed') return NodeFilter.FILTER_REJECT;
+                        return NodeFilter.FILTER_ACCEPT;
+                      }
+                    });
+                    const frag = document.createElement('div');
+                    let started = false;
+                    while(walker.nextNode()){
+                      const node = walker.currentNode;
+                      if (node === startEl) { started = true; continue; }
+                      if (!started) continue;
+                      if (endElExclusive && node === endElExclusive) break;
+                      frag.appendChild(node.cloneNode(true));
+                    }
+                    const text = frag.innerText.replace(/\n{2,}/g,'\n').trim();
+                    const html = frag.innerHTML;
+                    return { text, html, html_len: html.length };
+                  }
 
-                        // --- Super Attack robust parser ---
-                        function parseSuper(superHtml){
-                          const tmp = document.createElement('div');
-                          tmp.innerHTML = superHtml || "";
+                  const sections = {};
+                  const headers_debug = [];
+                  const raw_sections = {};
+                  for (let i=0; i<headerNodes.length; i++) {
+                    const cur = headerNodes[i];
+                    const j = nextHeaderIndex(i);
+                    const endEl = j === -1 ? null : headerNodes[j].el;
+                    const slice = collectBetween(cur.el, endEl);
+                    sections[cur.label] = slice;
+                    headers_debug.push({
+                      label: cur.label,
+                      depth: cur.depth,
+                      tag: cur.tag,
+                      css_path: cur.css_path,
+                      html_len: slice.html_len,
+                      text_preview: slice.text.slice(0, 200)
+                    });
+                    raw_sections[cur.label] = { text: slice.text, html: slice.html };
+                  }
 
-                          // remove embedded Ultra header if present
-                          const nodes = tmp.querySelectorAll('*');
-                          let cut = null;
-                          nodes.forEach(n => {
-                            const t = n.textContent.trim();
-                            if (t === 'Ultra Super Attack' && !cut) cut = n;
-                          });
-                          if (cut){
-                            let parent = cut.parentNode;
-                            cut.remove();
-                            while (parent && parent.nextSibling) {
-                              parent.parentNode.removeChild(parent.nextSibling);
-                            }
-                          }
+                  const G = (k) => sections[k] ? sections[k].text : '';
+                  const H = (k) => sections[k] ? sections[k].html : '';
 
-                          const rawLines = tmp.innerText.split('\\n').map(s => s.trim()).filter(Boolean);
+                  const dropNoise = (line) => {
+                    if (!line) return false;
+                    if (/^\d+\s*%$/.test(line)) return false;
+                    if (/SA\s*Lv/i.test(line)) return false;
+                    if (/^\s*$/.test(line)) return false;
+                    return true;
+                  };
+                  const dedupLines = (arr) => {
+                    const seen = new Set(); const out=[];
+                    arr.forEach(l => { if (l && !seen.has(l)) { seen.add(l); out.push(l); }});
+                    return out;
+                  };
+                  const tidyEffect = (s) => s
+                    .replace(/\s*Raises ATK & DEF\s*Causes/gi, ' Raises ATK & DEF; Causes')
+                    .replace(/\s+;/g,';')
+                    .replace(/;\s+/g,'; ')
+                    .replace(/\s+/g,' ')
+                    .trim();
 
-                          const seen = new Set();
-                          const lines = [];
-                          rawLines.forEach(l => {
-                            if (/^\\d+\\s*%$/.test(l)) return;
-                            if (/SA\\s*Lv/i.test(l)) return;
-                            if (!seen.has(l)) { lines.push(l); seen.add(l); }
-                          });
+                  function splitNameEffectFromHtml(html, cutNextHeaderLabel){
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = html || "";
+                    if (cutNextHeaderLabel) {
+                      const all = Array.from(tmp.querySelectorAll('*'));
+                      const nested = all.find(n => n.textContent.trim() === cutNextHeaderLabel);
+                      if (nested) {
+                        while (nested.nextSibling) nested.nextSibling.remove();
+                        nested.remove();
+                      }
+                    }
+                    let raw = tmp.innerText.split('\n').map(s => s.trim());
+                    const html_lines_raw = raw.slice();
+                    raw = raw.filter(dropNoise);
+                    const after_noise = raw.slice();
+                    const dedup = dedupLines(raw);
+                    if (!dedup.length) return { name:null, effect:null, _debug: { html_lines_raw, after_noise, dedup } };
+                    const name = dedup[0];
+                    const eff = dedup.slice(1).join(' ').trim() || null;
+                    return { name, effect: eff ? tidyEffect(eff) : null, _debug: { html_lines_raw, after_noise, dedup } };
+                  }
 
-                          let name = null, effect = null;
-                          if (lines.length > 0){
-                            name = lines[0];
-                            const eff = lines.slice(1).filter(l => l !== name);
-                            effect = eff.join(' ').replace(/\\s+/g, ' ').trim() || null;
-                          }
+                  function parseSuper(superHtml, superTextRaw){
+                    const htmlParsed = splitNameEffectFromHtml(superHtml, 'Ultra Super Attack');
+                    const super_html_debug = htmlParsed._debug;
+                    if (htmlParsed.name || htmlParsed.effect) return {
+                      ...htmlParsed,
+                      _debug: { mode: 'html', super_html_debug }
+                    };
 
-                          if (effect) {
-                            effect = effect
-                              .replace(/\\s*Raises ATK & DEF\\s*Causes/gi, ' Raises ATK & DEF; Causes')
-                              .replace(/\\s*Raises ATK & DEF\\s*$/i, ' Raises ATK & DEF');
-                          }
+                    const lines0 = (superTextRaw || '').split('\n').map(s => s.trim());
+                    const stopIdx = lines0.findIndex(l => l === 'Ultra Super Attack');
+                    const before = (stopIdx >= 0 ? lines0.slice(0, stopIdx) : lines0);
+                    const after_noise = before.filter(dropNoise);
+                    const dedup = dedupLines(after_noise);
+                    const name = dedup[0] || null;
+                    const eff = name ? tidyEffect(dedup.slice(1).join(' ')) : null;
+                    return {
+                      name, effect: eff || null,
+                      _debug: { mode: 'text-fallback', stop_idx: stopIdx, lines_raw: lines0, before_stop: before, after_noise, dedup }
+                    };
+                  }
 
-                          return { name, effect };
-                        }
+                  function parseActive(activeHtml, activationText){
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = activeHtml || "";
+                    Array.from(tmp.querySelectorAll('*')).forEach(el => {
+                      if (el.textContent.trim() === 'Activation Condition(s)') el.remove();
+                    });
+                    let lines = tmp.innerText.split('\n').map(s => s.trim());
+                    const raw_lines = lines.slice();
+                    lines = lines.filter(dropNoise);
+                    const after_noise = lines.slice();
+                    lines = dedupLines(lines);
+                    let name = null, effect = null;
+                    if (lines.length){
+                      name = lines[0];
+                      effect = tidyEffect(lines.slice(1).join(' '));
+                      if (effect && name && effect.startsWith(name)) effect = effect.slice(name.length).trim();
+                    }
+                    let act_lines = (activationText || '').split('\n').map(s=>s.trim());
+                    const act_raw = act_lines.slice();
+                    act_lines = act_lines.filter(dropNoise);
+                    const act_dedup = dedupLines(act_lines);
+                    const activation = act_dedup.join(' ').trim() || null;
+                    return { name, effect, activation, _debug: {
+                      active_raw_lines: raw_lines,
+                      active_after_noise: after_noise,
+                      activation_raw_lines: act_raw,
+                      activation_dedup: act_dedup
+                    }};
+                  }
 
-                        // --- Active Skill robust parser ---
-                        function parseActive(activeHtml, activationText){
-                          const tmp = document.createElement('div');
-                          tmp.innerHTML = activeHtml || "";
+                  function pickAnchors(sectionHtml, mode){
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = sectionHtml || '';
+                    const out=[]; const seen=new Set();
+                    tmp.querySelectorAll('a, button, span, div').forEach(n => {
+                      const a = n.closest('a');
+                      const href = a?.getAttribute('href') || '';
+                      const t = (n.textContent||'').trim();
+                      if (!t || t.length > 40 || !/[A-Za-z]/.test(t)) return;
+                      if (mode === 'links' && !/\/links?\//.test(href)) return;
+                      if (mode === 'cats'  && !/\/categor(y|ies)\//.test(href)) return;
+                      if (/(ATK|DEF|Ki|\+|%|Total:|Links:|Categories:|\.png|\d)/.test(t)) return;
+                      if (['background','icon','rarity','element','EZA','undefined','Venatus'].includes(t)) return;
+                      if (!seen.has(t+href)) { seen.add(t+href); out.push({ text:t, href }) }
+                    });
+                    return out;
+                  }
 
-                          Array.from(tmp.querySelectorAll('*')).forEach(el => {
-                            const t = el.textContent.trim();
-                            if (t === 'Activation Condition(s)') el.remove();
-                          });
+                  function parseStatsFromSection(html, text){
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = html || '';
+                    const table_rows = [];
+                    const stats_out = {};
+                    tmp.querySelectorAll('tr').forEach(tr => {
+                      const row = Array.from(tr.querySelectorAll('th,td')).map(c => c.textContent.trim());
+                      if (row.length) table_rows.push(row);
+                    });
+                    const lines = (text||'').split('\n').map(s=>s.trim()).filter(Boolean);
+                    const grab = (label) => {
+                      const line = lines.find(l => new RegExp('^'+label+'\\b','i').test(l));
+                      if (!line) return null;
+                      const nums = line.match(/\d+/g) || [];
+                      if (!nums.length) return null;
+                      return {
+                        base_min: nums[0] || null,
+                        base_max: nums[1] || null,
+                        '55%':    nums[2] || null,
+                        '100%':   nums[3] || null,
+                      };
+                    };
+                    const hp  = grab('HP');  if (hp)  stats_out.HP  = hp;
+                    const atk = grab('ATK'); if (atk) stats_out.ATK = atk;
+                    const def = grab('DEF'); if (def) stats_out.DEF = def;
+                    const mCost = /\bCost\s*[:\n]\s*(\d+)/i.exec(text || '');    if (mCost) stats_out.Cost = mCost[1];
+                    const mMax  = /\bMax\s*Lv\s*[:\n]\s*(\d+)/i.exec(text || ''); if (mMax)  stats_out['Max Lv'] = mMax[1];
+                    const mSA   = /\bSA\s*Lv\s*[:\n]\s*(\d+)/i.exec(text || '');  if (mSA)   stats_out['SA Lv'] = mSA[1];
+                    return { table_rows, text_lines: lines, parsed: stats_out };
+                  }
 
-                          const lines = tmp.innerText.split('\\n').map(s => s.trim()).filter(Boolean);
+                  const superHtml = H('Super Attack');
+                  const superTextRaw = G('Super Attack');
+                  const superParsed = parseSuper(superHtml, superTextRaw);
 
-                          let name = null, effect = null;
-                          if (lines.length > 0){
-                            name = lines[0];
-
-                            const seen = new Set();
-                            const effLines = [];
-                            lines.slice(1).forEach(l => {
-                              if (!seen.has(l)) { effLines.append ? effLines.append(l) : effLines.push(l); seen.add(l); }
-                            });
-
-                            effect = effLines.join(' ').replace(/\\s+/g,' ').trim() || null;
-                            if (effect && name && effect.startsWith(name)) {
-                              effect = effect.slice(name.length).trim();
-                            }
-                          }
-
-                          let activation = (activationText || '').split('\\n').map(s => s.trim()).filter(Boolean);
-                          const aSeen = new Set(); const aOut = [];
-                          activation.forEach(l => { if (!aSeen.has(l)) { aSeen.add(l); aOut.push(l); } });
-                          const activation_clean = aOut.join(' ').replace(/\\s+/g,' ').trim() || null;
-
-                          return { name, effect, activation: activation_clean };
-                        }
-
-                        function pickNames(sectionHtml, mode){
-                          const tmp = document.createElement('div');
-                          tmp.innerHTML = sectionHtml || '';
-                          const out = [];
-                          const seen = new Set();
-
-                          const nodes = tmp.querySelectorAll('a,button,span,div');
-                          nodes.forEach(n => {
-                            const t = n.textContent.trim();
-                            if (!t || t.length > 40 || !/[A-Za-z]/.test(t)) return;
-
-                            const a = n.closest('a');
-                            const href = a?.getAttribute('href') || '';
-
-                            if (mode === 'links') {
-                              if (!/\\/links?\\//.test(href)) return;
-                            } else if (mode === 'cats') {
-                              if (!/\\/categor(y|ies)\\//.test(href)) return;
-                            } else return;
-
-                            if (/(ATK|DEF|Ki|\\+|%|Total:|Links:|Categories:|\\.png|\\d)/.test(t)) return;
-                            if (!seen.has(t)) { out.push(t); seen.add(t); }
-                          });
-
-                          if (out.length === 0){
-                            tmp.textContent.split('\\n').map(s => s.trim()).forEach(t => {
-                              if (!t || t.length > 40) return;
-                              if (/(ATK|DEF|Ki|\\+|%|Total:|Links:|Categories:|\\.png|\\d)/.test(t)) return;
-                              if (!seen.has(t)) { out.push(t); seen.add(t); }
-                            });
-                          }
-                          return out;
-                        }
-
-                        function parseStats(text){
-                          const stats = {};
-                          if (!text) return stats;
-                          ['HP','ATK','DEF','Cost','Max Lv','SA Lv'].forEach(k => {
-                            const m = new RegExp('(^|\\n)\\s*' + k.replace(' ','\\s+') + '\\s*[:\\n]\\s*([0-9,]+)','i').exec(text);
-                            if (m) stats[k] = m[2].replace(/,/g,'');
-                          });
-                          return stats;
-                        }
-
-                        const leader_skill = G('Leader Skill');
-                        const superParsed = parseSuper(H('Super Attack'));
-                        const ultraRaw = splitNameDetails(G('Ultra Super Attack'));
-                        const passiveRaw = splitNameDetails(G('Passive Skill'));
-                        const activeParsed = parseActive(H('Active Skill'), G('Activation Condition(s)'));
-
-                        const link_skills = pickNames(H('Link Skills'), 'links');
-                        const categories  = pickNames(H('Categories'), 'cats');
-                        const stats = parseStats(G('Stats') || '');
-
-                        // Release Date
-                        const bodyText = document.body.innerText;
-                        let releaseDate = null, timezone = null;
-                        const m = /Release Date\\s+([0-9/.-]+)\\s+([0-9: ]+[APMapm]{2})\\s+([A-Z]{2,4})/.exec(bodyText);
-                        if (m){ releaseDate = m[1] + ' ' + m[2]; timezone = m[3]; }
-
-                        const image_urls = Array.from(document.images)
-                          .filter(isVisible)
-                          .map(img => img.getAttribute('src'))
-                          .filter(Boolean)
-                          .map(s => new URL(s, location.origin).href);
-
-                        return {
-                          display_name, page_title,
-                          release_date: releaseDate, timezone,
-                          leader_skill,
-
-                          super_attack_name: superParsed.name,
-                          super_attack_effect: superParsed.effect,
-
-                          ultra_super_attack_name: ultraRaw.name,
-                          ultra_super_attack_effect: ultraRaw.details,
-
-                          passive_skill_name: passiveRaw.name,
-                          passive_skill_effect: passiveRaw.details,
-
-                          active_skill_name: activeParsed.name,
-                          active_skill_effect: activeParsed.effect,
-                          activation_conditions: activeParsed.activation,
-
-                          link_skills, categories, stats,
-                          image_urls,
-                          page_text: document.body.innerText.trim(),
-                          page_html: document.documentElement.outerHTML
-                        };
-                    }""",
-                    HEADERS,
-                )
-
-                # Log quick stats about extraction
-                logging.info(
-                    "Extracted sections -> name:%s | super:%s | ultra:%s | passive:%s | active:%s",
-                    (data.get("display_name") or "")[:60],
-                    f"{bool(data.get('super_attack_name'))}",
-                    f"{bool(data.get('ultra_super_attack_name'))}",
-                    f"{bool(data.get('passive_skill_name'))}",
-                    f"{bool(data.get('active_skill_name'))}",
-                )
-                logging.debug("Link skills (%d): %s", len(data.get("link_skills") or []), data.get("link_skills"))
-                logging.debug("Categories (%d): %s", len(data.get("categories") or []), data.get("categories"))
-                logging.debug("Stats: %s", data.get("stats"))
-
-                # ---- Write outputs ----
-                image_urls = list(dict.fromkeys(data["image_urls"]))
-                logging.info("Found %d images", len(image_urls))
-
-                rarity, type_icon = detect_rarity_and_type_from_images(image_urls)
-                display_name = data.get("display_name") or "Unknown Card"
-                prefix = f"{rarity} " if rarity else ""
-                folder_name = sanitize_filename(f"{prefix}{display_name}")
-
-                card_dir = OUTROOT / folder_name
-                assets_dir = card_dir / "assets"
-                card_dir.mkdir(parents=True, exist_ok=True)
-
-                # Page sources
-                (card_dir / "page.html").write_text(data["page_html"], encoding="utf-8")
-                (card_dir / "PAGE_TEXT.txt").write_text(data["page_text"], encoding="utf-8")
-                logging.info("Saved page sources to %s", card_dir)
-
-                # Clean metadata
-                meta = {
-                    "page_title": data.get("page_title"),
-                    "display_name": display_name,
-                    "release_date": data.get("release_date"),
-                    "timezone": data.get("timezone"),
-                    "leader_skill": data.get("leader_skill"),
-                    "super_attack": {
-                        "name": data.get("super_attack_name"),
-                        "effect": data.get("super_attack_effect"),
+                  const out = {
+                    url: location.href,
+                    page_title,
+                    display_name,
+                    headers_found: headers_debug,
+                    raw_sections,
+                    leader: (function(){
+                      const lp = splitNameEffectFromHtml(H('Leader Skill'), null);
+                      return { name: lp.name, effect: lp.effect, _debug: lp._debug };
+                    })(),
+                    super_debug: {
+                      present: Boolean(superHtml),
+                      html_len: (superHtml || '').length,
+                      text_len: (superTextRaw || '').length,
+                      parsed: superParsed
                     },
-                    "ultra_super_attack": {
-                        "name": data.get("ultra_super_attack_name"),
-                        "effect": data.get("ultra_super_attack_effect"),
-                    },
-                    "passive_skill": {
-                        "name": data.get("passive_skill_name"),
-                        "effect": data.get("passive_skill_effect"),
-                    },
-                    "active_skill": {
-                        "name": data.get("active_skill_name"),
-                        "effect": data.get("active_skill_effect"),
-                        "activation_conditions": data.get("activation_conditions"),
-                    },
-                    "link_skills": data.get("link_skills") or [],
-                    "categories": data.get("categories") or [],
-                    "stats": data.get("stats") or {},
-                    "source_url": card_url,
-                    "rarity_detected": rarity,
-                    "type_icon_filename": type_icon,
-                    "image_urls": image_urls,
-                }
-                meta_path = card_dir / "METADATA.json"
-                meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-                logging.info("Wrote METADATA.json")
+                    ultra_debug: (function(){
+                      const up = splitNameEffectFromHtml(H('Ultra Super Attack'), null);
+                      return { name: up.name, effect: up.effect, _debug: up._debug };
+                    })(),
+                    passive_debug: (function(){
+                      const pp = splitNameEffectFromHtml(H('Passive Skill'), null);
+                      return { name: pp.name, effect: pp.effect, _debug: pp._debug };
+                    })(),
+                    active_debug: (function(){
+                      const ap = parseActive(H('Active Skill'), G('Activation Condition(s)'));
+                      return { name: ap.name, effect: ap.effect, activation: ap.activation, _debug: ap._debug };
+                    })(),
+                    link_skills_anchors: pickAnchors(H('Link Skills'), 'links'),
+                    categories_anchors: pickAnchors(H('Categories'), 'cats'),
+                    stats_debug: parseStatsFromSection(H('Stats'), G('Stats') || ''),
+                    release_debug: (function(){
+                      const bodyText = document.body.innerText;
+                      const md = /Release Date\s+([0-9/.-]+)\s+([0-9: ]+[APMapm]{2})\s+([A-Z]{2,4})/.exec(bodyText);
+                      return md ? { matched: true, date: md[1], time: md[2], tz: md[3] } : { matched: false };
+                    })(),
+                    image_urls: Array.from(new Set(Array.from(document.images).filter(isVisible).map(img => new URL(img.getAttribute('src'), location.origin).href))),
+                    page_text_preview: (document.body.innerText || '').slice(0, 1200)
+                  };
+                  return out;
+                }""",
+                {"headers": HEADERS, "cssPathFn": css_path_js()},
+            )
 
-                # Assets
-                saved = download_assets(image_urls, assets_dir)
-                logging.info("Saved %d assets into %s", len(saved), assets_dir)
-
-                # Attribution
-                (card_dir / "ATTRIBUTION.txt").write_text(
-                    "Data and image asset links collected from DokkanInfo.\n"
-                    f"Source page: {card_url}\n"
-                    "Site: https://dokkaninfo.com\n\n"
-                    "Notes:\n"
-                    "- Personal/educational use.\n"
-                    "- Respect the site's Terms and original owners' rights.\n"
-                    "- If you share output, credit: “Data/images via dokkaninfo.com”.\n",
-                    encoding="utf-8",
-                )
-                logging.info("Wrote attribution file")
-
-                time.sleep(SLEEP_BETWEEN_CARDS)
+            safe_dump_json(run_dir / "debug.json", {
+                "env": env.__dict__,
+                "source_url": debug_obj.get("url"),
+                "page_title": debug_obj.get("page_title"),
+                "display_name": debug_obj.get("display_name"),
+                "headers_found": debug_obj.get("headers_found"),
+                "raw_sections": debug_obj.get("raw_sections"),
+                "leader": debug_obj.get("leader"),
+                "super_debug": debug_obj.get("super_debug"),
+                "ultra_debug": debug_obj.get("ultra_debug"),
+                "passive_debug": debug_obj.get("passive_debug"),
+                "active_debug": debug_obj.get("active_debug"),
+                "link_skills_anchors": debug_obj.get("link_skills_anchors"),
+                "categories_anchors": debug_obj.get("categories_anchors"),
+                "stats_debug": debug_obj.get("stats_debug"),
+                "release_debug": debug_obj.get("release_debug"),
+                "image_urls": debug_obj.get("image_urls"),
+                "page_text_preview": debug_obj.get("page_text_preview"),
+            })
 
         except PWTimeoutError as e:
             logging.exception("Playwright timeout: %s", e)
         except Exception as e:
             logging.exception("Unexpected error: %s", e)
         finally:
-            if ENABLE_TRACE:
-                try:
-                    context.tracing.stop()  # stop without args
-                    try:
-                        context.tracing.export(path=str(trace_path))
-                        logging.info("Saved trace: %s", trace_path)
-                    except Exception as ee:
-                        logging.warning("Trace export failed: %s", ee)
-                except Exception as te:
-                    logging.warning("Tracing stop failed: %s", te)
-            browser.close()
-            logging.info("Browser closed. Log file: %s", log_path)
+            # persist console/network
+            safe_dump_json(run_dir / "console.json", console_events)
+            safe_dump_json(run_dir / "network.json", {
+                "responses": responses[:1000],
+                "failures": failures[:1000],
+            })
 
+            # tracing finalize (old/new API compatible)
+            if tracing_started:
+                try:
+                    if hasattr(context.tracing, "export"):
+                        context.tracing.stop()
+                        try:
+                            context.tracing.export(path=str(trace_zip))
+                            logging.info("Saved trace (export): %s", trace_zip)
+                        except Exception as ee:
+                            logging.warning("Trace export failed: %s", ee)
+                    else:
+                        context.tracing.stop(path=str(trace_zip))
+                        logging.info("Saved trace (stop with path): %s", trace_zip)
+                except Exception as te:
+                    logging.warning("Tracing save failed: %s", te)
+
+            try:
+                context.close()
+            except Exception:
+                pass
+            try:
+                browser.close()
+            except Exception:
+                pass
+
+    # zip everything for upload
+    out_zip = OUTROOT / f"dokkan_debug-{stamp}.zip"
+    with zipfile.ZipFile(out_zip, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for p in run_dir.rglob("*"):
+            if p.is_file():
+                zf.write(p, p.relative_to(run_dir))
+    print(f"DEBUG_BUNDLE: {out_zip}")
 
 if __name__ == "__main__":
     main()
