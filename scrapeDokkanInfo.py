@@ -1,14 +1,6 @@
-# scrapeDokkanInfo_textparse_v2.py
-# DokkanInfo scraper (text-driven + scoped DOM for categories) — Python 3.9 compatible
-#
-# Setup:
-#   python -m venv .venv
-#   . .\.venv\Scripts\Activate.ps1
-#   pip install playwright requests
-#   python -m playwright install chromium
-#
-# Run:
-#   python scrapeDokkanInfo_textparse_v2.py
+# scrapeDokkanInfo_textparse_v2_3.py
+# DokkanInfo scraper (text-driven parsing + robust DOM fallback for Categories)
+# Python 3.9 compatible
 
 import json
 import logging
@@ -102,7 +94,7 @@ def sanitize_filename(name: str) -> str:
 
 def detect_rarity_and_type_from_images(image_urls: List[str]) -> Tuple[Optional[str], Optional[str]]:
     rarity = None
-    patterns: Dict[str, List[str]] = {
+    patterns = {
         "LR": ["cha_rare_sm_lr", "cha_rare_lr", "/lr."],
         "UR": ["cha_rare_sm_ur", "cha_rare_ur"],
         "SSR": ["cha_rare_sm_ssr", "cha_rare_ssr"],
@@ -175,12 +167,25 @@ def _condense_spaces(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 def _clean_leader(block: List[str]) -> Optional[str]:
-    # Be strict: Leader is a single clean line on DokkanInfo
     if not block:
         return None
     leader = block[0].strip()
-    # Remove accidental duplication if any appears
-    leader = re.sub(r'("Exploding Rage"\s*Category\s+Ki\s*\+\d+\s+and\s+HP,\s*ATK\s*&\s*DEF\s*\+\d+%)\s*\1', r"\1", leader, flags=re.IGNORECASE)
+    # Drop immediate duplication of an identical sentence
+    parts = [p.strip() for p in re.split(r'(?<=[.])\s+', leader) if p.strip()]
+    seen = set()
+    dedup = []
+    for p in parts:
+        if p not in seen:
+            seen.add(p)
+            dedup.append(p)
+    leader = " ".join(dedup)
+    # Specific common duplication on this site
+    leader = re.sub(
+        r'("Exploding Rage"\s*Category\s+Ki\s*\+\d+\s+and\s+HP,\s*ATK\s*&\s*DEF\s*\+\d+%)\s*\1',
+        r"\1",
+        leader,
+        flags=re.IGNORECASE,
+    )
     return leader
 
 def _clean_super_like(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
@@ -206,12 +211,11 @@ def _clean_super_like(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
 def _group_passive_lines(lines: List[str]) -> str:
     if not lines:
         return ""
+    # Remove headers if any snuck in
     lines = [ln for ln in lines if ln not in HEADERS]
-
-    # Normalize 'Basic effect(s)'
+    # Normalize "Basic effect(s)"
     lines = [("Basic effect(s):" if re.fullmatch(r"Basic effect\(s\)", ln, flags=re.IGNORECASE) else ln) for ln in lines]
-
-    # Move "Activates the Entrance Animation..." to the start if found later
+    # Ensure "Activates the Entrance Animation..." leads the effect block
     activ_idx = next((i for i, ln in enumerate(lines) if ln.lower().startswith("activates the entrance animation")), None)
     if activ_idx is not None and activ_idx != 0:
         first = lines.pop(activ_idx)
@@ -240,21 +244,16 @@ def _group_passive_lines(lines: List[str]) -> str:
     cur: List[str] = []
     for ln in lines:
         if is_leading(ln) and cur:
-            groups.append(cur)
-            cur = [ln]
+            groups.append(cur); cur = [ln]
         else:
-            if not cur:
-                cur = [ln]
-            else:
-                cur.append(ln)
-    if cur:
-        groups.append(cur)
+            if not cur: cur = [ln]
+            else: cur.append(ln)
+    if cur: groups.append(cur)
 
     out_parts: List[str] = []
     for g in groups:
         g = [x for x in g if x and x not in HEADERS]
-        if not g:
-            continue
+        if not g: continue
         clause = " ".join(g)
         clause = _condense_spaces(clause)
         clause = re.sub(r"^(Basic effect\(s\))\s*:?(\s*)", r"\1:\2", clause, flags=re.IGNORECASE)
@@ -292,25 +291,19 @@ def _clean_links(block: List[str]) -> List[str]:
     seen = set()
     for ln in block or []:
         s = _condense_spaces(ln)
-        if not s:
-            continue
-        if s in seen:
-            continue
-        seen.add(s)
-        out.append(s)
+        if not s: continue
+        if s in seen: continue
+        seen.add(s); out.append(s)
     return out
 
 def _parse_stats(block: List[str], page_text: str) -> Dict[str, object]:
     stats: Dict[str, object] = {}
     m_cost = re.search(r"\bCost\s*:\s*(\d+)", page_text, flags=re.IGNORECASE)
-    if m_cost:
-        stats["Cost"] = int(m_cost.group(1))
+    if m_cost: stats["Cost"] = int(m_cost.group(1))
     m_max = re.search(r"\bMax\s*Lv\s*:\s*(\d+)", page_text, flags=re.IGNORECASE)
-    if m_max:
-        stats["Max Lv"] = int(m_max.group(1))
+    if m_max: stats["Max Lv"] = int(m_max.group(1))
     m_sa = re.search(r"\bSA\s*Lv\s*:\s*(\d+)", page_text, flags=re.IGNORECASE)
-    if m_sa:
-        stats["SA Lv"] = int(m_sa.group(1))
+    if m_sa: stats["SA Lv"] = int(m_sa.group(1))
 
     def parse_row(key: str) -> Optional[Dict[str, int]]:
         pat = re.compile(rf"^{key}\s+([0-9,]+)\s+([0-9,]+)\s+([0-9,]+)\s+([0-9,]+)$", flags=re.IGNORECASE)
@@ -327,8 +320,7 @@ def _parse_stats(block: List[str], page_text: str) -> Dict[str, object]:
 
     for key in ["HP", "ATK", "DEF"]:
         row = parse_row(key)
-        if row:
-            stats[key] = row
+        if row: stats[key] = row
 
     return stats
 
@@ -347,21 +339,14 @@ def _clean_categories_python(cats: List[str]) -> List[str]:
     seen = set()
     for s in cats or []:
         s = (s or "").strip().strip("•· ")
-        if not s:
-            continue
+        if not s: continue
         low = s.lower()
-        if low in CATEGORY_BLACKLIST_TOKENS:
-            continue
-        if EXT_FILE_PATTERN.search(s):
-            continue
-        if re.fullmatch(r"[\d\s%:]+", s):
-            continue
-        if s in HEADERS or "Links:" in s or "Show More" in s:
-            continue
-        if s in seen:
-            continue
-        seen.add(s)
-        out.append(s)
+        if low in CATEGORY_BLACKLIST_TOKENS: continue
+        if EXT_FILE_PATTERN.search(s): continue
+        if re.fullmatch(r"[\d\s%:]+", s): continue
+        if s in HEADERS or "Links:" in s or "Show More" in s: continue
+        if s in seen: continue
+        seen.add(s); out.append(s)
     return out
 
 # ------------ Main -------------
@@ -419,6 +404,7 @@ def main():
                 page.goto(card_url, wait_until="domcontentloaded", timeout=TIMEOUT)
                 page.wait_for_timeout(1500)
 
+                # Screenshot (use bytes write to avoid any headless path oddities)
                 shot_dir = LOGDIR / "screens"
                 shot_dir.mkdir(parents=True, exist_ok=True)
                 shot_file = shot_dir / f"card-{i}.png"
@@ -437,7 +423,6 @@ def main():
                     "img",
                     "els => els.map(e => e.getAttribute('src')).filter(Boolean)",
                 )
-                # absolutize & dedupe
                 abs_urls = []
                 seen = set()
                 for s in image_urls:
@@ -453,113 +438,116 @@ def main():
                 # ---- Parse TEXT sections ----
                 sections = _split_sections(page_text)
 
-                # Leader (one line)
+                # Leader
                 leader_skill = _clean_leader(sections.get("Leader Skill") or [])
 
-                # Super / Ultra
+                # Super / Ultra from text blocks
                 super_name, super_effect = _clean_super_like(sections.get("Super Attack") or [])
                 ultra_name, ultra_effect = _clean_super_like(sections.get("Ultra Super Attack") or [])
 
-                # Passive: name + grouped effect
+                # --- Fallbacks to guarantee Super/Ultra (as requested) ---
+                if not super_name:
+                    mS = re.search(r"Super Attack\s+([\s\S]*?)\s+Ultra Super Attack", page_text, flags=re.IGNORECASE)
+                    if mS:
+                        block = [ln.strip() for ln in mS.group(1).splitlines() if ln.strip()]
+                        sn, se = _clean_super_like(block)
+                        super_name = super_name or sn
+                        super_effect = super_effect or se
+
+                if not ultra_name:
+                    mU = re.search(
+                        r"Ultra Super Attack\s+([\s\S]*?)\s+(Passive Skill|Active Skill|Link Skills|Categories|Stats)",
+                        page_text,
+                        flags=re.IGNORECASE,
+                    )
+                    if mU:
+                        block = [ln.strip() for ln in mU.group(1).splitlines() if ln.strip()]
+                        un, ue = _clean_super_like(block)
+                        ultra_name = ultra_name or un
+                        ultra_effect = ultra_effect or ue
+
+                # Passive
                 passive_block = sections.get("Passive Skill") or []
                 passive_name = passive_block[0] if passive_block else None
                 passive_effect_lines = passive_block[1:] if len(passive_block) > 1 else []
                 passive_effect = _group_passive_lines(passive_effect_lines)
 
-                # Active + Activation Conditions
+                # Active + Activation
                 active_name, active_effect = _clean_active(sections.get("Active Skill") or [])
                 activation_conditions = _clean_activation(sections.get("Activation Condition(s)") or [])
 
-                # Links
+                # Link Skills
                 link_skills = _clean_links(sections.get("Link Skills") or [])
 
-                # Categories — DOM scoped strictly between Categories and next header
-                categories_scoped = page.evaluate("""
-                  () => {
-                    function isVisible(el){
-                      const s = getComputedStyle(el);
-                      return s.display !== 'none' && s.visibility !== 'hidden' &&
-                             (el.offsetParent !== null || s.position === 'fixed');
-                    }
-                    const HEADERS = [
-                      "Leader Skill","Super Attack","Ultra Super Attack",
-                      "Passive Skill","Active Skill","Activation Condition(s)",
-                      "Link Skills","Categories","Stats"
-                    ];
-                    const all = Array.from(document.querySelectorAll('body *')).filter(isVisible);
-                    const isHeaderEl = (el) => {
-                      const t = (el.textContent || '').trim();
-                      if (!t) return false;
-                      // Must be visually header-ish: H1..H6 or contain heading-ish class
-                      const tag = (el.tagName || '').toUpperCase();
-                      if (/^H[1-6]$/.test(tag)) return HEADERS.includes(t);
-                      const cls = (el.className || '').toString();
-                      const role = (el.getAttribute('role') || '').toLowerCase();
-                      if (role === 'heading' || /(title|header|heading)/i.test(cls)) {
-                        return HEADERS.includes(t);
-                      }
-                      return false;
-                    };
-                    const headers = all.filter(isHeaderEl);
-                    const catHeader = headers.find(el => (el.textContent || '').trim() === 'Categories');
-                    if (!catHeader) return [];
+                # Categories — robust DOM extractor (between "Categories" and next header) via img alt/title
+                categories_scoped = page.evaluate(
+                    """(HEADERS) => {
+                        const all = Array.from(document.querySelectorAll('body *'));
+                        const textOf = el => (el && (el.textContent || '').trim()) || '';
+                        const isHeaderText = (txt) => HEADERS.includes((txt || '').trim());
 
-                    // find next header after catHeader in DOM order
-                    let nextHeader = null;
-                    let seenCat = False = false;
-                    for (const el of all){
-                      if (el === catHeader){ seenCat = true; continue; }
-                      if (!seenCat) continue;
-                      if (isHeaderEl(el)){ nextHeader = el; break; }
-                    }
+                        // 1) find the 'Categories' marker
+                        let catEl = null;
+                        for (const el of all) {
+                          if (textOf(el) === 'Categories') { catEl = el; break; }
+                        }
+                        if (!catEl) return [];
 
-                    // collect elements between catHeader and nextHeader
-                    const out = [];
-                    let collecting = false;
-                    for (const el of all){
-                      if (el === catHeader){ collecting = true; continue; }
-                      if (!collecting) continue;
-                      if (nextHeader && el === nextHeader) break;
+                        // 2) find the next header (stop boundary)
+                        let startHit = false, nextHeader = null;
+                        for (const el of all) {
+                          if (el === catEl) { startHit = true; continue; }
+                          if (!startHit) continue;
+                          if (isHeaderText(textOf(el))) { nextHeader = el; break; }
+                        }
 
-                      // gather anchor texts and image alt/title in this region only
-                      // anchors:
-                      if (el.tagName && el.tagName.toUpperCase() === 'A'){
-                        const txt = (el.textContent || '').trim();
-                        if (txt) out.push(txt);
-                      }
-                      // images:
-                      if (el.tagName && el.tagName.toUpperCase() === 'IMG'){
-                        const a = (el.getAttribute('alt') || '').trim();
-                        const t = (el.getAttribute('title') || '').trim();
-                        if (a) out.push(a);
-                        if (t) out.push(t);
-                      }
-                    }
+                        // 3) collect nodes strictly between catEl and nextHeader
+                        const between = [];
+                        startHit = false;
+                        for (const el of all) {
+                          if (el === catEl) { startHit = true; continue; }
+                          if (!startHit) continue;
+                          if (nextHeader && el === nextHeader) break;
+                          between.push(el);
+                        }
 
-                    // de-dupe, trim
-                    const seen = new Set();
-                    const uniq = [];
-                    for (const s of out){
-                      const v = s.replace(/[\\u2022•·]/g,'').trim();
-                      if (!v) continue;
-                      if (!seen.has(v)){ seen.add(v); uniq.push(v); }
-                    }
-                    return uniq;
-                  }
-                """)
-                # Clean & keep only meaningful category names
+                        // 4) gather from label images only (alts/titles)
+                        const values = [];
+                        const seen = new Set();
+                        const pushUniq = (v) => {
+                          if (!v) return;
+                          const s = String(v).replace(/[\\u2022•·]/g,'').trim();
+                          if (!s) return;
+                          if (seen.has(s)) return;
+                          seen.add(s);
+                          values.push(s);
+                        };
+
+                        between.forEach(el => {
+                          if ((el.tagName || '').toUpperCase() !== 'IMG') return;
+                          const alt = el.getAttribute('alt') || '';
+                          const title = el.getAttribute('title') || '';
+                          // Only consider images under /card_category/label/ (the category chips)
+                          const src = el.getAttribute('src') || '';
+                          if (!/\\/card_category\\/label\\//i.test(src)) return;
+                          pushUniq(alt);
+                          pushUniq(title);
+                        });
+
+                        return values;
+                    }""",
+                    HEADERS,
+                )
                 categories = _clean_categories_python(categories_scoped)
+                logging.debug("Categories raw from DOM: %s", categories_scoped)
+                logging.info("Categories cleaned (%d): %s", len(categories), categories)
 
-                # Stats
+                # Stats + release + rarity/type
                 stats = _parse_stats(sections.get("Stats") or [], page_text)
-
-                # Release date
                 release_date, tz = _parse_release(page_text)
-
-                # Rarity & type
                 rarity, type_icon = detect_rarity_and_type_from_images(image_urls)
 
-                # Names
+                # Names/titles
                 try:
                     h1 = page.text_content("h1") or ""
                     display_name = h1.strip() if h1.strip() else (page.title() or "").strip()
@@ -600,7 +588,10 @@ def main():
                     "type_icon_filename": type_icon,
                     "image_urls": image_urls,
                 }
-                (card_dir / "METADATA.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+                (card_dir / "METADATA.json").write_text(
+                    json.dumps(meta, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
                 logging.info("Wrote METADATA.json")
 
                 saved = download_assets(image_urls, assets_dir)

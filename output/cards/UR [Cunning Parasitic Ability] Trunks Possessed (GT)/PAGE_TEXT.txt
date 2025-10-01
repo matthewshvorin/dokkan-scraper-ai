@@ -1,0 +1,85 @@
+News
+Banners 
+Cards 
+Events 
+Items 
+Missions 
+Baba's Shop 
+Tools 
+Users 
+Other 
+Cunning Parasitic Ability
+Trunks Possessed (GT)
+Release Date
+9/30/2025 1:00:00 AM EDT
+Trunks Possessed (GT)
+200%+ Leaders
+Featured Banners
+Card Assets
+Extreme Z Battle
+Equipment
+Extra Info
+Max Lv:
+120
+SA Lv:
+10
+Cost:
+40
+Summonable
+Leader Skill
+"Corroded Body and Mind" or "Terrifying Conquerors" Category Ki +3 and HP, ATK & DEF +130%
+Super Attack
+Buster Cannon
+Raises DEF for 1 turn
+Causes supreme damage to enemy
+Seals Super Attack
+ 100%
+ 30%
+Passive Skill
+Confirmation of Power
+Basic effect(s)
+"Corroded Body and Mind" Category allies' Ki +1 and ATK & DEF 30%
+Per "Corroded Body and Mind" or "Terrifying Conquerors" Category ally on the team (depending on which Category has more members)
+ATK & DEF 50%
+Damage reduction rate 5%
+When there is an ally whose name includes "Baby" attacking in the same turn, or when all allies attacking in the same turn are "Corroded Body and Mind" Category characters
+ATK 100% when attacking
+Guards all attacks
+As the 1st attacker in a turn
+Ki +1 and ATK & DEF 150%
+Damage reduction rate 15%
+Attacked enemy's ATK & DEF 30% for 2 turns
+After receiving an attack
+ATK & DEF 250%
+Launches an additional Super Attack
+Link Skills
+Thirst for Conquest
+Coward
+GT
+Loyalty
+Royal Lineage
+Hatred of Saiyans
+Fierce Battle
+Categories
+Stats	Base Min	Base Max	55%	100%
+HP	2777	9167	11167	13767
+ATK	2653	8756	10756	13756
+DEF	1589	5244	7244	10644
+Similar Links
+Show More
+Links: 6
+Categories: 5
+Links: 5
+Categories: 5
+Links: 5
+Categories: 5
+Links: 5
+Categories: 1
+Super Attack+
+Free to Play
+50%
+Privacy Policy
+ | 
+Cookie Policy
+ | 
+Terms of Use
