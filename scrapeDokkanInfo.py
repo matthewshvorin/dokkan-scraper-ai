@@ -1,5 +1,5 @@
-# scrapeDokkanInfo_textparse_v2_3.py
-# DokkanInfo scraper (text-driven parsing + robust DOM fallback for Categories)
+# scrapeDokkanInfo_textparse_v2_4.py
+# DokkanInfo scraper (text-driven parsing + robust DOM strategies for Categories)
 # Python 3.9 compatible
 
 import json
@@ -26,7 +26,7 @@ USER_AGENT = (
 )
 HEADERS_DL = {"User-Agent": USER_AGENT, "Referer": BASE}
 TIMEOUT = 60_000
-LIMIT_CARDS = 1
+LIMIT_CARDS = 10
 SLEEP_BETWEEN_CARDS = 1.0
 
 HEADLESS = False
@@ -404,7 +404,7 @@ def main():
                 page.goto(card_url, wait_until="domcontentloaded", timeout=TIMEOUT)
                 page.wait_for_timeout(1500)
 
-                # Screenshot (use bytes write to avoid any headless path oddities)
+                # Screenshot
                 shot_dir = LOGDIR / "screens"
                 shot_dir.mkdir(parents=True, exist_ok=True)
                 shot_file = shot_dir / f"card-{i}.png"
@@ -424,12 +424,12 @@ def main():
                     "els => els.map(e => e.getAttribute('src')).filter(Boolean)",
                 )
                 abs_urls = []
-                seen = set()
+                seen_urls = set()
                 for s in image_urls:
                     try:
                         u = urljoin(page.url, s)
-                        if u not in seen:
-                            seen.add(u); abs_urls.append(u)
+                        if u not in seen_urls:
+                            seen_urls.add(u); abs_urls.append(u)
                     except Exception:
                         continue
                 image_urls = abs_urls
@@ -445,7 +445,7 @@ def main():
                 super_name, super_effect = _clean_super_like(sections.get("Super Attack") or [])
                 ultra_name, ultra_effect = _clean_super_like(sections.get("Ultra Super Attack") or [])
 
-                # --- Fallbacks to guarantee Super/Ultra (as requested) ---
+                # --- Fallbacks to guarantee Super/Ultra ---
                 if not super_name:
                     mS = re.search(r"Super Attack\s+([\s\S]*?)\s+Ultra Super Attack", page_text, flags=re.IGNORECASE)
                     if mS:
@@ -479,68 +479,86 @@ def main():
                 # Link Skills
                 link_skills = _clean_links(sections.get("Link Skills") or [])
 
-                # Categories — robust DOM extractor (between "Categories" and next header) via img alt/title
-                categories_scoped = page.evaluate(
+                # -------------- Categories (robust DOM strategies) --------------
+                # Strategy 1: <a href="/categories/..."><img alt="..."></a>
+                cats1 = page.eval_on_selector_all(
+                    'a[href*="/categories/"] img',
+                    'els => els.map(e => e.getAttribute("alt") || e.getAttribute("title") || "").filter(Boolean)',
+                )
+                logging.debug("Categories strategy1 (a[href*='/categories/'] img): %s", cats1)
+
+                # Strategy 2: label sprites anywhere: img[src*="/card_category/label/"]
+                cats2 = page.eval_on_selector_all(
+                    'img[src*="/card_category/label/"]',
+                    'els => els.map(e => e.getAttribute("alt") || e.getAttribute("title") || "").filter(Boolean)',
+                )
+                logging.debug("Categories strategy2 (img[src*='/card_category/label/']): %s", cats2)
+
+                # Strategy 3 (fallback): between "Categories" and next header, collect image alts/titles + anchor text
+                cats3 = page.evaluate(
                     """(HEADERS) => {
+                        const out = [];
+                        const push = (v) => { if (v && String(v).trim()) out.push(String(v).trim()); };
                         const all = Array.from(document.querySelectorAll('body *'));
                         const textOf = el => (el && (el.textContent || '').trim()) || '';
                         const isHeaderText = (txt) => HEADERS.includes((txt || '').trim());
 
-                        // 1) find the 'Categories' marker
                         let catEl = null;
                         for (const el of all) {
                           if (textOf(el) === 'Categories') { catEl = el; break; }
                         }
                         if (!catEl) return [];
 
-                        // 2) find the next header (stop boundary)
-                        let startHit = false, nextHeader = null;
+                        let start = false, nextHeader = null;
                         for (const el of all) {
-                          if (el === catEl) { startHit = true; continue; }
-                          if (!startHit) continue;
+                          if (el === catEl) { start = true; continue; }
+                          if (!start) continue;
                           if (isHeaderText(textOf(el))) { nextHeader = el; break; }
                         }
 
-                        // 3) collect nodes strictly between catEl and nextHeader
                         const between = [];
-                        startHit = false;
+                        start = false;
                         for (const el of all) {
-                          if (el === catEl) { startHit = true; continue; }
-                          if (!startHit) continue;
+                          if (el === catEl) { start = true; continue; }
+                          if (!start) continue;
                           if (nextHeader && el === nextHeader) break;
                           between.push(el);
                         }
 
-                        // 4) gather from label images only (alts/titles)
-                        const values = [];
-                        const seen = new Set();
-                        const pushUniq = (v) => {
-                          if (!v) return;
-                          const s = String(v).replace(/[\\u2022•·]/g,'').trim();
-                          if (!s) return;
-                          if (seen.has(s)) return;
-                          seen.add(s);
-                          values.push(s);
-                        };
-
                         between.forEach(el => {
-                          if ((el.tagName || '').toUpperCase() !== 'IMG') return;
-                          const alt = el.getAttribute('alt') || '';
-                          const title = el.getAttribute('title') || '';
-                          // Only consider images under /card_category/label/ (the category chips)
-                          const src = el.getAttribute('src') || '';
-                          if (!/\\/card_category\\/label\\//i.test(src)) return;
-                          pushUniq(alt);
-                          pushUniq(title);
+                          if ((el.tagName || '').toUpperCase() === 'IMG') {
+                            const src = el.getAttribute('src') || '';
+                            if (/\\/card_category\\/label\\//i.test(src)) {
+                              push(el.getAttribute('alt') || '');
+                              push(el.getAttribute('title') || '');
+                            }
+                          }
+                          if ((el.tagName || '').toUpperCase() === 'A') {
+                            const href = el.getAttribute('href') || '';
+                            if (/\\/categories\\//i.test(href)) {
+                              push(textOf(el));
+                            }
+                          }
                         });
-
-                        return values;
+                        return out;
                     }""",
                     HEADERS,
                 )
-                categories = _clean_categories_python(categories_scoped)
-                logging.debug("Categories raw from DOM: %s", categories_scoped)
-                logging.info("Categories cleaned (%d): %s", len(categories), categories)
+                logging.debug("Categories strategy3 (between header): %s", cats3)
+
+                # Merge (priority: 1, then 2, then 3), then clean/dedup
+                merged_cats = []
+                seen_cat = set()
+                for pool in (cats1, cats2, cats3):
+                    for c in pool or []:
+                        s = (c or "").strip()
+                        if not s: continue
+                        if s in seen_cat: continue
+                        seen_cat.add(s)
+                        merged_cats.append(s)
+
+                categories = _clean_categories_python(merged_cats)
+                logging.info("Categories merged/cleaned (%d): %s", len(categories), categories)
 
                 # Stats + release + rarity/type
                 stats = _parse_stats(sections.get("Stats") or [], page_text)
