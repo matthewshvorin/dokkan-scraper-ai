@@ -1,16 +1,12 @@
 # scrapeDokkanInfo_play_bs4_index_start.py
 # Playwright (headed) + BeautifulSoup
 # - Starts from index: https://dokkaninfo.com/cards?sort=open_at
-# - Collects card links per page from container:
-#     div.row.d-flex.flex-wrap.justify-content-center
-# - When there are **no more** cards in that container:
-#     * If URL has **no page=** param, assume page 1 and go to **&page=2**
-#     * Else, increment page=N -> **page=N+1** and navigate
-# - Stops when a page yields **no cards at all**, or after MAX_NEW_CARDS are saved
+# - Paginates: when the main card container is empty, add/increment `page` query (&page=2, page=N+1)
+# - Stops when a page yields no cards, or after MAX_NEW_CARDS are saved
 # - Skips IDs already in output/cards/CARDS_INDEX.json
 # - Scrapes each new card
 # - From header row, reads each div.col-5 image src to extract related IDs (SKIPS FIRST TILE)
-#   and opens https://dokkaninfo.com/cards/<ID> directly (also skip if already indexed)
+#   and opens https://dokkaninfo.com/cards/<ID> directly (also skips if already indexed)
 # - NO asset downloading in this version
 # - RARITY: detected from
 #     div.card-icon-item.card-icon-item-rarity.card-info-above-thumb img[src*="cha_rare_..."]
@@ -20,6 +16,9 @@
 # - Display name (plain): "<RARITY> [<TYPE>] <Original H1/Title>"
 # - Display name (bracketed for folder): "<RARITY> [<TYPE>] [<Original H1/Title>]"
 # - Leader Skill full capture; Passive Skill never starts with "Basic effect(s):"
+# - Passive: extracts "transformation" and "reversible_exchange" from the effect text and removes them
+# - Captures "Transformation Condition(s)" section as `transformation_conditions`
+# - Parses "Domain Effect(s)" sections as `domains`
 # - Maintains a persistent index at output/cards/CARDS_INDEX.json
 
 import json
@@ -51,7 +50,7 @@ USER_AGENT = (
 TIMEOUT = 60_000
 SLEEP_BETWEEN_CARDS = 0.6
 MAX_PAGES = 200            # safety stop to avoid infinite loops
-MAX_NEW_CARDS = 10         # <-- stop after saving this many *new* cards
+MAX_NEW_CARDS = 10        # stop after saving this many *new* cards
 
 HEADERS = [
     "Leader Skill",
@@ -60,6 +59,7 @@ HEADERS = [
     "Passive Skill",
     "Active Skill",
     "Activation Condition(s)",
+    "Transformation Condition(s)",   # <-- added
     "Link Skills",
     "Categories",
     "Stats",
@@ -259,9 +259,10 @@ def _group_passive_lines(lines: List[str]) -> str:
     if not lines:
         return ""
 
-    lines = [ln for ln in lines if ln not in HEADERS]
-    lines = [ln for ln in lines if not re.fullmatch(r"Basic effect\(s\):?", ln, flags=re.IGNORECASE)]
+    # Remove headers if any snuck in and drop "Basic effect(s):"
+    lines = [ln for ln in lines if ln not in HEADERS and not re.fullmatch(r"Basic effect\(s\):?", ln, flags=re.IGNORECASE)]
 
+    # Ensure "Activates the Entrance Animation..." leads the effect block
     activ_idx = next((i for i, ln in enumerate(lines) if ln.lower().startswith("activates the entrance animation")), None)
     if activ_idx is not None and activ_idx != 0:
         first = lines.pop(activ_idx)
@@ -283,7 +284,6 @@ def _group_passive_lines(lines: List[str]) -> str:
         for pat in leading_patterns:
             if re.search(pat, s, flags=re.IGNORECASE):
                 return True
-            # also treat "Basic effect(s):" as NOT-leading and strip it out
         return False
 
     groups: List[List[str]] = []
@@ -299,13 +299,13 @@ def _group_passive_lines(lines: List[str]) -> str:
 
     out_parts: List[str] = []
     for g in groups:
-      g = [x for x in g if x and x not in HEADERS and not re.fullmatch(r"Basic effect\(s\):?", x, flags=re.IGNORECASE)]
-      if not g:
-          continue
-      clause = _condense_spaces(" ".join(g))
-      clause = re.sub(r"^\s*Basic effect\(s\):\s*", "", clause, flags=re.IGNORECASE)
-      clause = re.sub(r"^(For every [^.]+?)(?!:)\s", r"\1: ", clause, flags=re.IGNORECASE)
-      out_parts.append(clause)
+        g = [x for x in g if x and x not in HEADERS and not re.fullmatch(r"Basic effect\(s\):?", x, flags=re.IGNORECASE)]
+        if not g:
+            continue
+        clause = _condense_spaces(" ".join(g))
+        clause = re.sub(r"^\s*Basic effect\(s\):\s*", "", clause, flags=re.IGNORECASE)
+        clause = re.sub(r"^(For every [^.]+?)(?!:)\s", r"\1: ", clause, flags=re.IGNORECASE)
+        out_parts.append(clause)
 
     effect = "; ".join(out_parts)
     effect = re.sub(r"\s*;\s*", "; ", effect).strip()
@@ -327,7 +327,6 @@ def _clean_active(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
 def _clean_activation(block: List[str]) -> Optional[str]:
     if not block:
         return None
-    # FIXED: previously had a typo " " ".join(block)
     text = _condense_spaces(" ".join(block))
     for h in HEADERS:
         text = text.replace(h, "")
@@ -489,6 +488,154 @@ def detect_type_token_from_dom(soup: BeautifulSoup) -> Optional[str]:
                 type_found = suffix  # last one wins
     return type_found
 
+# ------------ Passive extras: transform/exchange extractors -------------
+def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, Optional[str]], Dict[str, Optional[str]]]:
+    """
+    Pulls transformation and reversible-exchange clauses out of the passive effect.
+    Returns (cleaned_effect, transformation_dict, reversible_exchange_dict).
+
+    transformation_dict = {"can_transform": bool, "condition": str or None}
+    reversible_exchange_dict = {"can_exchange": bool, "condition": str or None}
+    """
+    if not passive_effect:
+        return passive_effect, {"can_transform": False, "condition": None}, {"can_exchange": False, "condition": None}
+
+    clauses = [c.strip() for c in re.split(r"\s*;\s*", passive_effect) if c.strip()]
+    keep: List[str] = []
+    transform_clauses: List[str] = []
+    exchange_clauses: List[str] = []
+
+    for c in clauses:
+        low = c.lower()
+        if "reversible exchange" in low or re.search(r"\bexchange\b", low):
+            exchange_clauses.append(c)
+            continue
+        if re.search(r"\btransforms?\b", low) or "transformation" in low:
+            transform_clauses.append(c)
+            continue
+        keep.append(c)
+
+    def pick_condition(cands: List[str]) -> Optional[str]:
+        if not cands:
+            return None
+        # Prefer clauses that include explicit timing/condition words
+        prioritized = [x for x in cands if re.search(r"\b(when|starting|from the|turn|team|entry)\b", x, re.IGNORECASE)]
+        chosen_pool = prioritized if prioritized else cands
+        # Choose the longest (usually the most complete)
+        chosen = max(chosen_pool, key=len)
+        # Normalize duplicated "Transformation" wordings like "Transforms Transformation Transforms ..."
+        chosen = re.sub(r"\bTransformation\b\s*", "", chosen, flags=re.IGNORECASE)
+        chosen = re.sub(r"\bTransforms\s+Transforms\b", "Transforms", chosen, flags=re.IGNORECASE)
+        chosen = _condense_spaces(chosen)
+        return chosen
+
+    transform_condition = pick_condition(transform_clauses)
+    exchange_condition = pick_condition(exchange_clauses)
+
+    # Remove redundant stub lines like "Meets up with X and can perform Reversible Exchange"
+    # if we already have a conditional one; or generic "Transforms" stub if we have a detailed one.
+    def filter_stubs(cands: List[str], chosen: Optional[str]) -> List[str]:
+        if not chosen:
+            return cands
+        return [c for c in cands if len(c.strip()) >= len(chosen.strip())]
+
+    transform_clauses = filter_stubs(transform_clauses, transform_condition)
+    exchange_clauses = filter_stubs(exchange_clauses, exchange_condition)
+
+    # Remove all transform/exchange clauses from passive effect
+    cleaned_effect = "; ".join(keep).strip()
+
+    transformation = {"can_transform": bool(transform_condition), "condition": None}
+    if transform_condition:
+        # Strip leading "Transforms" etc. for a cleaner condition string
+        cond = re.sub(r"^\s*(Transforms|Transformation)\s*", "", transform_condition, flags=re.IGNORECASE).strip()
+        transformation["condition"] = cond if cond else transform_condition
+
+    reversible_exchange = {"can_exchange": bool(exchange_condition), "condition": None}
+    if exchange_condition:
+        # Strip leading stubs like "Meets up with ..." if present
+        cond = re.sub(r"^\s*Meets up with.*?Reversible Exchange\s*", "", exchange_condition, flags=re.IGNORECASE).strip()
+        reversible_exchange["condition"] = cond if cond else exchange_condition
+
+    return cleaned_effect, transformation, reversible_exchange
+
+# ------------ Domains parser -------------
+def detect_type_suffix_from_classes(cls_list: List[str]) -> Optional[str]:
+    t = None
+    for cls in cls_list or []:
+        if cls.startswith("border-") or cls.startswith("bg-"):
+            suf = cls.split("-", 1)[-1].strip().lower()
+            if suf in TYPE_SET:
+                t = suf
+    return t
+
+def parse_domains(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
+    """
+    Parse blocks like:
+    <div class="row font-size-1_2 margin-top-bottom-5 justify-content-center align-items-center border border-2 border-str">
+      <div class="col">
+        <div class="row padding-top-bottom-10 bg-str">
+          <div class="col-sm-4"><b>Domain Effect(s)</b></div>
+          <div class="col-sm-4"><b>City (Future) (Rainy)</b></div>
+        </div>
+        <div class="row padding-top-bottom-5 bg-str-2">
+          <div class="col"><div class="row"><div class="col">Increases damage received by Extreme Class enemies and allies by 30%</div></div></div>
+        </div>
+      </div>
+    </div>
+    """
+    domains: List[Dict[str, Optional[str]]] = []
+    # Find all bold nodes with "Domain Effect(s)"
+    for bnode in soup.find_all("b", string=re.compile(r"^\s*Domain Effect\(s\)\s*$", re.IGNORECASE)):
+        outer_row = bnode.find_parent("div", class_=re.compile(r"\brow\b"))
+        if not outer_row:
+            continue
+        # The domain name is the next <b> in the same "title" row
+        bolds = outer_row.find_all("b")
+        domain_name = None
+        if len(bolds) >= 2:
+            domain_name = bolds[1].get_text(strip=True)
+
+        # Type suffix from the overall bordered container (border-<type>)
+        container = outer_row.find_parent("div", class_=re.compile(r"\bborder\b"))
+        type_suffix = None
+        if container:
+            type_suffix = detect_type_suffix_from_classes(container.get("class") or [])
+
+        # Effect likely sits in the next row with bg-*-2
+        effect_text = None
+        effect_row = outer_row.find_next_sibling("div")
+        # Sometimes nested one more layer; tolerate that
+        hops = 0
+        while effect_row and hops < 3 and not effect_text:
+            if effect_row.get("class") and any(c.startswith("bg-") and c.endswith("-2") for c in effect_row.get("class")):
+                effect_text = effect_row.get_text(" ", strip=True)
+                break
+            # look deeper
+            deep = effect_row.find("div", class_=re.compile(r"\bbg-.*-2\b"))
+            if deep:
+                effect_text = deep.get_text(" ", strip=True)
+                break
+            effect_row = effect_row.find_next_sibling("div")
+            hops += 1
+
+        domains.append({
+            "name": domain_name,
+            "effect": effect_text,
+            "type": (type_suffix.upper() if type_suffix else None),
+        })
+
+    # Deduplicate by name+effect
+    seen = set()
+    uniq = []
+    for d in domains:
+        key = (d.get("name") or "", d.get("effect") or "")
+        if key in seen:
+            continue
+        seen.add(key)
+        uniq.append(d)
+    return uniq
+
 # ------------ Scraping core -------------
 def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
     soup = BeautifulSoup(page_html, "lxml")
@@ -510,7 +657,7 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
 
     if not ultra_name:
         mU = re.search(
-            r"Ultra Super Attack\s+([\s\S]*?)\s+(Passive Skill|Active Skill|Link Skills|Categories|Stats)",
+            r"Ultra Super Attack\s+([\s\S]*?)\s+(Passive Skill|Active Skill|Link Skills|Categories|Stats|Transformation Condition\(s\))",
             page_text,
             flags=re.IGNORECASE,
         )
@@ -525,8 +672,12 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
     passive_effect_lines = passive_block[1:] if len(passive_block) > 1 else []
     passive_effect = _group_passive_lines(passive_effect_lines)
 
+    # Extract transformation and reversible exchange from passive effect (and remove them)
+    passive_effect, transformation, reversible_exchange = extract_transform_and_exchange(passive_effect)
+
     active_name, active_effect = _clean_active(sections.get("Active Skill") or [])
     activation_conditions = _clean_activation(sections.get("Activation Condition(s)") or [])
+    transformation_conditions = _clean_activation(sections.get("Transformation Condition(s)") or [])
     link_skills = _clean_links(sections.get("Link Skills") or [])
 
     categories = parse_categories_from_soup(soup)
@@ -577,6 +728,9 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
 
     char_id = extract_character_id_from_url(page_url)
 
+    # Domains
+    domains = parse_domains(soup)
+
     meta = {
         "page_title": page_title,
         "display_name": base_display_name,
@@ -588,7 +742,13 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         "leader_skill": leader_skill,
         "super_attack": {"name": super_name, "effect": super_effect},
         "ultra_super_attack": {"name": ultra_name, "effect": ultra_effect},
-        "passive_skill": {"name": passive_name, "effect": passive_effect},
+        "passive_skill": {
+            "name": passive_name,
+            "effect": passive_effect,
+        },
+        "transformation": transformation,                  # {"can_transform": bool, "condition": str|None}
+        "reversible_exchange": reversible_exchange,        # {"can_exchange": bool, "condition": str|None}
+        "transformation_conditions": transformation_conditions,
         "active_skill": {
             "name": active_name,
             "effect": active_effect,
@@ -597,6 +757,7 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         "link_skills": link_skills,
         "categories": categories,
         "stats": stats,
+        "domains": domains,                                # [{name, effect, type}]
         "source_url": page_url,
         "rarity_detected": rarity,
         "type_token": type_token,
@@ -622,17 +783,25 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
     # Compose PAGE_TEXT for quick view
     parts = []
     def add_line(k, v):
-        if v:
-            parts.append(f"{k}: {v}" if isinstance(v, str) else f"{k}: {json.dumps(v, ensure_ascii=False)}")
+        if v is None:
+            return
+        if isinstance(v, (dict, list)):
+            parts.append(f"{k}: {json.dumps(v, ensure_ascii=False)}")
+        else:
+            parts.append(f"{k}: {v}")
 
     add_line("leader_skill", meta.get("leader_skill"))
     add_line("super_attack", meta.get("super_attack"))
     add_line("ultra_super_attack", meta.get("ultra_super_attack"))
     add_line("passive_skill", meta.get("passive_skill"))
+    add_line("transformation", meta.get("transformation"))
+    add_line("reversible_exchange", meta.get("reversible_exchange"))
+    add_line("transformation_conditions", meta.get("transformation_conditions"))
     add_line("active_skill", meta.get("active_skill"))
     add_line("link_skills", meta.get("link_skills"))
     add_line("categories", meta.get("categories"))
     add_line("stats", meta.get("stats"))
+    add_line("domains", meta.get("domains"))
     add_line("rarity_detected", rarity)
     add_line("type_token", meta.get("type_token"))
 
@@ -673,7 +842,7 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
 # ------------ Main orchestration -------------
 def main():
     log_path = setup_logging()
-    logging.info("Starting DokkanInfo scraper (headed) — index paging, cap after MAX_NEW_CARDS, skip already indexed, parse related IDs (skip first tile), bracketed folder name")
+    logging.info("Starting DokkanInfo scraper (headed) — index paging, cap after MAX_NEW_CARDS, skip already indexed, parse related IDs (skip first tile), bracketed folder name, passive extras, domains")
     OUTROOT.mkdir(parents=True, exist_ok=True)
 
     # Load persistent index and seed seen_ids from it
