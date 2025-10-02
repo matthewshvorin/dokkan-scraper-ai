@@ -1,0 +1,8 @@
+leader_skill: "Exploding Rage" Category Ki +2 and HP, ATK & DEF +160%
+super_attack: {"name": "Gigantic Impact", "effect": "Raises ATK & DEF; Causes supreme damage to enemy"}
+ultra_super_attack: {"name": null, "effect": null}
+passive_skill: {"name": "Anomalies", "effect": "ATK & DEF 150% High chance of guarding all attacks; For every attack: performed; DEF 20% (up to 200%) Chance of performing a critical hit 5% (up to 100%); For every attack: received; ATK 10% (up to 100%); Launches an additional attack that has a medium chance of becoming a Super Attack (up to 2 times); For every Super: Attack the enemy launches at the character; ATK & DEF 10%"}
+active_skill: {"name": null, "effect": null, "activation_conditions": null}
+link_skills: ["Saiyan Warrior Race", "Prodigies", "Berserker", "Shocking Speed", "Prepared for Battle"]
+categories: ["Exploding Rage", "Movie Bosses", "Pure Saiyans", "Rapid Growth", "Giant Ape Power", "Gifted Warriors", "Super Bosses", "Uncontrollable Power", "Mission Execution"]
+stats: {"Cost": 26, "Max Lv": 80, "SA Lv": 10}

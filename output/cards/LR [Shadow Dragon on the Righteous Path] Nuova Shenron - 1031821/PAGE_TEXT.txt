@@ -1,0 +1,8 @@
+leader_skill: "Shadow Dragon Saga" Category Ki +3 and HP, ATK & DEF +80%
+super_attack: {"name": "Flame Shot", "effect": "Raises ATK & DEF by 44% for 1 turn; Causes colossal damage to enemy"}
+ultra_super_attack: {"name": "Burst Attack", "effect": "Raises ATK & DEF by 44% for 4 turns; Causes mega-colossal damage to enemy"}
+passive_skill: {"name": "Incarnation of the Four-Star Ball", "effect": "Ki +4 and ATK & DEF 144% When there is another \"Shadow Dragon Saga\" Category ally attacking in the same turn or a \"Shadow Dragon Saga\" Category enemy; Ki +4 Chance of performing a critical hit 44% When facing only 1 enemy, or when all allies attacking in the same turn are Extreme Class characters; Ki +4 Launches 2 additional attacks, each of which has a high chance of becoming a Super Attack When attacking with 14 or more Ki; ATK & DEF 244% Damage reduction rate 24% When activating the Active Skill or when attacking with 24 Ki; ATK 244% Chance of performing a critical hit 44% When receiving a Ki Blast Super Attack Nullifies it for 4 turns from the character's entry turn Great chance of nullifying it starting from the 5th turn from the character's entry turn"}
+active_skill: {"name": "Burning Spin", "effect": "Massively raises ATK temporarily; Causes ultimate damage to enemy; Disables enemy's action once within the turn", "activation_conditions": "Can be activated when facing only 1 enemy Whose HP is 50% or less (once only)"}
+link_skills: ["Shocking Speed", "Gentleman", "Cold Judgment", "Speedy Retribution", "GT", "Shadow Dragons", "Legendary Power"]
+categories: ["Shadow Dragon Saga", "GT Bosses", "Accelerated Battle"]
+stats: {"Cost": 59, "Max Lv": 150, "SA Lv": 20}

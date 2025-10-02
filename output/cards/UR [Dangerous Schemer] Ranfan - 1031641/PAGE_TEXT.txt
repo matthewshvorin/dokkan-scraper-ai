@@ -1,0 +1,8 @@
+leader_skill: "Peppy Gals" Category or Super TEQ Type Ki +3 and HP, ATK & DEF +120%
+super_attack: {"name": "Fake Tears Ruse", "effect": "Raises ATK & DEF for 1 turn; Causes supreme damage to enemy; Raises allies' ATK & DEF by 30% for 2 turns"}
+ultra_super_attack: {"name": null, "effect": null}
+passive_skill: {"name": "Ranfan's True Nature", "effect": "ATK & DEF 200% Chance of evading enemy's attack 40% All allies' Ki +1 and DEF 40% , plus an additional Ki +1 and DEF 30% for characters who also belong to the \"Peppy Gals\" Category When attacking; ATK & DEF 200%; ATK & DEF 50% (up to 200%) and chance of evading enemy's attack & damage reduction rate 10% (up to 40%) per \"Peppy Gals\" Category ally on the team After receiving or evading an attack All allies' ATK 20% (\"Peppy Gals\" Category allies excluded) \"Peppy Gals\" Category allies' ATK 20% for 2 turns When facing only 1 enemy Attacked enemy's ATK & DEF 30% for 2 turns Great chance of stunning the attacked enemy for 2 turns Great chance of sealing the attacked enemy's Super Attack for 2 turns When the target enemy is in the following status: , , or Launches an additional Super Attack"}
+active_skill: {"name": null, "effect": null, "activation_conditions": null}
+link_skills: ["Battlefield Diva", "Brainiacs", "Coward", "Guidance of the Dragon Balls", "The Incredible Adventure", "Infighter", "Shattering the Limit"]
+categories: ["Peppy Gals", "World Tournament", "DB Saga", "Earthlings", "Earth-Bred Fighters", "Tournament Participants"]
+stats: {"Cost": 18, "Max Lv": 120, "SA Lv": 10}

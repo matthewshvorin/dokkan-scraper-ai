@@ -1,0 +1,8 @@
+leader_skill: "Corroded Body and Mind" or "Battle of Fate" Category Ki +3, HP +200% and ATK & DEF +170%, plus an additional HP, ATK & DEF +50% for characters who also belong to the "Terrifying Conquerors", "Final Trump Card" or "GT Bosses" Category
+super_attack: {"name": "Big Bang Attack", "effect": "Raises ATK & DEF for 1 turn; Causes immense damage to enemy"}
+ultra_super_attack: {"name": null, "effect": null}
+passive_skill: {"name": "Controlled Vegeta", "effect": "Ki +2 and ATK & DEF 250% Great chance of evading enemy's attack; Guards all attacks \"Corroded Body and Mind\" Category allies' ATK 50% When attacking with 12 or more Ki; ATK & DEF 250% Chance of evading enemy's attack 10% Starting from the 5th turn from the character's entry turn, or when another 3 or more \"Corroded Body and Mind\" or \"GT Bosses\" Category allies are on the team starting from the 3rd turn from the character's entry turn Transforms Transformation Transforms starting from the 5th turn from the character's entry turn, or when another 3 or more \"Corroded Body and Mind\" or \"GT Bosses\" Category allies are on the team starting from the 3rd turn from the character's entry turn"}
+active_skill: {"name": null, "effect": null, "activation_conditions": null}
+link_skills: ["Thirst for Conquest", "Metamorphosis", "Big Bad Bosses", "GT", "Hatred of Saiyans", "Nightmare", "Fierce Battle"]
+categories: ["Corroded Body and Mind", "Battle of Fate", "Terrifying Conquerors", "Final Trump Card", "GT Bosses", "Transformation Boost", "Artificial Life Forms", "Target: Goku", "Revenge", "Inhuman Deeds", "Space-Traveling Warriors", "Giant Form", "Giant Ape Power"]
+stats: {"Cost": 58, "Max Lv": 120, "SA Lv": 10}

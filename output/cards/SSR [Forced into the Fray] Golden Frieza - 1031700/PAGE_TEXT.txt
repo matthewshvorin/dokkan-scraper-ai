@@ -1,0 +1,8 @@
+leader_skill: "Movie Bosses" or "Movie Heroes" Category Ki +2, HP +150% and ATK & DEF +130%, plus an additional HP, ATK & DEF +20% for characters who also belong to the "Transformation Boost", "Gifted Warriors" or "Inhuman Deeds" Category
+super_attack: {"name": "Psychokinesis", "effect": "Raises ATK for 1 turn; Causes supreme damage to enemy"}
+ultra_super_attack: {"name": null, "effect": null}
+passive_skill: {"name": "The Aftermath of Chaos", "effect": "ATK & DEF 150% Damage reduction rate 30% For 5 turns from the character's entry turn High chance of guarding all attacks Starting from the 6th turn from the character's entry turn Medium chance of guarding all attacks When there is another \"Movie Heroes\" or \"Movie Bosses\" Category ally attacking in the same turn; Launches an additional attack that has a high chance of becoming a Super Attack; For every attack: received; ATK 50% within the turn"}
+active_skill: {"name": null, "effect": null, "activation_conditions": null}
+link_skills: ["Prodigies", "Universe’s Most Malevolent", "Shocking Speed", "Strongest Clan in Space", "Thirst for Conquest"]
+categories: ["Movie Bosses", "Movie Heroes", "Transformation Boost", "Gifted Warriors", "Inhuman Deeds", "Full Power", "Wicked Bloodline", "Dragon Ball Seekers", "Terrifying Conquerors", "Target: Goku", "Revenge", "Space-Traveling Warriors", "Super Bosses", "Successors", "Mastered Evolution", "Sworn Enemies"]
+stats: {"Cost": 26, "Max Lv": 80, "SA Lv": 10}
