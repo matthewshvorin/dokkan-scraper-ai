@@ -50,7 +50,7 @@ USER_AGENT = (
 TIMEOUT = 60_000
 SLEEP_BETWEEN_CARDS = 0.6
 MAX_PAGES = 200            # safety stop to avoid infinite loops
-MAX_NEW_CARDS = 10        # stop after saving this many *new* cards
+MAX_NEW_CARDS = 2        # stop after saving this many *new* cards
 
 HEADERS = [
     "Leader Skill",
