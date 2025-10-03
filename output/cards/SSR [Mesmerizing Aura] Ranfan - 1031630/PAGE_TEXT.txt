@@ -1,8 +1,0 @@
-leader_skill: "Peppy Gals" Category or Super TEQ Type Ki +2 and HP, ATK & DEF +80%
-super_attack: {"name": "Fake Tears Ruse", "effect": "Raises ATK & DEF for 1 turn; Causes supreme damage to enemy; Raises allies' ATK & DEF by 20% for 1 turn"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Ranfan's Seductive Charm", "effect": "ATK & DEF 150% Chance of evading enemy's attack 30% All allies' DEF 30% , plus an additional Ki +1 and DEF 10% for characters who also belong to the \"Peppy Gals\" Category When attacking; ATK & DEF 150%; ATK & DEF 30% per \"Peppy Gals\" Category ally on the team (up to 120%) When facing only 1 enemy Attacked enemy's ATK & DEF 30% for 1 turn High chance of stunning the attacked enemy for 1 turn High chance of sealing the attacked enemy's Super Attack for 1 turn"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Battlefield Diva", "Brainiacs", "Coward", "Guidance of the Dragon Balls", "The Incredible Adventure", "Infighter"]
-categories: ["Peppy Gals", "World Tournament", "DB Saga", "Earthlings", "Earth-Bred Fighters", "Tournament Participants"]
-stats: {"Cost": 9, "Max Lv": 80, "SA Lv": 10}

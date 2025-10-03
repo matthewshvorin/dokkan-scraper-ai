@@ -1,8 +1,0 @@
-leader_skill: "Movie Bosses" or "Movie Heroes" Category Ki +3, HP +170% and ATK & DEF +150%, plus an additional HP, ATK & DEF +30% for characters who also belong to the "Transformation Boost", "Gifted Warriors" or "Inhuman Deeds" Category
-super_attack: {"name": "Psychokinesis", "effect": "Raises ATK for 1 turn,; causes supreme damage to enemy; and lowers ATK & DEF"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "The Ripple Effect of Ambition", "effect": "ATK & DEF 200% Damage reduction rate 50% For 5 turns from the character's entry turn Great chance of guarding all attacks Starting from the 6th turn from the character's entry turn High chance of guarding all attacks When there is another \"Movie Heroes\" or \"Movie Bosses\" Category ally attacking in the same turn; Launches an additional attack that has a great chance of becoming a Super Attack; For every attack: received; ATK 100% within the turn"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Prodigies", "Universe’s Most Malevolent", "Shocking Speed", "Strongest Clan in Space", "Thirst for Conquest", "Fierce Battle"]
-categories: ["Movie Bosses", "Movie Heroes", "Transformation Boost", "Gifted Warriors", "Inhuman Deeds", "Full Power", "Wicked Bloodline", "Dragon Ball Seekers", "Terrifying Conquerors", "Target: Goku", "Revenge", "Space-Traveling Warriors", "Super Bosses", "Successors", "Mastered Evolution", "Sworn Enemies"]
-stats: {"Cost": 58, "Max Lv": 120, "SA Lv": 10}

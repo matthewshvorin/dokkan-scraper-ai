@@ -1,8 +1,0 @@
-leader_skill: "Hybrid Saiyans", "Youth" or "Defenders of Justice" Category Ki +3, HP +170% and ATK & DEF +150%, plus an additional HP, ATK & DEF +30% for characters who also belong to the "Siblings' Bond", "Bond of Parent and Child" or "Bond of Friendship" Category
-super_attack: {"name": "No Forgiveness for Evil!", "effect": "Causes supreme damage to enemy; Raises chance of performing a critical hit; by 10% for 1 turn"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Sense of Real Combat", "effect": "ATK & DEF 150%; Launches an additional attack that has a great chance of becoming a Super Attack Receives an additional Ki +1 per Rainbow Ki Sphere obtained When receiving an attack; DEF 150% When there is another \"Hybrid Saiyans\" or \"Bond of Parent and Child\" Category ally on the team; ATK 150% when attacking All allies' ATK & DEF 20% and chance of performing a critical hit 10% (self excluded) 1 or more Rainbow Ki Spheres obtained; DEF 150% Damage reduction rate 15%; ATK 150% when attacking"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Super Saiyan", "Golden Warrior", "Saiyan Warrior Race", "All in the Family", "Prepared for Battle", "Fierce Battle"]
-categories: ["Hybrid Saiyans", "Youth", "Siblings' Bond", "Bond of Parent and Child", "Bond of Friendship", "Majin Buu Saga", "Goku's Family", "Super Saiyans", "Earth-Bred Fighters", "Demonic Power", "Defenders of Justice"]
-stats: {"Cost": 58, "Max Lv": 120, "SA Lv": 10}

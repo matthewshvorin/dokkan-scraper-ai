@@ -1,8 +1,0 @@
-leader_skill: "Exploding Rage" Category Ki +4 and HP, ATK & DEF +220%
-super_attack: {"name": "Gigantic Impact", "effect": "Raises ATK & DEF; Causes colossal damage to enemy"}
-ultra_super_attack: {"name": "Anger Shout", "effect": "Raises ATK & DEF; Causes mega-colossal damage to enemy"}
-passive_skill: {"name": "Terrifying Surge of Ki", "effect": "Activates the Entrance Animation upon the character's entry; Ki +4 and damage reduction rate 40% for 1 turn; Ki +3 and damage reduction rate 30% for 3 turns; ATK & DEF 260%; Guards all attacks; For every attack: performed; Ki +1 (up to +5); DEF 50% (up to 400%) Chance of performing a critical hit 20% (up to 100%); For every attack: received; Ki +1 (up to +5); ATK 40% (up to 300%); Launches an additional attack that has a high chance of becoming a Super Attack (up to 4 times); For every Super: Attack the enemy launches at the character; ATK & DEF 30%; When receiving an Unarmed Super Attack Great chance of nullifying it, ATK 260% temporarily and countering with tremendous power"}
-active_skill: {"name": "Pure Heart and Wrathful Power", "effect": "Massively raises ATK temporarily and; causes ultimate damage to enemy;; DEF +60%; Foresees enemy's; Super Attack for 1 turn", "activation_conditions": "Can be activated starting from the 3rd turn from the character's entry turn (once only)"}
-link_skills: ["Saiyan Warrior Race", "Prodigies", "Berserker", "Shocking Speed", "Prepared for Battle", "Fierce Battle", "Legendary Power"]
-categories: ["Exploding Rage", "Movie Bosses", "Pure Saiyans", "Rapid Growth", "Giant Ape Power", "Gifted Warriors", "Super Bosses", "Uncontrollable Power", "Mission Execution"]
-stats: {"Cost": 77, "Max Lv": 150, "SA Lv": 20}

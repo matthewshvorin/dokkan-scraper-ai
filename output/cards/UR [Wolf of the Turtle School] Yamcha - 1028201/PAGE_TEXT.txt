@@ -1,8 +1,0 @@
-leader_skill: Super TEQ Type Ki +3 and HP, ATK & DEF +90%
-super_attack: {"name": "Kamehameha", "effect": "Greatly raises ATK & DEF for 1 turn; Causes supreme damage; A high chance of stunning the enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Yamcha's Strategy", "effect": "ATK & DEF 200% High chance of evading enemy's attack High chance of performing a critical hit Per \"Tournament Participants\" or \"Turtle School\" Category ally on the team (depending on which Category has more members); ATK & DEF 50% (up to 250%) When there is another \"Tournament Participants\" or \"Turtle School\" Category ally attacking in the same turn; Ki +4 Chance of evading enemy's attack 20% Launches an additional Super Attack When attacking with 12 or more Ki; ATK & DEF 200% When HP is 86% or more; DEF 200% Damage reduction rate 20% When HP is 86% or less; ATK 200% Chance of performing a critical hit 50%"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Turtle School", "Infighter", "Kamehameha", "Shocking Speed", "The Incredible Adventure", "Guidance of the Dragon Balls", "Shattering the Limit"]
-categories: ["World Tournament", "DB Saga", "Worthy Rivals", "Kamehameha", "Bond of Master and Disciple", "Earthlings", "Earth-Bred Fighters", "Tournament Participants", "Turtle School"]
-stats: {"Cost": 36, "Max Lv": 120, "SA Lv": 10}

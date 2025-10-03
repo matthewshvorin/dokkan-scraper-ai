@@ -1,8 +1,0 @@
-leader_skill: "Peppy Gals" Category or Super AGL Type Ki +2 and HP, ATK & DEF +80%
-super_attack: {"name": "Videl Rush", "effect": "Greatly raises DEF for 1 turn; Causes supreme damage to enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Expectations for Videl", "effect": "Ki +1 and ATK & DEF 150% Damage reduction rate 20% When attacking with 12 or more Ki; ATK & DEF 150% For every turn passed Damage reduction rate 10% (no more than -20%) For 3 turns from the character's entry turn; DEF 150% Medium chance of performing a critical hit; Launches an additional attack that has a medium chance of becoming a Super Attack"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Courage", "Money Money Money", "Cold Judgment", "Infighter", "Champion's Strength", "Battlefield Diva"]
-categories: ["Peppy Gals", "World Tournament", "Majin Buu Saga", "Earthlings", "Bond of Parent and Child", "Earth-Bred Fighters", "Tournament Participants", "Defenders of Justice"]
-stats: {"Cost": 9, "Max Lv": 80, "SA Lv": 10}

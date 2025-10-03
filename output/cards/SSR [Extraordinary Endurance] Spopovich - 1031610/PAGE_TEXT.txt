@@ -1,8 +1,0 @@
-leader_skill: "Corroded Body and Mind" or "Majin Buu Saga" Category Ki +2 and HP, ATK & DEF +100%
-super_attack: {"name": "Berserker Crash", "effect": "Raises ATK & DEF for 1 turn; Causes supreme damage to enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Peculiar Atmosphere", "effect": "Ki +1 and ATK & DEF 100% When there is another Extreme Class ally attacking in the same turn Damage reduction rate 20% When attacking; ATK & DEF 100%; For every attack: performed; ATK 50% within the turn After receiving 8 or more attacks in battle; ATK & DEF 100% Chance of performing a critical hit 20% When there is a \"Tournament Participants\" Category enemy; DEF 30% Chance of performing a critical hit 10%; Launches an additional attack that has a high chance of becoming a Super Attack When there is an \"Earthlings\" Category enemy; DEF 30% Chance of performing a critical hit 10%; Launches an additional attack that has a high chance of becoming a Super Attack When there is a \"Peppy Gals\" Category enemy; DEF 30% Chance of performing a critical hit 10%; Launches an additional attack that has a high chance of becoming a Super Attack"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Brutal Beatdown", "Evil Autocrats", "Demonic Power", "Berserker", "Tough as Nails", "Infighter"]
-categories: ["Corroded Body and Mind", "Majin Buu Saga", "World Tournament", "Terrifying Conquerors", "Earthlings", "Earth-Bred Fighters", "Tournament Participants", "Mission Execution"]
-stats: {"Cost": 21, "Max Lv": 80, "SA Lv": 10}

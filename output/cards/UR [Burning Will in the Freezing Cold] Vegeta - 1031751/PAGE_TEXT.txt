@@ -1,8 +1,0 @@
-leader_skill: "Movie Heroes" or "Gifted Warriors" Category Ki +3 and HP, ATK & DEF +130%
-super_attack: {"name": "Amazing Impact", "effect": "Greatly raises DEF; Causes supreme damage to enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Anticipation for Battles", "effect": "Ki +3 and ATK & DEF 150% High chance of evading enemy's attack Changes Ki Spheres: PHY to Rainbow When the character is the 1st attacker at the start of turn Randomly changes Ki Spheres of a certain Type (TEQ & PHY excluded) to Rainbow Ki Spheres When the character is the 2nd or 3rd attacker at the start of turn High chance of randomly changing Ki Spheres of a certain Type (TEQ & PHY excluded) to Rainbow Ki Spheres When attacking with 12 or more Ki; ATK & DEF 100% When attacking as the 3rd attacker in a turn; ATK 200% Launches an additional Super Attack When there is another \"Movie Heroes\" or \"Movie Bosses\" Category ally attacking in the same turn; ATK & DEF 150% Damage reduction rate 30% When all allies attacking in the same turn are \"Movie Heroes\" or \"Movie Bosses\" Category characters (self excluded); ATK & DEF 150% Chance of evading enemy's attack 30%"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Saiyan Warrior Race", "Royal Lineage", "Prodigies", "Saiyan Pride", "Shocking Speed", "Prepared for Battle", "Fierce Battle"]
-categories: ["Movie Heroes", "Gifted Warriors", "Pure Saiyans", "Vegeta's Family", "Siblings' Bond", "Worthy Rivals", "Bond of Master and Disciple", "Bond of Parent and Child", "Super Heroes", "Successors"]
-stats: {"Cost": 40, "Max Lv": 120, "SA Lv": 10}

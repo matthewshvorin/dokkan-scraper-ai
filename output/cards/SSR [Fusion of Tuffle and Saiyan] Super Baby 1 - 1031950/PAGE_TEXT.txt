@@ -1,8 +1,0 @@
-leader_skill: "Corroded Body and Mind" or "Battle of Fate" Category Ki +2, HP +150% and ATK & DEF +130%, plus an additional HP, ATK & DEF +20% for characters who also belong to the "Terrifying Conquerors", "Final Trump Card" or "GT Bosses" Category
-super_attack: {"name": "Big Bang Attack", "effect": "Raises ATK for 1 turn; Causes immense damage to enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Possessed Vegeta", "effect": "Ki +1 and ATK & DEF 100% High chance of evading enemy's attack Great chance of guarding all attacks \"Corroded Body and Mind\" Category allies' ATK 30% When attacking with 12 or more Ki; ATK & DEF 100%"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Thirst for Conquest", "Metamorphosis", "Big Bad Bosses", "GT", "Hatred of Saiyans", "Nightmare"]
-categories: ["Corroded Body and Mind", "Battle of Fate", "Terrifying Conquerors", "Final Trump Card", "GT Bosses", "Transformation Boost", "Artificial Life Forms", "Target: Goku", "Revenge", "Inhuman Deeds", "Space-Traveling Warriors"]
-stats: {"Cost": 30, "Max Lv": 80, "SA Lv": 10}

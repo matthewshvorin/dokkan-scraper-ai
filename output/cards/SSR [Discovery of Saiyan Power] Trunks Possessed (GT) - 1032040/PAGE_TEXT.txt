@@ -1,8 +1,0 @@
-leader_skill: "Corroded Body and Mind" or "Terrifying Conquerors" Category Ki +2 and HP, ATK & DEF +100%
-super_attack: {"name": "Buster Cannon", "effect": "Raises DEF for 1 turn; Causes supreme damage to enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Discovery of Power", "effect": "\"Corroded Body and Mind\" Category allies' ATK & DEF 20% Per \"Corroded Body and Mind\" or \"Terrifying Conquerors\" Category ally on the team (depending on which Category has more members); ATK & DEF 30% As the 1st attacker in a turn; Ki +1 and ATK & DEF 100% Damage reduction rate 10% After receiving an attack; ATK & DEF 100%; Launches an additional attack that has a high chance of becoming a Super Attack"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Thirst for Conquest", "Coward", "GT", "Loyalty", "Royal Lineage", "Hatred of Saiyans"]
-categories: ["Corroded Body and Mind", "Terrifying Conquerors", "Hybrid Saiyans", "Earth-Bred Fighters", "Mission Execution"]
-stats: {"Cost": 21, "Max Lv": 80, "SA Lv": 10}

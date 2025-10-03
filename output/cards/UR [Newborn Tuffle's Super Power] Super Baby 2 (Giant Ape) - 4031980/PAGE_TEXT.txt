@@ -1,8 +1,0 @@
-leader_skill: "Corroded Body and Mind" or "Battle of Fate" Category Ki +3, HP +200% and ATK & DEF +170%, plus an additional HP, ATK & DEF +50% for characters who also belong to the "Terrifying Conquerors", "Final Trump Card" or "GT Bosses" Category
-super_attack: {"name": "Super Galick Blaster", "effect": "Massively raises ATK temporarily; Causes destructive damage to enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "Monstrous Baby", "effect": "ATK 300% Receives an additional Ki +1 per Ki Sphere obtained Performs a critical hit"}
-active_skill: {"name": "Revenge Death Ball Final", "effect": "Raises ATK by 1700% temporarily; Causes ultimate damage to enemy", "activation_conditions": "Can be activated upon entering attacking turn (once only)"}
-link_skills: ["None"]
-categories: ["Corroded Body and Mind", "Battle of Fate", "Terrifying Conquerors", "Final Trump Card", "GT Bosses", "Transformation Boost", "Artificial Life Forms", "Target: Goku", "Revenge", "Inhuman Deeds", "Space-Traveling Warriors", "Giant Form", "Giant Ape Power"]
-stats: {"Cost": 58, "Max Lv": 120, "SA Lv": 10}

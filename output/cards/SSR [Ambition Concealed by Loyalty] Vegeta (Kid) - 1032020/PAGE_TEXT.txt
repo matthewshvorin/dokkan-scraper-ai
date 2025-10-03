@@ -1,8 +1,0 @@
-leader_skill: "Successors" Category Ki +2 and HP, ATK & DEF +30%; or AGL, INT & PHY Types Ki +1 and HP, ATK & DEF +30%
-super_attack: {"name": "Galick Beam", "effect": "Raises ATK & DEF for 1 turn; Causes supreme damage; A medium chance of stunning the enemy"}
-ultra_super_attack: {"name": null, "effect": null}
-passive_skill: {"name": "A Formidable Force in the Making", "effect": "Ki +1 and ATK & DEF 100% When facing 2 or more enemies; ATK & DEF 100% \"Space-Traveling Warriors\" or \"Gifted Warriors\" Category allies' ATK & DEF 20% for 1 turn When facing 3 or more enemies; ATK & DEF 100% \"Space-Traveling Warriors\" or \"Gifted Warriors\" Category allies' ATK & DEF 30% for 1 turn When attacking with 12 or more Ki; ATK & DEF 100%; Launches an additional attack that has a high chance of becoming a Super Attack"}
-active_skill: {"name": null, "effect": null, "activation_conditions": null}
-link_skills: ["Saiyan Warrior Race", "Prodigies", "The Saiyan Lineage", "Royal Lineage", "Thirst for Conquest", "Prepared for Battle"]
-categories: ["Pure Saiyans", "Vegeta's Family", "Youth", "Terrifying Conquerors", "Space-Traveling Warriors", "Gifted Warriors", "Successors", "Mission Execution"]
-stats: {"Cost": 13, "Max Lv": 80, "SA Lv": 10}
