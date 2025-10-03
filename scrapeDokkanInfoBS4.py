@@ -7,7 +7,6 @@
 # - Scrapes each new card
 # - From header row, reads each div.col-5 image src to extract related IDs (SKIPS FIRST TILE)
 #   and opens https://dokkaninfo.com/cards/<ID> directly (also skips if already indexed)
-# - NO asset downloading in this version
 # - RARITY: detected from
 #     div.card-icon-item.card-icon-item-rarity.card-info-above-thumb img[src*="cha_rare_..."]
 # - TYPE: detected from
@@ -21,6 +20,8 @@
 # - Parses "Domain Effect(s)" sections as `domains`
 # - Parses "Standby Skill" and "Finish Skill(s)" blocks with their conditions and type
 # - Maintains a persistent index at output/cards/CARDS_INDEX.json
+# - NEW: Downloads each image URL into a **global assets** folder output/assets/<host>/<path...>,
+#        avoids re-downloading, and stores relative file paths in meta["assets"] (replaces image_urls)
 
 import json
 import logging
@@ -31,14 +32,16 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Set
 from urllib.parse import urljoin, urlparse, parse_qsl, urlencode, urlunparse
 
+import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeoutError
 
 # ------------ Config -------------
 BASE = "https://dokkaninfo.com"
 INDEX_URL = f"{BASE}/cards?sort=open_at"
-
+git
 OUTROOT = Path("output/cards")
+ASSETS_ROOT = Path("output/assets")  # <--- global shared assets folder
 INDEX_PATH = OUTROOT / "CARDS_INDEX.json"
 LOGDIR = Path("output/logs")
 
@@ -47,11 +50,12 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/124.0.0.0 Safari/537.36"
 )
+REQUEST_HEADERS = {"User-Agent": USER_AGENT, "Referer": BASE}
 
 TIMEOUT = 60_000
-SLEEP_BETWEEN_CARDS = 0.6
+SLEEP_BETWEEN_CARDS = 0
 MAX_PAGES = 200            # safety stop to avoid infinite loops
-MAX_NEW_CARDS = 50         # stop after saving this many *new* cards
+MAX_NEW_CARDS = 30         # stop after saving this many *new* cards
 
 HEADERS = [
     "Leader Skill",
@@ -522,7 +526,6 @@ def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, 
     def pick_condition(cands: List[str]) -> Optional[str]:
         if not cands:
             return None
-        # Prefer clauses with obvious timing/entry words
         prioritized = [x for x in cands if re.search(r"\b(when|starting|from the|turn|team|entry|once only)\b", x, re.IGNORECASE)]
         chosen_pool = prioritized if prioritized else cands
         chosen = max(chosen_pool, key=len)
@@ -530,30 +533,18 @@ def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, 
         return chosen
 
     def normalize_transform(text: str) -> str:
-        # Remove redundant "Transformation" tokens and duplicate "Transforms"
         text = re.sub(r"\bTransformation\b\s*", "", text, flags=re.IGNORECASE)
         text = re.sub(r"\bTransforms\s+Transforms\b", "Transforms", text, flags=re.IGNORECASE)
-        # Strip leading "Transforms" or "Transformation"
         text = re.sub(r"^\s*(Transforms|Transformation)\s*", "", text, flags=re.IGNORECASE)
         return _condense_spaces(text)
 
     def normalize_exchange(text: str) -> str:
-        """
-        Ensure the condition starts from the 'Meets up ... Reversible Exchange'
-        or from 'Reversible Exchange ...' phrase, not earlier passive fluff.
-        Also collapse duplicated 'Reversible Exchange'.
-        """
-        # Collapse duplicated tokens first
         text = re.sub(r"(?i)\b(Reversible Exchange)\b(?:\s+\1\b)+", r"\1", text)
-        # Find the most relevant starting phrase
-        # Prefer 'Meets up ... Reversible Exchange'
         m = re.search(r"(?is)(meets\s+up\s+with.*?reversible\s+exchange.*)$", text)
         if not m:
-            # Fallback: start from the first 'Reversible Exchange'
             m = re.search(r"(?is)(reversible\s+exchange.*)$", text)
         if m:
             text = m.group(1)
-        # Finally, trim leading connective fluff like "and", punctuation
         text = re.sub(r"^\s*(and|or|,|;)\s*", "", text, flags=re.IGNORECASE)
         return _condense_spaces(text)
 
@@ -712,6 +703,75 @@ def parse_finish_skills(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
     blocks = parse_skill_blocks(soup, header_label="Finish Skill", cond_label="Finish Skill Condition(s)")
     return blocks
 
+# ------------ Assets downloader -------------
+def _url_to_asset_path(url: str) -> Optional[Path]:
+    """
+    Map a URL to a path under ASSETS_ROOT, preserving host and path.
+    E.g. https://dokkaninfo.com/assets/global/en/character/card/1031220/card.png
+         -> output/assets/dokkaninfo.com/assets/global/en/character/card/1031220/card.png
+    Return None for unsupported/invalid URLs.
+    """
+    try:
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.netloc:
+            return None
+        # Only download from dokkaninfo.com
+        if parsed.netloc.lower() not in {"dokkaninfo.com", "www.dokkaninfo.com"}:
+            return None
+        # We only want image-like URLs
+        if not EXT_FILE_PATTERN.search(parsed.path):
+            return None
+        # Build path
+        safe_parts = [p for p in Path(parsed.path).parts if p not in ("/", "")]
+        rel = Path(parsed.netloc, *safe_parts)
+        return ASSETS_ROOT / rel
+    except Exception:
+        return None
+
+def download_assets_for_card(image_urls: List[str]) -> List[str]:
+    """
+    Download each image URL into the global ASSETS_ROOT, mirroring URL structure under host/.
+    Skip duplicates (per-card and global: don't re-download if file exists and non-empty).
+    Returns list of relative paths (string) from ASSETS_ROOT.
+    """
+    ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
+    rel_paths: List[str] = []
+    seen_rel: Set[str] = set()
+
+    sess = requests.Session()
+    sess.headers.update(REQUEST_HEADERS)
+
+    for u in image_urls or []:
+        target = _url_to_asset_path(u)
+        if target is None:
+            continue
+
+        rel = str(target.relative_to(ASSETS_ROOT))
+        if rel in seen_rel:
+            continue
+        seen_rel.add(rel)
+
+        # Ensure directory exists
+        target.parent.mkdir(parents=True, exist_ok=True)
+
+        # Skip re-download if exists and non-empty
+        if target.exists() and target.stat().st_size > 0:
+            rel_paths.append(rel)
+            continue
+
+        try:
+            with sess.get(u, stream=True, timeout=30) as r:
+                r.raise_for_status()
+                with open(target, "wb") as f:
+                    for chunk in r.iter_content(65536):
+                        if chunk:
+                            f.write(chunk)
+            rel_paths.append(rel)
+        except Exception as e:
+            logging.warning("Asset failed: %s -> %s", u, e)
+
+    return rel_paths
+
 # ------------ Scraping core -------------
 def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
     soup = BeautifulSoup(page_html, "lxml")
@@ -760,7 +820,7 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
     stats = _parse_stats(sections.get("Stats") or [], page_text)
     release_date, tz = _parse_release(page_text)
 
-    # Collect image URLs (not downloading in this version)
+    # Collect image URLs (still collecting first, then download)
     image_urls = []
     seen = set()
     for img in soup.find_all("img"):
@@ -771,6 +831,9 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         if absu not in seen:
             seen.add(absu)
             image_urls.append(absu)
+
+    # Download assets to global folder and record relative paths
+    assets_rel_paths = download_assets_for_card(image_urls)
 
     # Rarity and Type (DOM-first)
     rarity = detect_rarity_from_dom(soup, image_urls)
@@ -843,7 +906,8 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         "type_token": type_token,
         "type_token_upper": type_token_upper,
         "type_icon_filename": type_icon,
-        "image_urls": image_urls,
+        # Replaced image_urls with assets (relative paths under output/assets)
+        "assets": assets_rel_paths,
     }
     return meta
 
@@ -886,6 +950,7 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
     add_line("domains", meta.get("domains"))
     add_line("rarity_detected", rarity)
     add_line("type_token", meta.get("type_token"))
+    add_line("assets", meta.get("assets"))
 
     page_text = "\n".join(parts)
     (card_dir / "PAGE_TEXT.txt").write_text(page_text, encoding="utf-8")
@@ -896,7 +961,7 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
     # Attribution
     src = meta.get("source_url") or ""
     (card_dir / "ATTRIBUTION.txt").write_text(
-        "Data and image asset links collected from DokkanInfo.\n"
+        "Data and image assets collected from DokkanInfo.\n"
         f"Source page: {src}\n"
         "Site: https://dokkaninfo.com\n\n"
         "Notes:\n"
@@ -924,8 +989,9 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
 # ------------ Main orchestration -------------
 def main():
     log_path = setup_logging()
-    logging.info("Starting DokkanInfo scraper (headed) — index paging, cap after MAX_NEW_CARDS, skip already indexed, related IDs (skip first tile), bracketed folder name, passive extras (fixed Reversible Exchange), domains, standby & finish skills")
+    logging.info("Starting DokkanInfo scraper (headed) — index paging, MAX_NEW_CARDS cap, skip indexed, related IDs (skip first), bracketed folder name, passive extras, domains, standby/finish skills, global assets download")
     OUTROOT.mkdir(parents=True, exist_ok=True)
+    ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
 
     # Load persistent index and seed seen_ids from it
     index = load_index()
