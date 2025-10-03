@@ -15,7 +15,13 @@
 # - Display name (plain): "<RARITY> [<TYPE>] <Original H1/Title>"
 # - Display name (bracketed for folder): "<RARITY> [<TYPE>] [<Original H1/Title>]"
 # - Leader Skill full capture; Passive Skill never starts with "Basic effect(s):"
-# - Passive: extracts "transformation" and **reversible_exchange** from the effect text and removes them
+# - Passive:
+#     * Parsed from DOM to capture icons per line (once/permanent, arrows up/down)
+#     * Lines under "Basic effect(s)" default to (Forever) if no icon.
+#     * Lines mentioning Entrance Animation / entry default to (Once).
+#     * **In-line icon replacements**: arrow-up → "up", arrow-down → "down" at the exact spot.
+#     * Human-readable passive text includes inline markers and **de-duplicates context** (printed once per block).
+#     * Extracts "transformation" and **reversible_exchange** from the consolidated marked text
 # - Captures "Transformation Condition(s)" section as `transformation_conditions`
 # - Parses "Domain Effect(s)" sections as `domains`
 # - Parses "Standby Skill" and "Finish Skill(s)" blocks with their conditions and type
@@ -55,7 +61,7 @@ REQUEST_HEADERS = {"User-Agent": USER_AGENT, "Referer": BASE}
 TIMEOUT = 60_000
 SLEEP_BETWEEN_CARDS = 0.6
 MAX_PAGES = 200
-MAX_NEW_CARDS = 50
+MAX_NEW_CARDS = 40
 
 HEADERS = [
     "Leader Skill",
@@ -243,7 +249,184 @@ def _clean_super_like(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
     eff = _condense_spaces(eff)
     return (name or None), (eff or None)
 
-def _group_passive_lines(lines: List[str]) -> str:
+# ---------- Passive (DOM-driven with icons) ----------
+PASSIVE_ICON_ONCE = "passive_skill_dialog_icon_01"
+PASSIVE_ICON_PERMA = "passive_skill_dialog_icon_02"
+PASSIVE_ARROW_UP = "passive_skill_dialog_arrow01"
+PASSIVE_ARROW_DOWN = "passive_skill_dialog_arrow02"
+
+ENTRANCE_REGEX = re.compile(r"(activates\s+the\s+entrance\s+animation|upon\s+the\s+character[’']?s\s+entry)", re.IGNORECASE)
+
+def _find_passive_content_div(soup: BeautifulSoup) -> Optional[Tag]:
+    bnode = soup.find("b", string=re.compile(r"^\s*Passive Skill\s*$", re.IGNORECASE))
+    if not bnode:
+        return None
+    title_row = bnode.find_parent("div", class_=re.compile(r"\brow\b"))
+    if not title_row:
+        return None
+    content = title_row.find_next_sibling("div")
+    hops = 0
+    while content and hops < 6:
+        cls = content.get("class") or []
+        if any(c.startswith("bg-") for c in cls) or content.find("ul") or content.find("strong"):
+            return content
+        content = content.find_next_sibling("div")
+        hops += 1
+    return title_row.find_parent("div", class_=re.compile(r"\bborder\b")) or title_row
+
+def _li_text_with_inline_markers(li: Tag) -> str:
+    """
+    Build the <li> text preserving the inline positions of arrow icons:
+      - arrow01 -> ' up'
+      - arrow02 -> ' down'
+      - passive once/perma icons are omitted here (handled as markers)
+      - other images are dropped
+    """
+    parts: List[str] = []
+    for node in li.children:
+        if isinstance(node, NavigableString):
+            parts.append(str(node))
+        elif isinstance(node, Tag):
+            if node.name == "img":
+                src = (node.get("src") or "").lower()
+                if PASSIVE_ARROW_UP in src:
+                    parts.append(" up")
+                elif PASSIVE_ARROW_DOWN in src:
+                    parts.append(" down")
+                elif PASSIVE_ICON_ONCE in src or PASSIVE_ICON_PERMA in src:
+                    # marker handled outside the text
+                    continue
+                else:
+                    # ignore other images
+                    continue
+            else:
+                parts.append(node.get_text(" ", strip=False))
+    text = "".join(parts)
+    return _condense_spaces(text)
+
+def _li_icons(li: Tag) -> Tuple[bool, bool, List[str], List[str]]:
+    once = False
+    permanent = False
+    arrows: List[str] = []
+    tokens: List[str] = []
+    for im in li.find_all("img"):
+        src = (im.get("src") or "").lower()
+        if PASSIVE_ICON_ONCE in src:
+            once = True
+            tokens.append(PASSIVE_ICON_ONCE)
+        elif PASSIVE_ICON_PERMA in src:
+            permanent = True
+            tokens.append(PASSIVE_ICON_PERMA)
+        elif PASSIVE_ARROW_UP in src:
+            arrows.append("up")
+            tokens.append(PASSIVE_ARROW_UP)
+        elif PASSIVE_ARROW_DOWN in src:
+            arrows.append("down")
+            tokens.append(PASSIVE_ARROW_DOWN)
+        else:
+            m = re.search(r"/([a-z0-9_]+)\.(?:png|jpg|jpeg|gif|webp)$", src)
+            if m:
+                tokens.append(m.group(1))
+    return once, permanent, arrows, tokens
+
+def parse_passive_lines_from_dom(soup: BeautifulSoup) -> Tuple[List[Dict[str, object]], str]:
+    """
+    Parse Passive Skill DOM into structured lines with icons and context.
+    Adds defaults:
+      - Lines under "Basic effect(s)" -> permanent=True if no icon says otherwise.
+      - Lines mentioning Entrance Animation / entry -> once=True if not already marked.
+    Returns (lines_list, consolidated_text_unmarked but context-deduped).
+    """
+    content = _find_passive_content_div(soup)
+    if not content:
+        return [], ""
+
+    lines: List[Dict[str, object]] = []
+    current_context: Optional[str] = None
+    in_basic_scope: bool = False
+
+    for child in content.descendants:
+        if isinstance(child, Tag):
+            if child.name in {"strong", "b"}:
+                txt = child.get_text(" ", strip=True)
+                if txt:
+                    if re.fullmatch(r"(?i)\s*basic effect\(s\)\s*", txt):
+                        in_basic_scope = True
+                        continue
+                    current_context = _condense_spaces(txt)
+                    in_basic_scope = False
+
+            if child.name == "li":
+                once, permanent, arrows, tokens = _li_icons(child)
+                text = _li_text_with_inline_markers(child)
+                if not text:
+                    continue
+
+                # Default permanence for Basic effect(s) block
+                if not once and not permanent and in_basic_scope:
+                    permanent = True
+
+                # Force Once for Entrance Animation / entry lines
+                ctx_join = f"{current_context or ''} {text}"
+                if not once and ENTRANCE_REGEX.search(ctx_join):
+                    once = True
+
+                item = {
+                    "text": text,
+                    "context": current_context,   # None for basic scope
+                    "once": once,
+                    "permanent": permanent,
+                    "arrows": arrows,
+                    "icons": tokens,
+                }
+                lines.append(item)
+
+    # Consolidated string (context printed once per block)
+    parts: List[str] = []
+    last_ctx = object()
+    for it in lines:
+        seg = it["text"]
+        ctx = it.get("context")
+        if ctx and ctx != last_ctx:
+            parts.append(f"{ctx}: {seg}")
+            last_ctx = ctx
+        elif ctx and ctx == last_ctx:
+            parts.append(seg)
+        else:
+            parts.append(seg)
+    consolidated = "; ".join(parts)
+    consolidated = re.sub(r"\s*;\s*", "; ", consolidated).strip()
+    consolidated = re.sub(r"^\s*Basic effect\(s\):\s*", "", consolidated, flags=re.IGNORECASE)
+    return lines, consolidated
+
+# ---- Marked passive rendering helpers ----
+def render_passive_effect_with_markers(lines: List[Dict[str, object]]) -> str:
+    """
+    Render human-readable passive string with:
+      - (Once)/(Forever) markers at the start
+      - inline 'up'/'down' already present in each line's text
+      - Context shown only once per contiguous block sharing the same context
+    """
+    rendered: List[str] = []
+    last_ctx: Optional[str] = None
+
+    for it in lines:
+        marker = "(Once) " if it.get("once") else "(Forever) " if it.get("permanent") else ""
+        seg = f"{marker}{it.get('text') or ''}".strip()
+
+        ctx = it.get("context")
+        if ctx != last_ctx:
+            if ctx:
+                seg = f"{ctx}: {seg}"
+            last_ctx = ctx
+
+        rendered.append(seg)
+
+    out = "; ".join(rendered)
+    return re.sub(r"\s*;\s*", "; ", out).strip()
+
+# ---------- Passive (legacy fallback) ----------
+def _group_passive_lines_fallback(lines: List[str]) -> str:
     if not lines:
         return ""
     lines = [ln for ln in lines if ln not in HEADERS and not re.fullmatch(r"Basic effect\(s\):?", ln, flags=re.IGNORECASE)]
@@ -264,10 +447,8 @@ def _group_passive_lines(lines: List[str]) -> str:
         r"^When receiving an Unarmed Super Attack",
     ]
     def is_leading(s: str) -> bool:
-        for pat in leading_patterns:
-            if re.search(pat, s, flags=re.IGNORECASE):
-                return True
-        return False
+        return any(re.search(p, s, flags=re.IGNORECASE) for p in leading_patterns)
+
     groups: List[List[str]] = []
     cur: List[str] = []
     for ln in lines:
@@ -292,6 +473,7 @@ def _group_passive_lines(lines: List[str]) -> str:
     effect = re.sub(r"^\s*Basic effect\(s\):\s*", "", effect, flags=re.IGNORECASE)
     return effect
 
+# ------------ Active/Activation/Categories/Stats/Release -------------
 def _clean_active(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
     if not block:
         return None, None
@@ -330,6 +512,7 @@ def _parse_stats(block: List[str], page_text: str) -> Dict[str, object]:
     if m_max: stats["Max Lv"] = int(m_max.group(1))
     m_sa = re.search(r"\bSA\s*Lv\s*:\s*(\d+)", page_text, flags=re.IGNORECASE)
     if m_sa: stats["SA Lv"] = int(m_sa.group(1))
+
     def parse_row(key: str) -> Optional[Dict[str, int]]:
         pat = re.compile(rf"^{key}\s+([0-9,]+)\s+([0-9,]+)\s+([0-9,]+)\s+([0-9,]+)$", flags=re.IGNORECASE)
         for ln in block:
@@ -342,6 +525,7 @@ def _parse_stats(block: List[str], page_text: str) -> Dict[str, object]:
                     "100%": int(m.group(4).replace(",", "")),
                 }
         return None
+
     for key in ["HP", "ATK", "DEF"]:
         row = parse_row(key)
         if row: stats[key] = row
@@ -375,8 +559,10 @@ def _clean_categories_python(cats: List[str]) -> List[str]:
 def parse_categories_from_soup(soup: BeautifulSoup) -> List[str]:
     cats1 = [(im.get("alt") or im.get("title") or "") for im in soup.select('a[href*="/categories/"] img')]
     cats1 = [c for c in cats1 if c]
+
     cats2 = [(im.get("alt") or im.get("title") or "") for im in soup.select('img[src*="/card_category/label/"]')]
     cats2 = [c for c in cats2 if c]
+
     cats3 = []
     cat_el: Optional[Tag] = None
     for el in soup.find_all(string=True):
@@ -407,6 +593,7 @@ def parse_categories_from_soup(soup: BeautifulSoup) -> List[str]:
                         t = a.get_text(strip=True)
                         if t:
                             cats3.append(t)
+
     merged = []
     seen = set()
     for pool in (cats1, cats2, cats3):
@@ -452,7 +639,7 @@ def detect_type_token_from_dom(soup: BeautifulSoup) -> Optional[str]:
                 type_found = suffix
     return type_found
 
-# ------------ Passive extras -------------
+# ------------ Passive extras (transform/exchange) -------------
 def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, Optional[str]], Dict[str, Optional[str]]]:
     if not passive_effect:
         return passive_effect, {"can_transform": False, "condition": None}, {"can_exchange": False, "condition": None}
@@ -588,11 +775,6 @@ def parse_finish_skills(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
 
 # ------------ Assets downloader -------------
 def _url_to_asset_rel(url: str) -> Optional[Path]:
-    """
-    Map a URL to a RELATIVE path under ASSETS_ROOT, preserving host and POSIX path.
-    Uses PurePosixPath to avoid Windows root issues.
-    Returns None for unsupported/invalid URLs or non-image files.
-    """
     try:
         parsed = urlparse(url)
         if not parsed.scheme or not parsed.netloc:
@@ -603,17 +785,11 @@ def _url_to_asset_rel(url: str) -> Optional[Path]:
         if not EXT_FILE_PATTERN.search(parsed.path):
             return None
         parts = [p for p in PurePosixPath(parsed.path).parts if p and p != "/"]
-        # Build a relative path: <host>/<posix parts...>
         return Path(host, *parts)
     except Exception:
         return None
 
 def download_assets_for_card(image_urls: List[str]) -> List[str]:
-    """
-    Download each image URL into ASSETS_ROOT/<host>/<path...>.
-    Skip duplicates and re-downloads (file exists with size > 0).
-    Return list of RELATIVE paths (strings) from ASSETS_ROOT.
-    """
     ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
     rel_paths: List[str] = []
     seen_rel: Set[str] = set()
@@ -681,12 +857,21 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
             ultra_name = ultra_name or un
             ultra_effect = ultra_effect or ue
 
-    passive_block = sections.get("Passive Skill") or []
-    passive_name = passive_block[0] if passive_block else None
-    passive_effect_lines = passive_block[1:] if len(passive_block) > 1 else []
-    passive_effect = _group_passive_lines(passive_effect_lines)
+    # ----- Passive via DOM (icons + lines) -----
+    passive_lines, passive_consolidated_unmarked = parse_passive_lines_from_dom(soup)
+    passive_marked = render_passive_effect_with_markers(passive_lines)
 
-    passive_effect, transformation, reversible_exchange = extract_transform_and_exchange(passive_effect)
+    # Fallback: if nothing parsed from DOM, use old text grouping (unmarked)
+    if not passive_lines and (sections.get("Passive Skill") or []):
+        passive_block = sections.get("Passive Skill") or []
+        passive_marked = _group_passive_lines_fallback(passive_block[1:])
+
+    # Passive name from textual sections (first line after header)
+    passive_block_text = sections.get("Passive Skill") or []
+    passive_name = passive_block_text[0] if passive_block_text else None
+
+    # Extract transformation + reversible exchange from the **marked** passive text
+    effect_for_scan, transformation, reversible_exchange = extract_transform_and_exchange(passive_marked)
 
     active_name, active_effect = _clean_active(sections.get("Active Skill") or [])
     activation_conditions = _clean_activation(sections.get("Activation Condition(s)") or [])
@@ -697,6 +882,7 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
     stats = _parse_stats(sections.get("Stats") or [], page_text)
     release_date, tz = _parse_release(page_text)
 
+    # Collect images and download global assets
     image_urls = []
     seen = set()
     for img in soup.find_all("img"):
@@ -749,13 +935,23 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         "character_id": char_id,
         "release_date": release_date,
         "timezone": tz,
+
+        # Leader / Supers
         "leader_skill": leader_skill,
         "super_attack": {"name": super_name, "effect": super_effect},
         "ultra_super_attack": {"name": ultra_name, "effect": ultra_effect},
-        "passive_skill": {"name": passive_name, "effect": passive_effect},
+
+        # Passive (marked effect + structured lines)
+        "passive_skill": {
+            "name": passive_name,
+            "effect": effect_for_scan,          # marked and cleaned of transform/exchange
+            "lines": passive_lines,             # structured, with inline 'up'/'down' already in text
+        },
         "transformation": transformation,
         "reversible_exchange": reversible_exchange,
         "transformation_conditions": transformation_conditions,
+
+        # Active + others
         "active_skill": {"name": active_name, "effect": active_effect, "activation_conditions": activation_conditions},
         "standby_skill": standby_skill,
         "finish_skills": finish_skills,
@@ -763,12 +959,15 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         "categories": categories,
         "stats": stats,
         "domains": domains,
+
         "source_url": page_url,
         "rarity_detected": rarity,
         "type_token": type_token,
         "type_token_upper": type_token_upper,
         "type_icon_filename": type_icon,
-        "assets": assets_rel_paths,   # relative to output/assets
+
+        # Assets saved under output/assets
+        "assets": assets_rel_paths,
     }
     return meta
 
@@ -844,7 +1043,7 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
 # ------------ Main -------------
 def main():
     log_path = setup_logging()
-    logging.info("Starting DokkanInfo scraper (headed) — index paging, MAX_NEW_CARDS cap, skip indexed, related IDs (skip first), bracketed folder name, passive extras, domains, standby/finish skills, global assets download")
+    logging.info("Starting DokkanInfo scraper (headed) — inline arrow words, Basic=(Forever) default, Entrance=(Once), context de-dup, index paging, skip indexed, related IDs (skip first), global assets download")
     OUTROOT.mkdir(parents=True, exist_ok=True)
     ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
 
