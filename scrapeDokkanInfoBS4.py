@@ -1,33 +1,16 @@
-# scrapeDokkanInfo_play_bs4_index_start.py
-# Playwright (headed) + BeautifulSoup
-# - Starts from index: https://dokkaninfo.com/cards?sort=open_at
-# - Paginates: when the main card container is empty, add/increment `page` query (&page=2, page=N+1)
-# - Stops when a page yields no cards, or after MAX_NEW_CARDS are saved
-# - Skips IDs already in output/cards/CARDS_INDEX.json
-# - Scrapes each new card
-# - From header row, reads each div.col-5 image src to extract related IDs (SKIPS FIRST TILE)
-#   and opens https://dokkaninfo.com/cards/<ID> directly (also skips if already indexed)
-# - RARITY: detected from
-#     div.card-icon-item.card-icon-item-rarity.card-info-above-thumb img[src*="cha_rare_..."]
-# - TYPE: detected from
-#     div.row.justify-content-center.align-items-center.padding-top-bottom-10.border.border-2.border-<type>.bg-<type>
-#     Take the **last** matching token among border-*/bg-* where suffix in {str, teq, int, agl, phy}
-# - Display name (plain): "<RARITY> [<TYPE>] <Original H1/Title>"
-# - Display name (bracketed for folder): "<RARITY> [<TYPE>] [<Original H1/Title>]"
-# - Leader Skill full capture; Passive Skill never starts with "Basic effect(s):"
-# - Passive:
-#     * Parsed from DOM to capture icons per line (once/permanent, arrows up/down)
-#     * Lines under "Basic effect(s)" default to (Forever) if no icon.
-#     * Lines mentioning Entrance Animation / entry default to (Once).
-#     * **In-line icon replacements**: arrow-up → "up", arrow-down → "down" at the exact spot.
-#     * Human-readable passive text includes inline markers and **de-duplicates context** (printed once per block).
-#     * Extracts "transformation" and **reversible_exchange** from the consolidated marked text
-# - Captures "Transformation Condition(s)" section as `transformation_conditions`
-# - Parses "Domain Effect(s)" sections as `domains`
-# - Parses "Standby Skill" and "Finish Skill(s)" blocks with their conditions and type
-# - Maintains a persistent index at output/cards/CARDS_INDEX.json
-# - Downloads each image URL into a **global assets** folder output/assets/<host>/<path...>,
-#   avoids re-downloading, and stores relative file paths in meta["assets"] (replaces image_urls)
+# scrapeDokkanInfo_play_bs4_index_eza_detect.py
+# Playwright (headed) + BeautifulSoup + Transformations + EZA variants with DOM-based EZA detection
+#
+# This version:
+# - Enforces strict ordering per card/form: base (eza=false) -> step=1 -> step=2 -> ... -> Super EZA last.
+# - Checks page.goto() response status; if not OK, the variant is skipped and no folder is created.
+# - For regular EZA steps we STOP at the first failure (assume higher steps don't exist).
+# - Only attempts Super EZA (UR step 8 / LR step 4) at the end; if it fails, it is skipped.
+#
+# Seed defaults to 1014761 (you can change SEED_URLS).
+#
+# Usage:
+#   python scrapeDokkanInfo_play_bs4_index_eza_detect.py
 
 import json
 import logging
@@ -61,7 +44,12 @@ REQUEST_HEADERS = {"User-Agent": USER_AGENT, "Referer": BASE}
 TIMEOUT = 60_000
 SLEEP_BETWEEN_CARDS = 0.6
 MAX_PAGES = 200
-MAX_NEW_CARDS = 40
+MAX_NEW_CARDS = 50
+
+# ---- Seed test ----
+SEED_URLS: List[str] = [
+    "https://dokkaninfo.com/cards/1014761",
+]
 
 HEADERS = [
     "Leader Skill",
@@ -125,6 +113,47 @@ def save_index(index: Dict[str, dict]) -> None:
     INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
     INDEX_PATH.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
 
+def is_variant_already_indexed(index: Dict[str, dict], char_id: str, variant_key: str) -> bool:
+    if char_id not in index:
+        return False
+    meta = index[char_id]
+    if variant_key == "base":
+        return bool(meta.get("folder"))
+    variants = meta.get("variants") or {}
+    return variant_key in variants
+
+def upsert_variant_in_index(index: Dict[str, dict], char_id: str, base_display_name: str,
+                            display_name_with_type: str, display_name_with_type_bracketed: str,
+                            rarity: Optional[str], type_token_upper: Optional[str],
+                            variant_key: str, folder: Path, url: str, eza: bool, step: Optional[int], is_super: bool):
+    if char_id not in index:
+        index[char_id] = {
+            "url": url,
+            "display_name": base_display_name,
+            "display_name_with_type": display_name_with_type,
+            "display_name_with_type_bracketed": display_name_with_type_bracketed,
+            "rarity": rarity,
+            "type": type_token_upper,
+            "folder": None,
+            "variants": {},
+            "saved_at": datetime.utcnow().isoformat() + "Z",
+        }
+    if variant_key == "base":
+        index[char_id]["folder"] = str(folder)
+    else:
+        index[char_id].setdefault("variants", {})
+        human_label = "Super EZA" if is_super else f"EZA step {step}" if step is not None else "EZA"
+        index[char_id]["variants"][variant_key] = {
+            "url": url,
+            "folder": str(folder),
+            "eza": eza,
+            "step": step,
+            "is_super_eza": is_super,
+            "label": human_label,
+            "saved_at": datetime.utcnow().isoformat() + "Z",
+        }
+    save_index(index)
+
 # ------------ Helpers -------------
 def sanitize_filename(name: str) -> str:
     name = (
@@ -154,14 +183,13 @@ def extract_ids_from_col5_images(page_html: str) -> List[str]:
             header_div = div
             break
     if not header_div:
-        logging.info("Header row not found; no .col-5 IDs to extract.")
         return []
     tiles = header_div.find_all("div", class_=lambda v: v and "col-5" in v.split())
     if not tiles:
         return []
     ids: List[str] = []
     seen: Set[str] = set()
-    for sub in tiles[1:]:  # SKIP FIRST TILE
+    for sub in tiles[1:]:  # skip first tile entirely
         img = sub.find("img")
         if not img:
             continue
@@ -184,6 +212,72 @@ def build_next_index_url(curr_url: str) -> str:
             q["page"] = str(int(q["page"]) + 1)
         except Exception:
             q["page"] = "2"
+    new_query = urlencode(q, doseq=True)
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+
+# ------------ Variant helpers -------------
+def parse_variant_from_url(url: str) -> Tuple[bool, Optional[int]]:
+    parsed = urlparse(url)
+    q = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    eza_flag = str(q.get("eza", "false")).lower() == "true"
+    step = q.get("step")
+    try:
+        step_i = int(step) if step is not None else None
+    except Exception:
+        step_i = None
+    return eza_flag, step_i
+
+def super_eza_step_for_rarity(rarity: Optional[str]) -> Optional[int]:
+    if not rarity:
+        return None
+    r = rarity.upper()
+    if r == "LR":
+        return 4
+    if r == "UR":
+        return 8
+    return None
+
+def regular_eza_steps_for_rarity(rarity: Optional[str]) -> List[int]:
+    if not rarity:
+        return []
+    r = rarity.upper()
+    if r == "LR":
+        return [1, 2, 3]
+    if r == "UR":
+        return [1, 2, 3, 4, 5, 6, 7]
+    return []
+
+def build_variant_key(eza: bool, step: Optional[int]) -> str:
+    if not eza:
+        return "base"
+    if step is None:
+        return "eza"
+    return f"eza_step_{step}"
+
+def label_variant_suffix_from_flags(variant_key: str, is_super: bool, step: Optional[int]) -> str:
+    if variant_key == "base":
+        return ""
+    if is_super:
+        return " - Super EZA"
+    if variant_key.startswith("eza_step_") and step is not None:
+        return f" - EZA step {step}"
+    if variant_key == "eza":
+        return " - EZA"
+    return " - " + variant_key
+
+def normalize_to_base_url(url: str) -> str:
+    p = urlparse(url)
+    return urlunparse((p.scheme, p.netloc, p.path, "", "", ""))
+
+def make_variant_url(base_url: str, eza: bool, step: Optional[int]) -> str:
+    parsed = urlparse(base_url)
+    q = {}
+    if eza:
+        q["eza"] = "true"
+        if step is not None:
+            q["step"] = str(step)
+    else:
+        q["eza"] = "false"
     new_query = urlencode(q, doseq=True)
     return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
 
@@ -221,12 +315,6 @@ def _clean_leader(block: List[str]) -> Optional[str]:
         return None
     leader = _condense_spaces(" ".join(block))
     leader = _dedup_sentences(leader)
-    leader = re.sub(
-        r'("Exploding Rage"\s*Category\s+Ki\s*\+\d+\s+and\s+HP,\s*ATK\s*&\s*DEF\s*\+\d+%)\s*\1',
-        r"\1",
-        leader,
-        flags=re.IGNORECASE,
-    )
     return leader or None
 
 def _clean_super_like(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
@@ -249,12 +337,11 @@ def _clean_super_like(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
     eff = _condense_spaces(eff)
     return (name or None), (eff or None)
 
-# ---------- Passive (DOM-driven with icons) ----------
+# ---------- Passive (DOM-driven) ----------
 PASSIVE_ICON_ONCE = "passive_skill_dialog_icon_01"
 PASSIVE_ICON_PERMA = "passive_skill_dialog_icon_02"
 PASSIVE_ARROW_UP = "passive_skill_dialog_arrow01"
 PASSIVE_ARROW_DOWN = "passive_skill_dialog_arrow02"
-
 ENTRANCE_REGEX = re.compile(r"(activates\s+the\s+entrance\s+animation|upon\s+the\s+character[’']?s\s+entry)", re.IGNORECASE)
 
 def _find_passive_content_div(soup: BeautifulSoup) -> Optional[Tag]:
@@ -275,13 +362,6 @@ def _find_passive_content_div(soup: BeautifulSoup) -> Optional[Tag]:
     return title_row.find_parent("div", class_=re.compile(r"\bborder\b")) or title_row
 
 def _li_text_with_inline_markers(li: Tag) -> str:
-    """
-    Build the <li> text preserving the inline positions of arrow icons:
-      - arrow01 -> ' up'
-      - arrow02 -> ' down'
-      - passive once/perma icons are omitted here (handled as markers)
-      - other images are dropped
-    """
     parts: List[str] = []
     for node in li.children:
         if isinstance(node, NavigableString):
@@ -294,15 +374,12 @@ def _li_text_with_inline_markers(li: Tag) -> str:
                 elif PASSIVE_ARROW_DOWN in src:
                     parts.append(" down")
                 elif PASSIVE_ICON_ONCE in src or PASSIVE_ICON_PERMA in src:
-                    # marker handled outside the text
                     continue
                 else:
-                    # ignore other images
                     continue
             else:
                 parts.append(node.get_text(" ", strip=False))
-    text = "".join(parts)
-    return _condense_spaces(text)
+    return _condense_spaces("".join(parts))
 
 def _li_icons(li: Tag) -> Tuple[bool, bool, List[str], List[str]]:
     once = False
@@ -330,13 +407,6 @@ def _li_icons(li: Tag) -> Tuple[bool, bool, List[str], List[str]]:
     return once, permanent, arrows, tokens
 
 def parse_passive_lines_from_dom(soup: BeautifulSoup) -> Tuple[List[Dict[str, object]], str]:
-    """
-    Parse Passive Skill DOM into structured lines with icons and context.
-    Adds defaults:
-      - Lines under "Basic effect(s)" -> permanent=True if no icon says otherwise.
-      - Lines mentioning Entrance Animation / entry -> once=True if not already marked.
-    Returns (lines_list, consolidated_text_unmarked but context-deduped).
-    """
     content = _find_passive_content_div(soup)
     if not content:
         return [], ""
@@ -361,27 +431,20 @@ def parse_passive_lines_from_dom(soup: BeautifulSoup) -> Tuple[List[Dict[str, ob
                 text = _li_text_with_inline_markers(child)
                 if not text:
                     continue
-
-                # Default permanence for Basic effect(s) block
                 if not once and not permanent and in_basic_scope:
                     permanent = True
-
-                # Force Once for Entrance Animation / entry lines
                 ctx_join = f"{current_context or ''} {text}"
                 if not once and ENTRANCE_REGEX.search(ctx_join):
                     once = True
-
-                item = {
+                lines.append({
                     "text": text,
-                    "context": current_context,   # None for basic scope
+                    "context": current_context,
                     "once": once,
                     "permanent": permanent,
                     "arrows": arrows,
                     "icons": tokens,
-                }
-                lines.append(item)
+                })
 
-    # Consolidated string (context printed once per block)
     parts: List[str] = []
     last_ctx = object()
     for it in lines:
@@ -399,33 +462,21 @@ def parse_passive_lines_from_dom(soup: BeautifulSoup) -> Tuple[List[Dict[str, ob
     consolidated = re.sub(r"^\s*Basic effect\(s\):\s*", "", consolidated, flags=re.IGNORECASE)
     return lines, consolidated
 
-# ---- Marked passive rendering helpers ----
 def render_passive_effect_with_markers(lines: List[Dict[str, object]]) -> str:
-    """
-    Render human-readable passive string with:
-      - (Once)/(Forever) markers at the start
-      - inline 'up'/'down' already present in each line's text
-      - Context shown only once per contiguous block sharing the same context
-    """
     rendered: List[str] = []
     last_ctx: Optional[str] = None
-
     for it in lines:
         marker = "(Once) " if it.get("once") else "(Forever) " if it.get("permanent") else ""
         seg = f"{marker}{it.get('text') or ''}".strip()
-
         ctx = it.get("context")
         if ctx != last_ctx:
             if ctx:
                 seg = f"{ctx}: {seg}"
             last_ctx = ctx
-
         rendered.append(seg)
+    return re.sub(r"\s*;\s*", "; ", "; ".join(rendered)).strip()
 
-    out = "; ".join(rendered)
-    return re.sub(r"\s*;\s*", "; ", out).strip()
-
-# ---------- Passive (legacy fallback) ----------
+# ---------- Passive fallback ----------
 def _group_passive_lines_fallback(lines: List[str]) -> str:
     if not lines:
         return ""
@@ -504,7 +555,7 @@ def _clean_links(block: List[str]) -> List[str]:
         seen.add(s); out.append(s)
     return out
 
-def _parse_stats(block: List[str], page_text: str) -> Dict[str, object]:
+def _parse_stats_textual(block: List[str], page_text: str) -> Dict[str, object]:
     stats: Dict[str, object] = {}
     m_cost = re.search(r"\bCost\s*:\s*(\d+)", page_text, flags=re.IGNORECASE)
     if m_cost: stats["Cost"] = int(m_cost.group(1))
@@ -512,24 +563,56 @@ def _parse_stats(block: List[str], page_text: str) -> Dict[str, object]:
     if m_max: stats["Max Lv"] = int(m_max.group(1))
     m_sa = re.search(r"\bSA\s*Lv\s*:\s*(\d+)", page_text, flags=re.IGNORECASE)
     if m_sa: stats["SA Lv"] = int(m_sa.group(1))
-
-    def parse_row(key: str) -> Optional[Dict[str, int]]:
-        pat = re.compile(rf"^{key}\s+([0-9,]+)\s+([0-9,]+)\s+([0-9,]+)\s+([0-9,]+)$", flags=re.IGNORECASE)
-        for ln in block:
-            m = pat.match(ln)
-            if m:
-                return {
-                    "Base Min": int(m.group(1).replace(",", "")),
-                    "Base Max": int(m.group(2).replace(",", "")),
-                    "55%": int(m.group(3).replace(",", "")),
-                    "100%": int(m.group(4).replace(",", "")),
-                }
-        return None
-
-    for key in ["HP", "ATK", "DEF"]:
-        row = parse_row(key)
-        if row: stats[key] = row
     return stats
+
+def _parse_stats_table_dom(soup: BeautifulSoup) -> Dict[str, object]:
+    out: Dict[str, object] = {}
+    table = None
+    for th in soup.find_all("th"):
+        if th.find("b") and th.find("b").get_text(strip=True).lower() == "stats":
+            tbl = th.find_parent("table")
+            if tbl:
+                table = tbl
+                break
+    if not table:
+        return out
+    header_row = table.find("tr")
+    if not header_row:
+        return out
+    headers = []
+    for th in header_row.find_all("th")[1:]:
+        headers.append(th.get_text(strip=True))
+    key_map = {
+        "Base Min": "Base Min",
+        "Base Max": "Base Max",
+        "55%": "55%",
+        "100%": "100%",
+        "EZA B. Max": "EZA B. Max",
+        "EZA 100%": "EZA 100%",
+    }
+    norm_headers = [key_map.get(h, h) for h in headers]
+    for row in table.find_all("tr")[1:]:
+        stat_name_th = row.find("th")
+        if not stat_name_th:
+            continue
+        stat_name = stat_name_th.get_text(strip=True).upper()
+        if stat_name not in {"HP", "ATK", "DEF"}:
+            continue
+        cells = [td.get_text(strip=True).replace(",", "") for td in row.find_all("td")]
+        values: Dict[str, int] = {}
+        for i, val in enumerate(cells):
+            if i >= len(norm_headers):
+                break
+            hkey = norm_headers[i]
+            if not val:
+                continue
+            try:
+                values[hkey] = int(val)
+            except ValueError:
+                continue
+        if values:
+            out[stat_name] = values
+    return out
 
 def _parse_release(page_text: str) -> Tuple[Optional[str], Optional[str]]:
     m = re.search(
@@ -541,28 +624,44 @@ def _parse_release(page_text: str) -> Tuple[Optional[str], Optional[str]]:
         return f"{m.group(1)} {m.group(2)}", m.group(3)
     return None, None
 
-def _clean_categories_python(cats: List[str]) -> List[str]:
-    out = []
-    seen = set()
-    for s in cats or []:
-        s = (s or "").strip().strip("•· ")
-        if not s: continue
-        low = s.lower()
-        if low in CATEGORY_BLACKLIST_TOKENS: continue
-        if EXT_FILE_PATTERN.search(s): continue
-        if re.fullmatch(r"[\d\s%:]+", s): continue
-        if s in HEADERS or "Links:" in s or "Show More" in s: continue
-        if s in seen: continue
-        seen.add(s); out.append(s)
-    return out
+def _parse_release_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def grab_block(b_label: str) -> Optional[str]:
+        b = soup.find("b", string=re.compile(rf"^\s*{re.escape(b_label)}\s*$", re.IGNORECASE))
+        if not b:
+            return None
+        row = b.find_parent("div", class_=re.compile(r"\brow\b"))
+        if not row:
+            return None
+        nxt = row.find_next_sibling("div")
+        hops = 0
+        while nxt and hops < 3:
+            text = nxt.get_text("\n", strip=True)
+            if text:
+                return _condense_spaces(text.replace("\n", " "))
+            nxt = nxt.find_next_sibling("div")
+            hops += 1
+        return None
+
+    rd_text = grab_block("Release Date")
+    eza_rd_text = grab_block("EZA Release Date")
+
+    def split_dt_tz(txt: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+        if not txt:
+            return None, None
+        m = re.search(r"([0-9/.\-]+\s+[0-9: ]+[APMapm]{2})\s+([A-Z]{2,4})", txt)
+        if m:
+            return m.group(1), m.group(2)
+        return txt, None
+
+    rel_dt, rel_tz = split_dt_tz(rd_text)
+    eza_rel_dt, _ = split_dt_tz(eza_rd_text)
+    return rel_dt, rel_tz, eza_rel_dt
 
 def parse_categories_from_soup(soup: BeautifulSoup) -> List[str]:
     cats1 = [(im.get("alt") or im.get("title") or "") for im in soup.select('a[href*="/categories/"] img')]
     cats1 = [c for c in cats1 if c]
-
     cats2 = [(im.get("alt") or im.get("title") or "") for im in soup.select('img[src*="/card_category/label/"]')]
     cats2 = [c for c in cats2 if c]
-
     cats3 = []
     cat_el: Optional[Tag] = None
     for el in soup.find_all(string=True):
@@ -593,7 +692,6 @@ def parse_categories_from_soup(soup: BeautifulSoup) -> List[str]:
                         t = a.get_text(strip=True)
                         if t:
                             cats3.append(t)
-
     merged = []
     seen = set()
     for pool in (cats1, cats2, cats3):
@@ -603,16 +701,24 @@ def parse_categories_from_soup(soup: BeautifulSoup) -> List[str]:
                 seen.add(s); merged.append(s)
     return _clean_categories_python(merged)
 
-# ------------ Rarity & Type -------------
+def _clean_categories_python(cats: List[str]) -> List[str]:
+    out = []
+    seen = set()
+    for s in cats or []:
+        s = (s or "").strip().strip("•· ")
+        if not s: continue
+        low = s.lower()
+        if low in CATEGORY_BLACKLIST_TOKENS: continue
+        if EXT_FILE_PATTERN.search(s): continue
+        if re.fullmatch(r"[\d\s%:]+", s): continue
+        if s in HEADERS or "Links:" in s or "Show More" in s: continue
+        if s in seen: continue
+        seen.add(s); out.append(s)
+    return out
+
+# ------------ Rarity, Type, Obtain Type -------------
 def detect_rarity_from_dom(soup: BeautifulSoup, image_urls_fallback: List[str]) -> Optional[str]:
-    rarity_map = {
-        "lr": "LR",
-        "ur": "UR",
-        "ssr": "SSR",
-        "sr": "SR",
-        "r": "R",
-        "n": "N",
-    }
+    rarity_map = {"lr": "LR", "ur": "UR", "ssr": "SSR", "sr": "SR", "r": "R", "n": "N"}
     node = soup.select_one("div.card-icon-item.card-icon-item-rarity.card-info-above-thumb img[src]")
     if node:
         src = (node.get("src") or "").lower()
@@ -638,6 +744,15 @@ def detect_type_token_from_dom(soup: BeautifulSoup) -> Optional[str]:
             if suffix in TYPE_SET:
                 type_found = suffix
     return type_found
+
+def parse_obtain_type(soup: BeautifulSoup) -> Optional[str]:
+    for div in soup.find_all("div", class_=re.compile(r"\brow\b")):
+        cls = " ".join(div.get("class") or [])
+        if "padding-top-bottom-10" in cls:
+            txt = div.get_text(" ", strip=True)
+            if "Summonable" in txt:
+                return "Summonable"
+    return None
 
 # ------------ Passive extras (transform/exchange) -------------
 def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, Optional[str]], Dict[str, Optional[str]]]:
@@ -684,7 +799,7 @@ def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, 
         reversible_exchange["condition"] = normalize_exchange(exchange_condition_raw)
     return cleaned_effect, transformation, reversible_exchange
 
-# ------------ Domains -------------
+# ------------ Domains / Standby / Finish -------------
 def detect_type_suffix_from_classes(cls_list: List[str]) -> Optional[str]:
     t = None
     for cls in cls_list or []:
@@ -721,7 +836,6 @@ def parse_domains(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
         seen.add(key); uniq.append(d)
     return uniq
 
-# ------------ Standby & Finish -------------
 def collect_effect_and_conditions(content_div: Tag, cond_label_regex: re.Pattern) -> Tuple[str, Optional[str]]:
     if not content_div:
         return "", None
@@ -744,7 +858,7 @@ def collect_effect_and_conditions(content_div: Tag, cond_label_regex: re.Pattern
     return effect, (condition or None)
 
 def parse_skill_blocks(soup: BeautifulSoup, header_label: str, cond_label: str) -> List[Dict[str, Optional[str]]]:
-    results: List[Dict[str, Optional[str]]] = []
+    results: List[Dict[str, Optional[str]]]= []
     bnodes = soup.find_all("b", string=re.compile(rf"^\s*{re.escape(header_label)}\s*$", re.IGNORECASE))
     for bnode in bnodes:
         title_row = bnode.find_parent("div", class_=re.compile(r"\brow\b"))
@@ -772,6 +886,18 @@ def parse_standby_skill(soup: BeautifulSoup) -> Optional[Dict[str, Optional[str]
 
 def parse_finish_skills(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
     return parse_skill_blocks(soup, header_label="Finish Skill", cond_label="Finish Skill Condition(s)")
+
+# ------------ EZA detection -------------
+def eza_exists_from_dom(soup: BeautifulSoup) -> bool:
+    rows = soup.find_all("div", class_=re.compile(r"\brow\b"))
+    for r in rows:
+        cls = " ".join(r.get("class") or [])
+        if "cursor-pointer" not in cls:
+            continue
+        bolds = [b.get_text(strip=True).upper() for b in r.find_all("b")]
+        if "PRE-EZA" in bolds and "EZA" in bolds:
+            return True
+    return False
 
 # ------------ Assets downloader -------------
 def _url_to_asset_rel(url: str) -> Optional[Path]:
@@ -827,10 +953,9 @@ def download_assets_for_card(image_urls: List[str]) -> List[str]:
     return rel_paths
 
 # ------------ Scraping core -------------
-def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
+def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, object]) -> Dict[str, object]:
     soup = BeautifulSoup(page_html, "lxml")
     page_text = soup.get_text("\n", strip=True)
-
     sections = _split_sections(page_text)
 
     leader_skill = _clean_leader(sections.get("Leader Skill") or [])
@@ -857,20 +982,14 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
             ultra_name = ultra_name or un
             ultra_effect = ultra_effect or ue
 
-    # ----- Passive via DOM (icons + lines) -----
-    passive_lines, passive_consolidated_unmarked = parse_passive_lines_from_dom(soup)
+    passive_lines, _ = parse_passive_lines_from_dom(soup)
     passive_marked = render_passive_effect_with_markers(passive_lines)
-
-    # Fallback: if nothing parsed from DOM, use old text grouping (unmarked)
     if not passive_lines and (sections.get("Passive Skill") or []):
         passive_block = sections.get("Passive Skill") or []
         passive_marked = _group_passive_lines_fallback(passive_block[1:])
-
-    # Passive name from textual sections (first line after header)
     passive_block_text = sections.get("Passive Skill") or []
     passive_name = passive_block_text[0] if passive_block_text else None
 
-    # Extract transformation + reversible exchange from the **marked** passive text
     effect_for_scan, transformation, reversible_exchange = extract_transform_and_exchange(passive_marked)
 
     active_name, active_effect = _clean_active(sections.get("Active Skill") or [])
@@ -879,10 +998,17 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
     link_skills = _clean_links(sections.get("Link Skills") or [])
 
     categories = parse_categories_from_soup(soup)
-    stats = _parse_stats(sections.get("Stats") or [], page_text)
-    release_date, tz = _parse_release(page_text)
 
-    # Collect images and download global assets
+    stats_textual = _parse_stats_textual(sections.get("Stats") or [], page_text)
+    stats_dom = _parse_stats_table_dom(soup)
+    stats = {**stats_textual, **stats_dom}
+
+    rel_dt_dom, rel_tz_dom, eza_rel_dom = _parse_release_dom(soup)
+    if rel_dt_dom:
+        release_date, tz = rel_dt_dom, rel_tz_dom
+    else:
+        release_date, tz = _parse_release(page_text)
+
     image_urls = []
     seen = set()
     for img in soup.find_all("img"):
@@ -893,7 +1019,6 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         if absu not in seen:
             seen.add(absu)
             image_urls.append(absu)
-
     assets_rel_paths = download_assets_for_card(image_urls)
 
     rarity = detect_rarity_from_dom(soup, image_urls)
@@ -905,6 +1030,8 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         if "cha_type_icon_" in url.lower():
             type_icon = url.split("/")[-1]
             break
+
+    obtain_type = parse_obtain_type(soup)
 
     h1 = soup.select_one("h1")
     base_display_name = (
@@ -927,6 +1054,8 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
     standby_skill = parse_standby_skill(soup)
     finish_skills = parse_finish_skills(soup)
 
+    eza_exists = eza_exists_from_dom(soup)
+
     meta = {
         "page_title": page_title,
         "display_name": base_display_name,
@@ -935,23 +1064,21 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         "character_id": char_id,
         "release_date": release_date,
         "timezone": tz,
+        "eza_release_date": eza_rel_dom,
 
-        # Leader / Supers
         "leader_skill": leader_skill,
         "super_attack": {"name": super_name, "effect": super_effect},
         "ultra_super_attack": {"name": ultra_name, "effect": ultra_effect},
 
-        # Passive (marked effect + structured lines)
         "passive_skill": {
             "name": passive_name,
-            "effect": effect_for_scan,          # marked and cleaned of transform/exchange
-            "lines": passive_lines,             # structured, with inline 'up'/'down' already in text
+            "effect": effect_for_scan,
+            "lines": passive_lines,
         },
         "transformation": transformation,
         "reversible_exchange": reversible_exchange,
         "transformation_conditions": transformation_conditions,
 
-        # Active + others
         "active_skill": {"name": active_name, "effect": active_effect, "activation_conditions": activation_conditions},
         "standby_skill": standby_skill,
         "finish_skills": finish_skills,
@@ -965,9 +1092,16 @@ def scrape_card_from_html(page_html: str, page_url: str) -> Dict[str, object]:
         "type_token": type_token,
         "type_token_upper": type_token_upper,
         "type_icon_filename": type_icon,
-
-        # Assets saved under output/assets
+        "obtain_type": obtain_type,
         "assets": assets_rel_paths,
+
+        "variant": {
+            "key": variant.get("key", "base"),
+            "eza": bool(variant.get("eza")),
+            "step": variant.get("step"),
+            "is_super_eza": False,  # set after rarity known
+            "eza_exists_on_page": eza_exists,
+        },
     }
     return meta
 
@@ -979,38 +1113,16 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
     type_token_upper = meta.get("type_token_upper")
     char_id = meta.get("character_id") or "unknown"
 
-    folder_name = sanitize_filename(f"{display_name_with_type_bracketed} - {char_id}")
+    variant = meta.get("variant") or {}
+    variant_key = variant.get("key", "base")
+    is_super = bool(variant.get("is_super_eza"))
+    step = variant.get("step")
+
+    suffix = label_variant_suffix_from_flags(variant_key, is_super=is_super, step=step)
+
+    folder_name = sanitize_filename(f"{display_name_with_type_bracketed} - {char_id}{suffix}")
     card_dir = OUTROOT / folder_name
     card_dir.mkdir(parents=True, exist_ok=True)
-
-    parts = []
-    def add_line(k, v):
-        if v is None: return
-        if isinstance(v, (dict, list)):
-            parts.append(f"{k}: {json.dumps(v, ensure_ascii=False)}")
-        else:
-            parts.append(f"{k}: {v}")
-
-    add_line("leader_skill", meta.get("leader_skill"))
-    add_line("super_attack", meta.get("super_attack"))
-    add_line("ultra_super_attack", meta.get("ultra_super_attack"))
-    add_line("passive_skill", meta.get("passive_skill"))
-    add_line("transformation", meta.get("transformation"))
-    add_line("reversible_exchange", meta.get("reversible_exchange"))
-    add_line("transformation_conditions", meta.get("transformation_conditions"))
-    add_line("active_skill", meta.get("active_skill"))
-    add_line("standby_skill", meta.get("standby_skill"))
-    add_line("finish_skills", meta.get("finish_skills"))
-    add_line("link_skills", meta.get("link_skills"))
-    add_line("categories", meta.get("categories"))
-    add_line("stats", meta.get("stats"))
-    add_line("domains", meta.get("domains"))
-    add_line("rarity_detected", rarity)
-    add_line("type_token", meta.get("type_token"))
-    add_line("assets", meta.get("assets"))
-
-    page_text = "\n".join(parts)
-    (card_dir / "PAGE_TEXT.txt").write_text(page_text, encoding="utf-8")
 
     (card_dir / "METADATA.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -1026,33 +1138,31 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
         encoding="utf-8",
     )
 
-    if char_id and char_id != "unknown":
-        index[char_id] = {
-            "url": meta.get("source_url"),
-            "display_name": base_display_name,
-            "display_name_with_type": display_name_with_type,
-            "display_name_with_type_bracketed": display_name_with_type_bracketed,
-            "rarity": rarity,
-            "type": type_token_upper,
-            "folder": str(card_dir),
-            "saved_at": datetime.utcnow().isoformat() + "Z",
-        }
-        save_index(index)
-        logging.info("Index updated for ID %s", char_id)
+    upsert_variant_in_index(
+        index=index,
+        char_id=char_id,
+        base_display_name=base_display_name,
+        display_name_with_type=display_name_with_type,
+        display_name_with_type_bracketed=display_name_with_type_bracketed,
+        rarity=rarity,
+        type_token_upper=type_token_upper,
+        variant_key=variant_key,
+        folder=card_dir,
+        url=meta.get("source_url") or "",
+        eza=bool(variant.get("eza")),
+        step=step,
+        is_super=is_super,
+    )
+    logging.info("Saved %s (%s) -> %s", char_id, "Super EZA" if is_super else variant_key, card_dir)
 
 # ------------ Main -------------
 def main():
     log_path = setup_logging()
-    logging.info("Starting DokkanInfo scraper (headed) — inline arrow words, Basic=(Forever) default, Entrance=(Once), context de-dup, index paging, skip indexed, related IDs (skip first), global assets download")
+    logging.info("Starting DokkanInfo scraper (headed) — Transformations + EZA detection (DOM) + sequential steps")
     OUTROOT.mkdir(parents=True, exist_ok=True)
     ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
 
     index = load_index()
-    seen_ids: Set[str] = set(index.keys())
-    if seen_ids:
-        logging.info("Loaded %d existing IDs from index; they will be skipped.", len(seen_ids))
-
-    new_cards_saved = 0
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
@@ -1063,13 +1173,119 @@ def main():
         )
         page = context.new_page()
 
+        def goto_ok(url: str):
+            """Navigate and return (ok_flag, html_or_none)."""
+            try:
+                resp = page.goto(url, wait_until="domcontentloaded", timeout=TIMEOUT)
+                # If response is None (file-url or same-document), we still try content but mark as False
+                ok = bool(resp and resp.ok)
+                if not ok and resp:
+                    logging.warning("Non-OK response %s for %s", resp.status, url)
+                page.wait_for_timeout(700)
+                html = page.content()
+                return ok, html
+            except PWTimeoutError as e:
+                logging.warning("Load timeout for %s -> %s", url, e)
+                return False, None
+            except Exception as e:
+                logging.warning("Navigation error for %s -> %s", url, e)
+                return False, None
+
+        def scrape_one(url: str, rarity_hint: Optional[str] = None, discover_forms: bool = False):
+            """
+            Scrape a single variant if not already saved.
+            Returns (char_id, rarity, eza_exists_flag, related_form_ids, success_bool).
+            """
+            eza_flag, step_i = parse_variant_from_url(url)
+            variant_key = build_variant_key(eza_flag, step_i)
+            cid = extract_character_id_from_url(url) or "unknown"
+
+            if is_variant_already_indexed(index, cid, variant_key):
+                logging.info("Skip %s %s: already indexed.", cid, variant_key)
+                return cid, None, None, [], False
+
+            ok, html = goto_ok(url)
+            if not ok or not html:
+                logging.info("Skipping %s (%s) due to non-OK load.", cid, variant_key)
+                return None, None, None, [], False
+
+            meta = scrape_card_from_html(html, url, variant={
+                "key": variant_key,
+                "eza": eza_flag,
+                "step": step_i,
+                "is_super_eza": False,  # temp; fix after rarity known
+            })
+
+            rarity = meta.get("rarity_detected") or rarity_hint
+            super_step = super_eza_step_for_rarity(rarity)
+            is_super = bool(eza_flag and step_i is not None and super_step is not None and step_i == super_step)
+            meta["variant"]["is_super_eza"] = is_super
+
+            write_card_outputs_and_update_index(meta, index)
+            eza_exists_flag = bool(meta["variant"].get("eza_exists_on_page"))
+
+            related_ids = extract_ids_from_col5_images(html) if discover_forms else []
+            return meta.get("character_id"), rarity, eza_exists_flag, related_ids, True
+
+        def scrape_all_variants_for_base(base_clean_url: str):
+            """
+            Enforce strict order: base -> steps ascending -> super.
+            Stops regular steps at first failure.
+            """
+            # Base first
+            base_url = make_variant_url(base_clean_url, eza=False, step=None)
+            cid, rarity, eza_exists, related_ids, ok = scrape_one(base_url, discover_forms=True)
+            if not cid:
+                return None, [], None
+
+            # Regular steps (if base shows EZA toggle)
+            if eza_exists:
+                steps = regular_eza_steps_for_rarity(rarity)
+                for st in steps:
+                    step_url = make_variant_url(base_clean_url, eza=True, step=st)
+                    c2, _, _, _, ok2 = scrape_one(step_url, rarity_hint=rarity)
+                    if not ok2:
+                        logging.info("Stopping further EZA steps after failure at step=%s for %s", st, base_clean_url)
+                        break
+                    time.sleep(SLEEP_BETWEEN_CARDS)
+                # Super step LAST
+                sstep = super_eza_step_for_rarity(rarity)
+                if sstep is not None:
+                    super_url = make_variant_url(base_clean_url, eza=True, step=sstep)
+                    c3, _, _, _, ok3 = scrape_one(super_url, rarity_hint=rarity)
+                    if not ok3:
+                        logging.info("Super EZA not available (or failed) at step=%s for %s", sstep, base_clean_url)
+
+            return cid, related_ids, rarity
+
+        if SEED_URLS:
+            logging.info("Seed mode: %d URL(s) — base then sequential EZA steps then Super EZA; repeat per transformation.", len(SEED_URLS))
+            visited_forms: Set[str] = set()
+
+            for base_any in SEED_URLS:
+                base_clean = normalize_to_base_url(base_any)
+
+                # Base + its EZAs sequentially
+                base_cid, related_ids, rarity = scrape_all_variants_for_base(base_clean)
+
+                # Each transformation: base then EZAs sequentially
+                for rid in related_ids or []:
+                    if rid in visited_forms:
+                        continue
+                    visited_forms.add(rid)
+                    form_base = normalize_to_base_url(f"{BASE}/cards/{rid}")
+                    scrape_all_variants_for_base(form_base)
+
+            browser.close()
+            logging.info("Run completed. Log file: %s", log_path)
+            return
+
+        # -------- Index crawl mode (unchanged except sequential order applied) --------
+        new_cards_saved = 0
         current_index_url = INDEX_URL
         pages_done = 0
 
-        while pages_done < MAX_PAGES:
-            if new_cards_saved >= MAX_NEW_CARDS:
-                logging.info("Reached MAX_NEW_CARDS=%d; stopping crawl.", MAX_NEW_CARDS)
-                break
+        while pages_done < MAX_PAGES and new_cards_saved < MAX_NEW_CARDS:
             try:
                 logging.info("Opening index page: %s", current_index_url)
                 page.goto(current_index_url, wait_until="domcontentloaded", timeout=TIMEOUT)
@@ -1113,74 +1329,18 @@ def main():
                     logging.info("Reached MAX_NEW_CARDS=%d; stopping crawl.", MAX_NEW_CARDS)
                     break
 
-                url_id = extract_character_id_from_url(card_url)
-                if url_id and url_id in seen_ids:
-                    logging.info("Page card %d/%d: ID %s already indexed — skipping open.", i, len(links), url_id)
-                    continue
-
-                logging.info("Page card %d/%d -> %s", i, len(links), card_url)
-                try:
-                    page.goto(card_url, wait_until="domcontentloaded", timeout=TIMEOUT)
-                    page.evaluate("window.scrollTo(0, document.body.scrollHeight * 0.25)")
-                    page.wait_for_timeout(800)
-                except PWTimeoutError as e:
-                    logging.warning("Card load timeout: %s", e)
-                    continue
-
-                page_html = page.content()
-                meta = scrape_card_from_html(page_html, card_url)
-
-                char_id = meta.get("character_id")
-                if char_id and char_id in seen_ids:
-                    logging.info("Card %s already scraped; skipping save.", char_id)
-                else:
-                    if char_id:
-                        seen_ids.add(char_id)
-                    write_card_outputs_and_update_index(meta, index)
+                base_clean = normalize_to_base_url(card_url)
+                base_cid, related_ids, rarity = scrape_all_variants_for_base(base_clean)
+                if base_cid:
                     new_cards_saved += 1
-                    logging.info("Scraped card ID %s (new_cards_saved=%d)", char_id or "unknown", new_cards_saved)
 
-                related_ids = extract_ids_from_col5_images(page_html)
-                if related_ids:
-                    logging.info("Found %d related IDs (skipping first tile): %s", len(related_ids), ", ".join(related_ids))
-                else:
-                    logging.info("No related IDs found on this page.")
-
-                for rid in related_ids:
-                    if new_cards_saved >= MAX_NEW_CARDS:
-                        logging.info("Reached MAX_NEW_CARDS=%d; stopping crawl.", MAX_NEW_CARDS)
-                        break
-                    if rid in seen_ids:
-                        logging.info("Related ID %s already indexed; skipping.", rid)
-                        continue
-
-                    rel_url = f"{BASE}/cards/{rid}"
-                    logging.info("Opening related URL directly: %s", rel_url)
-                    try:
-                        page.goto(rel_url, wait_until="domcontentloaded", timeout=TIMEOUT)
-                        page.wait_for_timeout(700)
-                    except PWTimeoutError as e:
-                        logging.warning("Related page load timeout for %s: %s", rel_url, e)
-                        continue
-
-                    rel_html = page.content()
-                    rel_meta = scrape_card_from_html(rel_html, rel_url)
-                    rel_id_final = rel_meta.get("character_id") or rid
-                    if rel_id_final in seen_ids:
-                        logging.info("ID %s already scraped after load; skipping save.", rel_id_final)
-                        continue
-                    seen_ids.add(rel_id_final)
-                    write_card_outputs_and_update_index(rel_meta, index)
-                    new_cards_saved += 1
-                    logging.info("Scraped related card ID %s (new_cards_saved=%d)", rel_id_final, new_cards_saved)
-
-                    time.sleep(SLEEP_BETWEEN_CARDS)
+                for rid in related_ids or []:
+                    form_base = normalize_to_base_url(f"{BASE}/cards/{rid}")
+                    c_form, _, _ = scrape_all_variants_for_base(form_base)
+                    if c_form:
+                        new_cards_saved += 1
 
                 time.sleep(SLEEP_BETWEEN_CARDS)
-
-            if new_cards_saved >= MAX_NEW_CARDS:
-                logging.info("Reached MAX_NEW_CARDS=%d; stopping crawl.", MAX_NEW_CARDS)
-                break
 
             next_url = build_next_index_url(current_index_url)
             if next_url == current_index_url:
@@ -1190,7 +1350,7 @@ def main():
             pages_done += 1
 
         browser.close()
-    logging.info("Run completed. Log file: %s", log_path)
+        logging.info("Run completed. Log file: %s", log_path)
 
 if __name__ == "__main__":
     main()

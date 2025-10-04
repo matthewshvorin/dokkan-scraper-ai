@@ -1,8 +1,0 @@
-Data and image assets collected from DokkanInfo.
-Source page: https://dokkaninfo.com/cards/1032181
-Site: https://dokkaninfo.com
-
-Notes:
-- Personal/educational use.
-- Respect the site's Terms and original owners' rights.
-- If you share output, credit: “Data/images via dokkaninfo.com”.
