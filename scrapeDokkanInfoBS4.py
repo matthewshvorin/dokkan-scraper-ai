@@ -1,16 +1,18 @@
 # scrapeDokkanInfo_play_bs4_index_eza_detect.py
-# Playwright (headed) + BeautifulSoup + Transformations + EZA variants with DOM-based EZA detection
+# Playwright (headed) + BeautifulSoup + Transformations + sequential EZA + DOM EZA toggle detection
 #
-# This version:
-# - Enforces strict ordering per card/form: base (eza=false) -> step=1 -> step=2 -> ... -> Super EZA last.
-# - Checks page.goto() response status; if not OK, the variant is skipped and no folder is created.
-# - For regular EZA steps we STOP at the first failure (assume higher steps don't exist).
-# - Only attempts Super EZA (UR step 8 / LR step 4) at the end; if it fails, it is skipped.
+# Flow per form:
+#   1) base (eza=false, with storage cleared) -> capture CANONICAL base URL
+#   2) if base shows PRE-EZA/EZA toggle: try regular steps in order (stop at first failure)
+#   3) if toggle exists: try Super EZA last (LR step=4 / UR step=8)
 #
-# Seed defaults to 1014761 (you can change SEED_URLS).
+# Guards:
+#   - Clear localStorage/sessionStorage before every navigation (prevents tab "stickiness")
+#   - Use canonical base URL for all ?eza=true&step=X requests
+#   - Final-URL param guard (if site strips eza/step, skip)
+#   - HTTP ok guard (non-OK => skip)
 #
-# Usage:
-#   python scrapeDokkanInfo_play_bs4_index_eza_detect.py
+# Usage: python scrapeDokkanInfo_play_bs4_index_eza_detect.py
 
 import json
 import logging
@@ -30,7 +32,7 @@ BASE = "https://dokkaninfo.com"
 INDEX_URL = f"{BASE}/cards?sort=open_at"
 
 OUTROOT = Path("output/cards")
-ASSETS_ROOT = Path("output/assets")  # global shared assets folder
+ASSETS_ROOT = Path("output/assets")
 INDEX_PATH = OUTROOT / "CARDS_INDEX.json"
 LOGDIR = Path("output/logs")
 
@@ -48,7 +50,7 @@ MAX_NEW_CARDS = 50
 
 # ---- Seed test ----
 SEED_URLS: List[str] = [
-    "https://dokkaninfo.com/cards/1014761",
+    "https://dokkaninfo.com/cards/1014761",  # your test LR
 ]
 
 HEADERS = [
@@ -887,15 +889,15 @@ def parse_standby_skill(soup: BeautifulSoup) -> Optional[Dict[str, Optional[str]
 def parse_finish_skills(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
     return parse_skill_blocks(soup, header_label="Finish Skill", cond_label="Finish Skill Condition(s)")
 
-# ------------ EZA detection -------------
-def eza_exists_from_dom(soup: BeautifulSoup) -> bool:
-    rows = soup.find_all("div", class_=re.compile(r"\brow\b"))
-    for r in rows:
-        cls = " ".join(r.get("class") or [])
-        if "cursor-pointer" not in cls:
+# ------------ EZA detection (toggle on base) -------------
+def eza_toggle_exists_on_base(soup: BeautifulSoup) -> bool:
+    # Robustly detect the two-tab selector PRE-EZA / EZA
+    for row in soup.find_all("div", class_=re.compile(r"\brow\b")):
+        classes = " ".join(row.get("class") or [])
+        if "cursor-pointer" not in classes:
             continue
-        bolds = [b.get_text(strip=True).upper() for b in r.find_all("b")]
-        if "PRE-EZA" in bolds and "EZA" in bolds:
+        labels = [b.get_text(strip=True).upper() for b in row.find_all("b")]
+        if ("PRE-EZA" in labels and "EZA" in labels) or ("PRE EZA" in labels and "EZA" in labels):
             return True
     return False
 
@@ -982,6 +984,7 @@ def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, obje
             ultra_name = ultra_name or un
             ultra_effect = ultra_effect or ue
 
+    # Passive
     passive_lines, _ = parse_passive_lines_from_dom(soup)
     passive_marked = render_passive_effect_with_markers(passive_lines)
     if not passive_lines and (sections.get("Passive Skill") or []):
@@ -1054,7 +1057,8 @@ def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, obje
     standby_skill = parse_standby_skill(soup)
     finish_skills = parse_finish_skills(soup)
 
-    eza_exists = eza_exists_from_dom(soup)
+    # EZA toggle only checked on base pages (but harmless to store here too)
+    eza_toggle = eza_toggle_exists_on_base(soup)
 
     meta = {
         "page_title": page_title,
@@ -1100,7 +1104,7 @@ def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, obje
             "eza": bool(variant.get("eza")),
             "step": variant.get("step"),
             "is_super_eza": False,  # set after rarity known
-            "eza_exists_on_page": eza_exists,
+            "eza_toggle_on_base": eza_toggle,   # <— base-page toggle presence
         },
     }
     return meta
@@ -1158,7 +1162,7 @@ def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str
 # ------------ Main -------------
 def main():
     log_path = setup_logging()
-    logging.info("Starting DokkanInfo scraper (headed) — Transformations + EZA detection (DOM) + sequential steps")
+    logging.info("Starting DokkanInfo scraper (headed) — Transformations + sequential EZA + base toggle detection + clean storage")
     OUTROOT.mkdir(parents=True, exist_ok=True)
     ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -1173,102 +1177,120 @@ def main():
         )
         page = context.new_page()
 
+        # Clear local/session storage BEFORE any site script runs
+        page.add_init_script("try{localStorage.clear();sessionStorage.clear();}catch(e){}")
+
         def goto_ok(url: str):
-            """Navigate and return (ok_flag, html_or_none)."""
+            """Navigate and return (ok_flag, html_or_none, final_url_str)."""
             try:
                 resp = page.goto(url, wait_until="domcontentloaded", timeout=TIMEOUT)
-                # If response is None (file-url or same-document), we still try content but mark as False
                 ok = bool(resp and resp.ok)
                 if not ok and resp:
                     logging.warning("Non-OK response %s for %s", resp.status, url)
                 page.wait_for_timeout(700)
                 html = page.content()
-                return ok, html
+                return ok, html, page.url
             except PWTimeoutError as e:
                 logging.warning("Load timeout for %s -> %s", url, e)
-                return False, None
+                return False, None, None
             except Exception as e:
                 logging.warning("Navigation error for %s -> %s", url, e)
-                return False, None
+                return False, None, None
 
         def scrape_one(url: str, rarity_hint: Optional[str] = None, discover_forms: bool = False):
             """
             Scrape a single variant if not already saved.
-            Returns (char_id, rarity, eza_exists_flag, related_form_ids, success_bool).
+            Returns (char_id, rarity, base_has_toggle, related_form_ids, canonical_base_url, success_bool).
             """
-            eza_flag, step_i = parse_variant_from_url(url)
-            variant_key = build_variant_key(eza_flag, step_i)
+            req_eza_flag, req_step_i = parse_variant_from_url(url)
+            variant_key = build_variant_key(req_eza_flag, req_step_i)
             cid = extract_character_id_from_url(url) or "unknown"
 
             if is_variant_already_indexed(index, cid, variant_key):
                 logging.info("Skip %s %s: already indexed.", cid, variant_key)
-                return cid, None, None, [], False
+                return cid, None, None, [], normalize_to_base_url(url), False
 
-            ok, html = goto_ok(url)
+            ok, html, final_url = goto_ok(url)
             if not ok or not html:
                 logging.info("Skipping %s (%s) due to non-OK load.", cid, variant_key)
-                return None, None, None, [], False
+                return None, None, None, [], None, False
 
-            meta = scrape_card_from_html(html, url, variant={
+            fin_eza_flag, fin_step_i = parse_variant_from_url(final_url or "")
+            if req_eza_flag != fin_eza_flag or req_step_i != fin_step_i:
+                logging.info("Final URL params mismatch for %s -> requested eza=%s,step=%s but final eza=%s,step=%s; skipping.",
+                             url, req_eza_flag, req_step_i, fin_eza_flag, fin_step_i)
+                return None, None, None, [], None, False
+
+            canonical_base = normalize_to_base_url(final_url or url)
+
+            meta = scrape_card_from_html(html, final_url or url, variant={
                 "key": variant_key,
-                "eza": eza_flag,
-                "step": step_i,
-                "is_super_eza": False,  # temp; fix after rarity known
+                "eza": req_eza_flag,
+                "step": req_step_i,
+                "is_super_eza": False,
             })
 
             rarity = meta.get("rarity_detected") or rarity_hint
             super_step = super_eza_step_for_rarity(rarity)
-            is_super = bool(eza_flag and step_i is not None and super_step is not None and step_i == super_step)
+            is_super = bool(req_eza_flag and req_step_i is not None and super_step is not None and req_step_i == super_step)
             meta["variant"]["is_super_eza"] = is_super
 
             write_card_outputs_and_update_index(meta, index)
-            eza_exists_flag = bool(meta["variant"].get("eza_exists_on_page"))
 
+            base_has_toggle = bool(meta["variant"].get("eza_toggle_on_base"))
             related_ids = extract_ids_from_col5_images(html) if discover_forms else []
-            return meta.get("character_id"), rarity, eza_exists_flag, related_ids, True
+            return meta.get("character_id"), rarity, base_has_toggle, related_ids, canonical_base, True
 
-        def scrape_all_variants_for_base(base_clean_url: str):
+        def scrape_all_variants_for_base(initial_base_url: str):
             """
-            Enforce strict order: base -> steps ascending -> super.
-            Stops regular steps at first failure.
+            Order: base -> steps ascending (if base toggle exists) -> Super EZA (if base toggle exists).
+            Always begin from eza=false for each form, then use the CANONICAL base URL for steps.
             """
             # Base first
-            base_url = make_variant_url(base_clean_url, eza=False, step=None)
-            cid, rarity, eza_exists, related_ids, ok = scrape_one(base_url, discover_forms=True)
-            if not cid:
+            base_url = make_variant_url(initial_base_url, eza=False, step=None)
+            cid, rarity, has_toggle, related_ids, canonical_base, ok = scrape_one(base_url, discover_forms=True)
+            if not cid or not canonical_base:
                 return None, [], None
 
-            # Regular steps (if base shows EZA toggle)
-            if eza_exists:
+            if canonical_base != initial_base_url:
+                logging.info("Canonical base for form resolved to %s (from %s)", canonical_base, initial_base_url)
+
+            if has_toggle:
+                # Regular steps in order; stop at first failure
                 steps = regular_eza_steps_for_rarity(rarity)
+                logging.info("Attempting regular EZA steps %s for %s", steps, canonical_base)
                 for st in steps:
-                    step_url = make_variant_url(base_clean_url, eza=True, step=st)
-                    c2, _, _, _, ok2 = scrape_one(step_url, rarity_hint=rarity)
+                    step_url = make_variant_url(canonical_base, eza=True, step=st)
+                    _c2, _, _tog2, _, _canon2, ok2 = scrape_one(step_url, rarity_hint=rarity)
                     if not ok2:
-                        logging.info("Stopping further EZA steps after failure at step=%s for %s", st, base_clean_url)
+                        logging.info("Regular EZA step %s failed or missing for %s; stopping further steps.", st, canonical_base)
                         break
                     time.sleep(SLEEP_BETWEEN_CARDS)
-                # Super step LAST
+
+                # Super EZA LAST (only if toggle exists at all)
                 sstep = super_eza_step_for_rarity(rarity)
                 if sstep is not None:
-                    super_url = make_variant_url(base_clean_url, eza=True, step=sstep)
-                    c3, _, _, _, ok3 = scrape_one(super_url, rarity_hint=rarity)
+                    logging.info("Attempting Super EZA (step=%s) for %s", sstep, canonical_base)
+                    super_url = make_variant_url(canonical_base, eza=True, step=sstep)
+                    _c3, _, _tog3, _, _canon3, ok3 = scrape_one(super_url, rarity_hint=rarity)
                     if not ok3:
-                        logging.info("Super EZA not available (or failed) at step=%s for %s", sstep, base_clean_url)
+                        logging.info("Super EZA not available (or failed) at step=%s for %s", sstep, canonical_base)
+            else:
+                logging.info("No PRE-EZA/EZA toggle on base for %s — skipping all EZA steps.", canonical_base)
 
             return cid, related_ids, rarity
 
         if SEED_URLS:
-            logging.info("Seed mode: %d URL(s) — base then sequential EZA steps then Super EZA; repeat per transformation.", len(SEED_URLS))
+            logging.info("Seed mode: %d URL(s) — base → regular EZAs → Super EZA (last). Includes transformations.", len(SEED_URLS))
             visited_forms: Set[str] = set()
 
             for base_any in SEED_URLS:
                 base_clean = normalize_to_base_url(base_any)
 
-                # Base + its EZAs sequentially
+                # Base + its EZAs sequentially (canonical base applied inside)
                 base_cid, related_ids, rarity = scrape_all_variants_for_base(base_clean)
 
-                # Each transformation: base then EZAs sequentially
+                # Each transformation: start from eza=false, then steps; canonical base handled per form
                 for rid in related_ids or []:
                     if rid in visited_forms:
                         continue
@@ -1280,7 +1302,7 @@ def main():
             logging.info("Run completed. Log file: %s", log_path)
             return
 
-        # -------- Index crawl mode (unchanged except sequential order applied) --------
+        # -------- Index crawl (sequential order + canonical base) --------
         new_cards_saved = 0
         current_index_url = INDEX_URL
         pages_done = 0
