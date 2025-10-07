@@ -45,7 +45,6 @@ SEED_URLS: List[str] = [
 # Counting knobs for index mode
 COUNT_TRANSFORMATIONS_TOWARD_MAX = False
 INCLUDE_ALREADY_INDEXED_IN_COUNT = False
-
 HEADERS = [
     "Leader Skill",
     "Super Attack",
