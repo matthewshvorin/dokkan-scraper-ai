@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Dokkan Cards — Catalog{% endblock %}
+{% block content %}
+
+<h1 class="page-title">Catalog</h1>
+
+<form class="filters" method="get" action="{{ url_for('home') }}">
+  <input type="search" name="q" placeholder="Search by name…" value="{{ q or '' }}" />
+  <select name="rarity">
+    <option value="">Any Rarity</option>
+    {% for r in ["LR","UR","SSR","SR","R","N"] %}
+      <option value="{{ r }}" {% if rarity==r %}selected{% endif %}>{{ r }}</option>
+    {% endfor %}
+  </select>
+  <select name="type">
+    <option value="">Any Type</option>
+    {% for t in ["AGL","TEQ","INT","STR","PHY"] %}
+      <option value="{{ t }}" {% if type_token==t %}selected{% endif %}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Apply</button>
+  <a class="link-reset" href="{{ url_for('home') }}">Reset</a>
+</form>
+
+{% if families %}
+<div class="grid">
+  {% for f in families %}
+  <a class="card" href="{{ url_for('card_detail', unit_id=f.unit_id) }}" title="{{ f.display_name }}">
+    <div class="thumb">
+      <img src="{{ f.thumb_url }}" loading="lazy" alt="{{ f.display_name }}">
+      <div class="badge type type-{{ f.type|lower }}">{{ f.type }}</div>
+      <div class="badge rarity rarity-{{ f.rarity|lower }}">{{ f.rarity }}</div>
+    </div>
+    <div class="body">
+      <div class="title">{{ f.display_name }}</div>
+      <div class="meta">
+        <span title="Variants count">Variants: {{ f.variants_count }}</span>
+        <span title="Forms in family">Forms: {{ f.family_size }}</span>
+        {% if f.eza_count %}<span class="chip">EZA: {{ f.eza_count }}</span>{% endif %}
+        {% if f.has_transform %}<span class="chip">Transform</span>{% endif %}
+        {% if f.has_exchange %}<span class="chip">Exchange</span>{% endif %}
+        {% if f.has_standby %}<span class="chip">Standby</span>{% endif %}
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p>No families found. Make sure your scraper has written <code>output/cards/*/METADATA.json</code>.</p>
+{% endif %}
+
+{% endblock %}

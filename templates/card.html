@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}{{ fam.summary.display_name }} — Card{% endblock %}
+
+{% block content %}
+<a class="back" href="{{ url_for('home') }}">← Back to catalog</a>
+
+<header class="hero">
+  <img class="hero-img" src="{{ fam.summary.thumb_url }}" alt="{{ fam.summary.display_name }}">
+  <div class="hero-text">
+    <h1 class="hero-title">{{ fam.summary.display_name }}</h1>
+    <div class="chips">
+      <span class="badge type type-{{ fam.summary.type|lower }}">{{ fam.summary.type }}</span>
+      <span class="badge rarity rarity-{{ fam.summary.rarity|lower }}">{{ fam.summary.rarity }}</span>
+      <span class="chip">Unit ID: {{ fam.summary.unit_id }}</span>
+      <span class="chip">Variants: {{ fam.summary.variants_count }}</span>
+      <span class="chip">Forms: {{ fam.summary.family_size }}</span>
+    </div>
+    <div class="source">
+      <small>Source: <a href="{{ fam.meta.source_base_url }}" target="_blank" rel="noopener">{{ fam.meta.source_base_url }}</a></small>
+    </div>
+  </div>
+</header>
+
+<section class="variants">
+  <h2>Variants</h2>
+
+  {% if fam.variants %}
+  <div class="variants-grid">
+    {% for v in fam.variants %}
+    <div class="variant-card">
+      <div class="variant-thumb">
+        <img src="{{ v._best_asset_url }}" alt="{{ v.display_name or v.variant_label }}" loading="lazy">
+        <div class="corner-tags">
+          {% if v.eza %}
+            <span class="tag eza">EZA{% if v.step is not none %} S{{ v.step }}{% endif %}</span>
+            {% if v.is_super_eza %}<span class="tag super-eza">Super</span>{% endif %}
+          {% endif %}
+          {% if v.type %}<span class="tag type type-{{ v.type|lower }}">{{ v.type }}</span>{% endif %}
+          {% if v.rarity %}<span class="tag rarity rarity-{{ v.rarity|lower }}">{{ v.rarity }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="variant-body">
+        <div class="variant-title">
+          {{ v.variant_label or v.display_name or v.key }}
+        </div>
+        <div class="variant-sub">
+          <small>Form ID: {{ v.form_id }}, Key: {{ v.key }}</small>
+        </div>
+
+        <details class="kit">
+          <summary>View kit</summary>
+          <div class="kit-line"><b>Leader Skill:</b> {{ v._leader_skill or "—" }}</div>
+          <div class="kit-line"><b>Passive:</b> {% if v._passive_name %}<i>{{ v._passive_name }}</i> — {% endif %}{{ v._passive_effect or "—" }}</div>
+          <div class="kit-line"><b>Active Skill:</b> {% if v._active_name %}<i>{{ v._active_name }}</i> — {% endif %}{{ v._active_effect or "—" }}{% if v._active_cond %} <span class="muted">(Cond: {{ v._active_cond }})</span>{% endif %}</div>
+
+          {% if v._standby %}
+          <div class="kit-block">
+            <b>Standby Skill:</b>
+            <div><i>{{ v._standby.name or "—" }}</i></div>
+            <div>{{ v._standby.effect or "—" }}</div>
+            {% if v._standby.conditions %}<div class="muted">Cond: {{ v._standby.conditions }}</div>{% endif %}
+          </div>
+          {% endif %}
+
+          {% if v._finish_skills %}
+          <div class="kit-block">
+            <b>Finish Skills:</b>
+            <ul>
+              {% for fs in v._finish_skills %}
+              <li><i>{{ fs.name or "—" }}</i>{% if fs.type %} <span class="chip">{{ fs.type }}</span>{% endif %}{% if fs.effect %} — {{ fs.effect }}{% endif %}{% if fs.conditions %} <span class="muted">(Cond: {{ fs.conditions }})</span>{% endif %}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if v._domains %}
+          <div class="kit-block">
+            <b>Domains:</b>
+            <ul>
+              {% for d in v._domains %}
+              <li>{{ d.name or "Domain" }}{% if d.type %} <span class="chip">{{ d.type }}</span>{% endif %}{% if d.effect %} — {{ d.effect }}{% endif %}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if v._links %}
+          <div class="kit-block">
+            <b>Link Skills:</b>
+            <div class="chips">
+              {% for l in v._links %}<span class="chip">{{ l }}</span>{% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if v._cats %}
+          <div class="kit-block">
+            <b>Categories:</b>
+            <div class="chips">
+              {% for c in v._cats %}<span class="chip">{{ c }}</span>{% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if v._stats %}
+          <div class="kit-block">
+            <b>Stats:</b>
+            <table class="stats">
+              <thead><tr><th></th><th>Base Min</th><th>Base Max</th><th>55%</th><th>100%</th><th>EZA B. Max</th><th>EZA 100%</th></tr></thead>
+              <tbody>
+                {% for stat_name, cols in v._stats.items() %}
+                <tr>
+                  <th>{{ stat_name }}</th>
+                  <td>{{ (cols["Base Min"] if "Base Min" in cols else "—") }}</td>
+                  <td>{{ (cols["Base Max"] if "Base Max" in cols else "—") }}</td>
+                  <td>{{ (cols["55%"] if "55%" in cols else "—") }}</td>
+                  <td>{{ (cols["100%"] if "100%" in cols else "—") }}</td>
+                  <td>{{ (cols["EZA B. Max"] if "EZA B. Max" in cols else "—") }}</td>
+                  <td>{{ (cols["EZA 100%"] if "EZA 100%" in cols else "—") }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+        </details>
+
+        <div class="variant-footer">
+          <a class="small" href="{{ v.source_url }}" target="_blank" rel="noopener">Open on dokkaninfo.com ↗</a>
+          {% if v.release_date %}<span class="muted small">Release: {{ v.release_date }} {% if v.timezone %}{{ v.timezone }}{% endif %}</span>{% endif %}
+          {% if v.eza_release_date %}<span class="muted small">EZA Release: {{ v.eza_release_date }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p>No variants found in METADATA.json.</p>
+  {% endif %}
+</section>
+
+<section class="gallery">
+  <h2>All Assets</h2>
+  {% if fam.gallery %}
+  <div class="gallery-grid">
+    {% for g in fam.gallery %}
+    <figure class="asset">
+      <img src="{{ g.url }}" loading="lazy" alt="{{ g.rel }}">
+      <figcaption>
+        <code class="truncate">{{ g.rel }}</code>
+        {% set m = g.meta or {} %}
+        <div class="muted">
+          {% if m.category %}<span class="chip">{{ m.category }}</span>{% endif %}
+          {% if m.subtype %}<span class="chip">{{ m.subtype }}</span>{% endif %}
+          {% if m.locale %}<span class="chip">{{ m.locale }}</span>{% endif %}
+          {% if m.card_id %}<span class="chip">#{{ m.card_id }}</span>{% endif %}
+        </div>
+      </figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p>No assets recorded. Your scraper adds them into <code>assets</code> and (ideally) <code>assets_index</code>.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

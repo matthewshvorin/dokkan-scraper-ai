@@ -1,0 +1,2582 @@
+{
+  "unit_id": "1031530",
+  "form_id": "1031530",
+  "display_name": "[Girl Striving for Victory] Pan (GT)",
+  "rarity": "SSR",
+  "type": "STR",
+  "source_base_url": "https://dokkaninfo.com/cards/1031530",
+  "variants": [
+    {
+      "key": "base",
+      "eza": false,
+      "step": null,
+      "is_super_eza": false,
+      "source_url": "https://dokkaninfo.com/cards/1031530?eza=false",
+      "release_date": "7/23/2025 9:00:00 AM",
+      "timezone": "EDT",
+      "eza_release_date": null,
+      "obtain_type": "Summonable",
+      "kit": {
+        "leader_skill": "\"GT Heroes\" or \"Hybrid Saiyans\" Category Ki +2 and HP, ATK & DEF +100%",
+        "super_attack": {
+          "name": "Maiden's Rage",
+          "effect": "Raises ATK & DEF for 1 turn; Causes supreme damage; A medium chance of stunning the enemy"
+        },
+        "ultra_super_attack": {
+          "name": null,
+          "effect": null
+        },
+        "passive_skill": {
+          "name": "Ideal Performance",
+          "effect": "(Forever) ATK & DEF 100% up; (Forever) Medium chance of performing a critical hit; (Forever) Damage reduction rate 10% up; (Forever) Randomly changes Ki Spheres of a certain Type (STR excluded) to Rainbow Ki Spheres; (Forever) \"GT Heroes\" or \"Youth\" Category allies' Ki +1 and ATK & DEF 20% up; When attacking with 12 or more Ki: ATK & DEF 100% up; Damage reduction rate 10% up; When receiving a normal attack: Damage reduction rate 10% up temporarily; After receiving an attack: (Forever) Launches an additional attack that has a high chance of becoming a Super Attack; Starting from the 2nd turn from the character's entry turn: ATK & DEF 100% up; (Once) ATK 100% up and launches an additional attack that has a great chance of becoming a Super Attack when attacking",
+          "lines": [
+            {
+              "text": "ATK & DEF 100% up",
+              "context": null,
+              "once": false,
+              "permanent": true,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_arrow01"
+              ]
+            },
+            {
+              "text": "Medium chance of performing a critical hit",
+              "context": null,
+              "once": false,
+              "permanent": true,
+              "arrows": [],
+              "icons": []
+            },
+            {
+              "text": "Damage reduction rate 10% up",
+              "context": null,
+              "once": false,
+              "permanent": true,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_arrow01"
+              ]
+            },
+            {
+              "text": "Randomly changes Ki Spheres of a certain Type (STR excluded) to Rainbow Ki Spheres",
+              "context": null,
+              "once": false,
+              "permanent": true,
+              "arrows": [],
+              "icons": []
+            },
+            {
+              "text": "\"GT Heroes\" or \"Youth\" Category allies' Ki +1 and ATK & DEF 20% up",
+              "context": null,
+              "once": false,
+              "permanent": true,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_arrow01"
+              ]
+            },
+            {
+              "text": "ATK & DEF 100% up",
+              "context": "When attacking with 12 or more Ki",
+              "once": false,
+              "permanent": false,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_arrow01"
+              ]
+            },
+            {
+              "text": "Damage reduction rate 10% up",
+              "context": "When attacking with 12 or more Ki",
+              "once": false,
+              "permanent": false,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_arrow01"
+              ]
+            },
+            {
+              "text": "Damage reduction rate 10% up temporarily",
+              "context": "When receiving a normal attack",
+              "once": false,
+              "permanent": false,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_arrow01"
+              ]
+            },
+            {
+              "text": "Launches an additional attack that has a high chance of becoming a Super Attack",
+              "context": "After receiving an attack",
+              "once": false,
+              "permanent": true,
+              "arrows": [],
+              "icons": [
+                "passive_skill_dialog_icon_02"
+              ]
+            },
+            {
+              "text": "ATK & DEF 100% up",
+              "context": "Starting from the 2nd turn from the character's entry turn",
+              "once": false,
+              "permanent": false,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_arrow01"
+              ]
+            },
+            {
+              "text": "ATK 100% up and launches an additional attack that has a great chance of becoming a Super Attack when attacking",
+              "context": "Starting from the 2nd turn from the character's entry turn",
+              "once": true,
+              "permanent": false,
+              "arrows": [
+                "up"
+              ],
+              "icons": [
+                "passive_skill_dialog_icon_01",
+                "passive_skill_dialog_arrow01"
+              ]
+            }
+          ]
+        },
+        "transformation": {
+          "can_transform": false,
+          "condition": null
+        },
+        "reversible_exchange": {
+          "can_exchange": false,
+          "condition": null
+        },
+        "transformation_conditions": null,
+        "active_skill": {
+          "name": null,
+          "effect": null,
+          "activation_conditions": null
+        },
+        "standby_skill": null,
+        "finish_skills": [],
+        "link_skills": [
+          "Saiyan Warrior Race",
+          "All in the Family",
+          "The Saiyan Lineage",
+          "Battlefield Diva",
+          "GT",
+          "The Innocents"
+        ],
+        "categories": [
+          "GT Heroes",
+          "Hybrid Saiyans",
+          "Shadow Dragon Saga",
+          "Youth",
+          "Goku's Family",
+          "Bond of Friendship",
+          "Bond of Parent and Child",
+          "Earth-Bred Fighters"
+        ],
+        "stats": {
+          "Cost": 21,
+          "Max Lv": 80,
+          "SA Lv": 10,
+          "HP": {
+            "Base Min": 2039,
+            "Base Max": 7143,
+            "55%": 8743,
+            "100%": 12143
+          },
+          "ATK": {
+            "Base Min": 1914,
+            "Base Max": 7074,
+            "55%": 8674,
+            "100%": 12474
+          },
+          "DEF": {
+            "Base Min": 1105,
+            "Base Max": 3858,
+            "55%": 5458,
+            "100%": 8458
+          }
+        },
+        "domains": []
+      },
+      "assets": [
+        "dokkaninfo.com\\images\\dokkan-info-logo.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_03.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031530_thumb\\card_1031530_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ssr.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_03.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_bg.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_character.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_effect.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_cutin.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_05.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031590_thumb\\card_1031590_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_lr.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_12.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_05.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031470_thumb\\card_1031470_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_10.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1026900_thumb\\card_1026900_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_05.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025560_thumb\\card_1025560_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_14.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_04.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031300_thumb\\card_1031300_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ur.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_24.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_04.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031080_thumb\\card_1031080_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025070_thumb\\card_1025070_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_04.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024990_thumb\\card_1024990_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_11.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11742.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11734.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11746.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11748.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11778.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\1031530.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_circle.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530sp_cutin_1.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_name.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_phrase.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_002.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_018.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_020.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_023.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_026.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_051.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_052.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_073.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_078.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_087.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_115.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_123.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_127.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_151.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_152.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_153.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_181.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_185.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0072_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0005_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0002_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0033_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0030_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0079_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0087_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0089_b_on.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_bronze.png",
+        "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00001\\thumb_awaken_items_00001.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_silver.png",
+        "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00006\\thumb_awaken_items_00006.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_gold.png",
+        "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00012\\thumb_awaken_items_00012.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_rainbow.png",
+        "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00016\\thumb_awaken_items_00016.png",
+        "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00020\\thumb_awaken_items_00020.png",
+        "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_05173\\thumb_awaken_items_05173.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_04.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031540_thumb\\card_1031540_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_13.png",
+        "dokkaninfo.com\\assets\\global\\en\\outgame\\extension\\character_detail\\en\\character_detail\\sp_skill_icon_02.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0100.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0001.png",
+        "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0002.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_arrow01.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_02.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_01.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1007360_thumb\\card_1007360_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012100_thumb\\card_1012100_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_05.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015910_thumb\\card_1015910_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\charamenu\\dokkan\\dok_img_kyokugen.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_03.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010350_thumb\\card_1010350_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_02.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010920_thumb\\card_1010920_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013740_thumb\\card_1013740_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1019890_thumb\\card_1019890_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_03.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1021770_thumb\\card_1021770_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_01.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030200_thumb\\card_1030200_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_04.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030210_thumb\\card_1030210_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030220_thumb\\card_1030220_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012090_thumb\\card_1012090_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012400_thumb\\card_1012400_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013150_thumb\\card_1013150_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013160_thumb\\card_1013160_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014460_thumb\\card_1014460_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014480_thumb\\card_1014480_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014490_thumb\\card_1014490_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022030_thumb\\card_1022030_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022040_thumb\\card_1022040_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_03.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022210_thumb\\card_1022210_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_00.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022220_thumb\\card_1022220_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022790_thumb\\card_1022790_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022800_thumb\\card_1022800_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024980_thumb\\card_1024980_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015230_thumb\\card_1015230_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014150_thumb\\card_1014150_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1011020_thumb\\card_1011020_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010130_thumb\\card_1010130_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010000_thumb\\card_1010000_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1009990_thumb\\card_1009990_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1005870_thumb\\card_1005870_thumb.png",
+        "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1002980_thumb\\card_1002980_thumb.png",
+        "dokkaninfo.com\\images\\venatus.webp"
+      ],
+      "assets_index": {
+        "site": [
+          {
+            "path": "dokkaninfo.com\\images\\venatus.webp",
+            "category": "site",
+            "subtype": "ad",
+            "card_id": null,
+            "locale": null,
+            "note": "Ad asset"
+          },
+          {
+            "path": "dokkaninfo.com\\images\\dokkan-info-logo.png",
+            "category": "site",
+            "subtype": "logo",
+            "card_id": null,
+            "locale": null,
+            "note": "DokkanInfo branding"
+          }
+        ],
+        "ui": [
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0001.png",
+            "category": "ui",
+            "subtype": "condition_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0002.png",
+            "category": "ui",
+            "subtype": "condition_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0100.png",
+            "category": "ui",
+            "subtype": "condition_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\charamenu\\dokkan\\dok_img_kyokugen.png",
+            "category": "ui",
+            "subtype": "menu_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_arrow01.png",
+            "category": "ui",
+            "subtype": "passive_mark",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_01.png",
+            "category": "ui",
+            "subtype": "passive_mark",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_02.png",
+            "category": "ui",
+            "subtype": "passive_mark",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_lr.png",
+            "category": "ui",
+            "subtype": "rarity_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ssr.png",
+            "category": "ui",
+            "subtype": "rarity_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ur.png",
+            "category": "ui",
+            "subtype": "rarity_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_03.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_04.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_05.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_03.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_04.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_03.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_04.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_05.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_03.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_04.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_05.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_04.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_05.png",
+            "category": "ui",
+            "subtype": "thumb_bg",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_00.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_01.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_02.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_03.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_10.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_11.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_12.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_13.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_14.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_24.png",
+            "category": "ui",
+            "subtype": "type_icon",
+            "card_id": null,
+            "locale": null,
+            "note": null
+          }
+        ],
+        "thumbnail": [
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1002980_thumb\\card_1002980_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1002980",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1005870_thumb\\card_1005870_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1005870",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1007360_thumb\\card_1007360_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1007360",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1009990_thumb\\card_1009990_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1009990",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010000_thumb\\card_1010000_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1010000",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010130_thumb\\card_1010130_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1010130",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010350_thumb\\card_1010350_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1010350",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010920_thumb\\card_1010920_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1010920",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1011020_thumb\\card_1011020_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1011020",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012090_thumb\\card_1012090_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1012090",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012100_thumb\\card_1012100_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1012100",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012400_thumb\\card_1012400_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1012400",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013150_thumb\\card_1013150_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1013150",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013160_thumb\\card_1013160_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1013160",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013740_thumb\\card_1013740_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1013740",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014150_thumb\\card_1014150_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1014150",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014460_thumb\\card_1014460_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1014460",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014480_thumb\\card_1014480_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1014480",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014490_thumb\\card_1014490_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1014490",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015230_thumb\\card_1015230_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1015230",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015910_thumb\\card_1015910_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1015910",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1019890_thumb\\card_1019890_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1019890",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1021770_thumb\\card_1021770_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1021770",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022030_thumb\\card_1022030_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1022030",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022040_thumb\\card_1022040_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1022040",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022210_thumb\\card_1022210_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1022210",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022220_thumb\\card_1022220_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1022220",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022790_thumb\\card_1022790_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1022790",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022800_thumb\\card_1022800_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1022800",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024980_thumb\\card_1024980_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1024980",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024990_thumb\\card_1024990_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1024990",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025070_thumb\\card_1025070_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1025070",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025560_thumb\\card_1025560_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1025560",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1026900_thumb\\card_1026900_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1026900",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030200_thumb\\card_1030200_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1030200",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030210_thumb\\card_1030210_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1030210",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030220_thumb\\card_1030220_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1030220",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031080_thumb\\card_1031080_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1031080",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031300_thumb\\card_1031300_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1031300",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031470_thumb\\card_1031470_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1031470",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031530_thumb\\card_1031530_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031540_thumb\\card_1031540_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1031540",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031590_thumb\\card_1031590_thumb.png",
+            "category": "thumbnail",
+            "subtype": "card_thumb",
+            "card_id": "1031590",
+            "locale": "en",
+            "note": null
+          }
+        ],
+        "card_art": [
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_bg.png",
+            "category": "card_art",
+            "subtype": "bg",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_character.png",
+            "category": "card_art",
+            "subtype": "character",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_circle.png",
+            "category": "card_art",
+            "subtype": "circle",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_cutin.png",
+            "category": "card_art",
+            "subtype": "cutin",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530sp_cutin_1.png",
+            "category": "card_art",
+            "subtype": "cutin",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_effect.png",
+            "category": "card_art",
+            "subtype": "effect",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\1031530.png",
+            "category": "card_art",
+            "subtype": "full_card",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_name.png",
+            "category": "card_art",
+            "subtype": "super_name",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_phrase.png",
+            "category": "card_art",
+            "subtype": "super_phrase",
+            "card_id": "1031530",
+            "locale": "en",
+            "note": null
+          }
+        ],
+        "other": [
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11734.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11742.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11746.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11748.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11778.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00001\\thumb_awaken_items_00001.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00006\\thumb_awaken_items_00006.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00012\\thumb_awaken_items_00012.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00016\\thumb_awaken_items_00016.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00020\\thumb_awaken_items_00020.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_05173\\thumb_awaken_items_05173.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_bronze.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_gold.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_rainbow.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_silver.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\outgame\\extension\\character_detail\\en\\character_detail\\sp_skill_icon_02.png",
+            "category": "other",
+            "subtype": null,
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          }
+        ],
+        "event_banner": [
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_002.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_018.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_020.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_023.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_026.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_051.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_052.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_073.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_078.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_087.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_115.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_123.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_127.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_151.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_152.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_153.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_181.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_185.png",
+            "category": "event_banner",
+            "subtype": "zbattle",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          }
+        ],
+        "category_label": [
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0002_b_on.png",
+            "category": "category_label",
+            "subtype": "0002",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0005_b_on.png",
+            "category": "category_label",
+            "subtype": "0005",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0030_b_on.png",
+            "category": "category_label",
+            "subtype": "0030",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0033_b_on.png",
+            "category": "category_label",
+            "subtype": "0033",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0072_b_on.png",
+            "category": "category_label",
+            "subtype": "0072",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0079_b_on.png",
+            "category": "category_label",
+            "subtype": "0079",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0087_b_on.png",
+            "category": "category_label",
+            "subtype": "0087",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          },
+          {
+            "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0089_b_on.png",
+            "category": "category_label",
+            "subtype": "0089",
+            "card_id": null,
+            "locale": "en",
+            "note": null
+          }
+        ]
+      },
+      "form_id": "1031530",
+      "rarity": "SSR",
+      "type": "STR",
+      "display_name": "[Girl Striving for Victory] Pan (GT)",
+      "variant_label": "[Girl Striving for Victory] Pan (GT) — Base"
+    }
+  ],
+  "assets": [
+    "dokkaninfo.com\\images\\dokkan-info-logo.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_03.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031530_thumb\\card_1031530_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ssr.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_03.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_bg.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_character.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_effect.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_cutin.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_05.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031590_thumb\\card_1031590_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_lr.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_12.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_05.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031470_thumb\\card_1031470_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_10.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1026900_thumb\\card_1026900_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_05.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025560_thumb\\card_1025560_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_14.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_04.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031300_thumb\\card_1031300_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ur.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_24.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_04.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031080_thumb\\card_1031080_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025070_thumb\\card_1025070_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_04.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024990_thumb\\card_1024990_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_11.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11742.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11734.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11746.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11748.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11778.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\1031530.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_circle.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530sp_cutin_1.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_name.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_phrase.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_002.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_018.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_020.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_023.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_026.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_051.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_052.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_073.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_078.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_087.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_115.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_123.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_127.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_151.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_152.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_153.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_181.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_185.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0072_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0005_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0002_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0033_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0030_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0079_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0087_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0089_b_on.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_bronze.png",
+    "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00001\\thumb_awaken_items_00001.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_silver.png",
+    "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00006\\thumb_awaken_items_00006.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_gold.png",
+    "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00012\\thumb_awaken_items_00012.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_rainbow.png",
+    "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00016\\thumb_awaken_items_00016.png",
+    "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00020\\thumb_awaken_items_00020.png",
+    "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_05173\\thumb_awaken_items_05173.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_04.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031540_thumb\\card_1031540_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_13.png",
+    "dokkaninfo.com\\assets\\global\\en\\outgame\\extension\\character_detail\\en\\character_detail\\sp_skill_icon_02.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0100.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0001.png",
+    "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0002.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_arrow01.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_02.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_01.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1007360_thumb\\card_1007360_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012100_thumb\\card_1012100_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_05.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015910_thumb\\card_1015910_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\charamenu\\dokkan\\dok_img_kyokugen.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_03.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010350_thumb\\card_1010350_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_02.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010920_thumb\\card_1010920_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013740_thumb\\card_1013740_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1019890_thumb\\card_1019890_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_03.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1021770_thumb\\card_1021770_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_01.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030200_thumb\\card_1030200_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_04.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030210_thumb\\card_1030210_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030220_thumb\\card_1030220_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012090_thumb\\card_1012090_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012400_thumb\\card_1012400_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013150_thumb\\card_1013150_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013160_thumb\\card_1013160_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014460_thumb\\card_1014460_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014480_thumb\\card_1014480_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014490_thumb\\card_1014490_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022030_thumb\\card_1022030_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022040_thumb\\card_1022040_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_03.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022210_thumb\\card_1022210_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_00.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022220_thumb\\card_1022220_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022790_thumb\\card_1022790_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022800_thumb\\card_1022800_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024980_thumb\\card_1024980_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015230_thumb\\card_1015230_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014150_thumb\\card_1014150_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1011020_thumb\\card_1011020_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010130_thumb\\card_1010130_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010000_thumb\\card_1010000_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1009990_thumb\\card_1009990_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1005870_thumb\\card_1005870_thumb.png",
+    "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1002980_thumb\\card_1002980_thumb.png",
+    "dokkaninfo.com\\images\\venatus.webp"
+  ],
+  "assets_index": {
+    "site": [
+      {
+        "path": "dokkaninfo.com\\images\\venatus.webp",
+        "category": "site",
+        "subtype": "ad",
+        "card_id": null,
+        "locale": null,
+        "note": "Ad asset"
+      },
+      {
+        "path": "dokkaninfo.com\\images\\dokkan-info-logo.png",
+        "category": "site",
+        "subtype": "logo",
+        "card_id": null,
+        "locale": null,
+        "note": "DokkanInfo branding"
+      }
+    ],
+    "ui": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0001.png",
+        "category": "ui",
+        "subtype": "condition_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0002.png",
+        "category": "ui",
+        "subtype": "condition_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\common\\condition\\st_0100.png",
+        "category": "ui",
+        "subtype": "condition_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\charamenu\\dokkan\\dok_img_kyokugen.png",
+        "category": "ui",
+        "subtype": "menu_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_arrow01.png",
+        "category": "ui",
+        "subtype": "passive_mark",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_01.png",
+        "category": "ui",
+        "subtype": "passive_mark",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\ingame\\battle\\skill_dialog\\passive_skill_dialog_icon_02.png",
+        "category": "ui",
+        "subtype": "passive_mark",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_lr.png",
+        "category": "ui",
+        "subtype": "rarity_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ssr.png",
+        "category": "ui",
+        "subtype": "rarity_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_rare_sm_ur.png",
+        "category": "ui",
+        "subtype": "rarity_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_03.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_04.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_00_05.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_03.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_01_04.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_03.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_04.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_02_05.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_03.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_04.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_03_05.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_04.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\character_thumb_bg\\cha_base_04_05.png",
+        "category": "ui",
+        "subtype": "thumb_bg",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_00.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_01.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_02.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_03.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_10.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_11.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_12.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_13.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_14.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\character\\cha_type_icon_24.png",
+        "category": "ui",
+        "subtype": "type_icon",
+        "card_id": null,
+        "locale": null,
+        "note": null
+      }
+    ],
+    "thumbnail": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1002980_thumb\\card_1002980_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1002980",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1005870_thumb\\card_1005870_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1005870",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1007360_thumb\\card_1007360_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1007360",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1009990_thumb\\card_1009990_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1009990",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010000_thumb\\card_1010000_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1010000",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010130_thumb\\card_1010130_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1010130",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010350_thumb\\card_1010350_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1010350",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1010920_thumb\\card_1010920_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1010920",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1011020_thumb\\card_1011020_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1011020",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012090_thumb\\card_1012090_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1012090",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012100_thumb\\card_1012100_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1012100",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1012400_thumb\\card_1012400_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1012400",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013150_thumb\\card_1013150_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1013150",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013160_thumb\\card_1013160_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1013160",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1013740_thumb\\card_1013740_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1013740",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014150_thumb\\card_1014150_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1014150",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014460_thumb\\card_1014460_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1014460",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014480_thumb\\card_1014480_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1014480",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1014490_thumb\\card_1014490_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1014490",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015230_thumb\\card_1015230_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1015230",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1015910_thumb\\card_1015910_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1015910",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1019890_thumb\\card_1019890_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1019890",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1021770_thumb\\card_1021770_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1021770",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022030_thumb\\card_1022030_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1022030",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022040_thumb\\card_1022040_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1022040",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022210_thumb\\card_1022210_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1022210",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022220_thumb\\card_1022220_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1022220",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022790_thumb\\card_1022790_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1022790",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1022800_thumb\\card_1022800_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1022800",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024980_thumb\\card_1024980_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1024980",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1024990_thumb\\card_1024990_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1024990",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025070_thumb\\card_1025070_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1025070",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1025560_thumb\\card_1025560_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1025560",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1026900_thumb\\card_1026900_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1026900",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030200_thumb\\card_1030200_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1030200",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030210_thumb\\card_1030210_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1030210",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1030220_thumb\\card_1030220_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1030220",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031080_thumb\\card_1031080_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1031080",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031300_thumb\\card_1031300_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1031300",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031470_thumb\\card_1031470_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1031470",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031530_thumb\\card_1031530_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031540_thumb\\card_1031540_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1031540",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\thumb\\card_1031590_thumb\\card_1031590_thumb.png",
+        "category": "thumbnail",
+        "subtype": "card_thumb",
+        "card_id": "1031590",
+        "locale": "en",
+        "note": null
+      }
+    ],
+    "card_art": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_bg.png",
+        "category": "card_art",
+        "subtype": "bg",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_character.png",
+        "category": "card_art",
+        "subtype": "character",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_circle.png",
+        "category": "card_art",
+        "subtype": "circle",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_cutin.png",
+        "category": "card_art",
+        "subtype": "cutin",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530sp_cutin_1.png",
+        "category": "card_art",
+        "subtype": "cutin",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\card_1031530_effect.png",
+        "category": "card_art",
+        "subtype": "effect",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\1031530.png",
+        "category": "card_art",
+        "subtype": "full_card",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_name.png",
+        "category": "card_art",
+        "subtype": "super_name",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\character\\card\\1031530\\en\\card_1031530_sp_phrase.png",
+        "category": "card_art",
+        "subtype": "super_phrase",
+        "card_id": "1031530",
+        "locale": "en",
+        "note": null
+      }
+    ],
+    "other": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11734.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11742.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11746.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11748.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\banners\\gasha_top_banner_11778.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00001\\thumb_awaken_items_00001.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00006\\thumb_awaken_items_00006.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00012\\thumb_awaken_items_00012.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00016\\thumb_awaken_items_00016.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_00020\\thumb_awaken_items_00020.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\item\\awaken\\en\\thumb\\thumb_awaken_items_05173\\thumb_awaken_items_05173.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_bronze.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_gold.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_rainbow.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\layout\\en\\image\\item\\awaken\\awaken_thumb_bg\\thumb_awaken_silver.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\outgame\\extension\\character_detail\\en\\character_detail\\sp_skill_icon_02.png",
+        "category": "other",
+        "subtype": null,
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      }
+    ],
+    "event_banner": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_002.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_018.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_020.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_023.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_026.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_051.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_052.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_073.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_078.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_087.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_115.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_123.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_127.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_151.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_152.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_153.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_181.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\ingame\\events\\myp_banner_event_zbattle_185.png",
+        "category": "event_banner",
+        "subtype": "zbattle",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      }
+    ],
+    "category_label": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0002_b_on.png",
+        "category": "category_label",
+        "subtype": "0002",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0005_b_on.png",
+        "category": "category_label",
+        "subtype": "0005",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0030_b_on.png",
+        "category": "category_label",
+        "subtype": "0030",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0033_b_on.png",
+        "category": "category_label",
+        "subtype": "0033",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0072_b_on.png",
+        "category": "category_label",
+        "subtype": "0072",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0079_b_on.png",
+        "category": "category_label",
+        "subtype": "0079",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0087_b_on.png",
+        "category": "category_label",
+        "subtype": "0087",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      },
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0089_b_on.png",
+        "category": "category_label",
+        "subtype": "0089",
+        "card_id": null,
+        "locale": "en",
+        "note": null
+      }
+    ]
+  }
+}

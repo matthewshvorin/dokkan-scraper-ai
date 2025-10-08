@@ -1,6 +1,69 @@
-# scrapeDokkanInfo_play_bs4_index_eza_detect.py
-# Playwright (headed) + BeautifulSoup + Transformations + EZA variants with
-# DOM-based EZA detection + multiselect step detection + canonical EZA ID resolver
+# scrapeDokkanInfo_play_bs4_eza_dropdown_singlefolder.py
+# Playwright (headed) + BeautifulSoup
+# Single-folder-per-family with variants[] aggregation (base + EZA steps + ALL transformations/variations)
+#
+# Output per family (folder: "[RARITY] [TYPE] [Display] - <baseId>/METADATA.json"):
+# {
+#   "unit_id": "<baseId>",            # canonical family id (base form's id)
+#   "form_id": "<baseId>",
+#   "display_name": "...",            # base form display name
+#   "rarity": "UR|LR|...",
+#   "type": "AGL|TEQ|INT|STR|PHY",
+#   "source_base_url": "https://dokkaninfo.com/cards/<baseId>",
+#   "variants": [
+#       {
+#         "key": "base" | "eza_step_1" | ... | "form_<id>_base" | "form_<id>_eza_step_<n>",
+#         "variant_label": "[Boiling Power] Super Saiyan 2 Goku — Base" | "... — EZA Step 3" | "... (#4014770) — Base",
+#         "form_id": "4014770",
+#         "display_name": "[Boiling Power] Super Saiyan 2 Goku",
+#         "rarity": "UR",
+#         "type": "AGL",
+#         "eza": false|true,
+#         "step": null|int,
+#         "is_super_eza": bool,
+#         "source_url": "final navigated URL",
+#         "release_date": "...", "timezone": "...", "eza_release_date": "...",
+#         "obtain_type": "Summonable|...",
+#         "kit": {
+#           "leader_skill": "...",
+#           "super_attack": {"name": "...", "effect": "..."},
+#           "ultra_super_attack": {"name": "...", "effect": "..."},
+#           "passive_skill": {"name": "...", "effect": "...", "lines": [...]},
+#           "transformation": {"can_transform": bool, "condition": str|null},
+#           "reversible_exchange": {"can_exchange": bool, "condition": str|null},
+#           "transformation_conditions": str|null,
+#           "active_skill": {"name": "...", "effect": "...", "activation_conditions": "..."},
+#           "standby_skill": {...}|null,
+#           "finish_skills": [...],
+#           "link_skills": [...],
+#           "categories": [...],
+#           "stats": {...},
+#           "domains": [...]
+#         },
+#         "assets": ["dokkaninfo.com\\...png", ...],
+#         "assets_index": {  # NEW per-variant
+#            "<category>": [
+#               {"path": "dokkaninfo.com\\...png", "subtype":"...", "card_id":"...", "locale":"en", "note":"..."},
+#               ...
+#            ],
+#            ...
+#         }
+#       }
+#   ],
+#   "assets": ["union of assets across all variants (base + eza + transformations)"],
+#   "assets_index": { ... union across variants ... }  # NEW top-level
+# }
+#
+# Also updates output/cards/CARDS_INDEX.json:
+#   {
+#     "<cardId>": {
+#       "folder": "...", "display_name": "...", "rarity": "...", "type": "...",
+#       "variants": ["base","eza_step_1",...,"form_<id>_base",...]
+#     }
+#   }
+#
+# Usage:
+#   python scrapeDokkanInfo_play_bs4_eza_dropdown_singlefolder.py
 
 import json
 import logging
@@ -17,7 +80,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeoutError
 
 # ------------ Config -------------
 BASE = "https://dokkaninfo.com"
-INDEX_URL = f"{BASE}/cards?sort=open_at_eza"  # includes EZAs
+INDEX_URL = f"{BASE}/cards?sort=open_at_eza"   # includes EZAs
 
 OUTROOT = Path("output/cards")
 ASSETS_ROOT = Path("output/assets")
@@ -34,17 +97,16 @@ REQUEST_HEADERS = {"User-Agent": USER_AGENT, "Referer": BASE}
 TIMEOUT = 60_000
 SLEEP_BETWEEN_CARDS = 0
 MAX_PAGES = 200
-MAX_NEW_CARDS = 200
+MAX_NEW_CARDS = 54     # limit how many BASE families to save if COUNT_MODE="bases"; if "total", counts forms incl. transformations
+COUNT_MODE = "bases"    # "bases" or "total"
 
-# ---- Seed test (set [] to crawl index) ----
+MAX_FAMILY_SIZE = 40    # safety cap for BFS across transformations/variations
+
+# ---- Seed test ----
 SEED_URLS: List[str] = [
-    # "https://dokkaninfo.com/cards/1022421",  # LR example
-    #"https://dokkaninfo.com/cards/1014761",     # UR example
+ #"https://dokkaninfo.com/cards/1014761",
 ]
 
-# Counting knobs for index mode
-COUNT_TRANSFORMATIONS_TOWARD_MAX = False
-INCLUDE_ALREADY_INDEXED_IN_COUNT = False
 HEADERS = [
     "Leader Skill",
     "Super Attack",
@@ -86,7 +148,8 @@ def setup_logging() -> Path:
     ch.setLevel(logging.INFO)
     ch.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
 
-    logger.handlers.clear()
+    for h in list(logger.handlers):
+        logger.removeHandler(h)
     logger.addHandler(fh)
     logger.addHandler(ch)
 
@@ -106,45 +169,36 @@ def save_index(index: Dict[str, dict]) -> None:
     INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
     INDEX_PATH.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
 
-def is_variant_already_indexed(index: Dict[str, dict], char_id: str, variant_key: str) -> bool:
-    if char_id not in index:
-        return False
-    meta = index[char_id]
-    if variant_key == "base":
-        return bool(meta.get("folder"))
-    variants = meta.get("variants") or {}
-    return variant_key in variants
-
-def upsert_variant_in_index(index: Dict[str, dict], char_id: str, base_display_name: str,
-                            display_name_with_type: str, display_name_with_type_bracketed: str,
-                            rarity: Optional[str], type_token_upper: Optional[str],
-                            variant_key: str, folder: Path, url: str, eza: bool, step: Optional[int], is_super: bool):
-    if char_id not in index:
-        index[char_id] = {
-            "url": url,
-            "display_name": base_display_name,
-            "display_name_with_type": display_name_with_type,
-            "display_name_with_type_bracketed": display_name_with_type_bracketed,
+def index_add_variant(index: Dict[str, dict],
+                      char_id: str,
+                      folder: Path,
+                      display_name: str,
+                      rarity: Optional[str],
+                      type_token_upper: Optional[str],
+                      variant_key: str) -> None:
+    node = index.get(char_id)
+    if not node:
+        node = index[char_id] = {
+            "folder": str(folder),
+            "display_name": display_name,
             "rarity": rarity,
             "type": type_token_upper,
-            "folder": None,
-            "variants": {},
+            "variants": [],
             "saved_at": datetime.utcnow().isoformat() + "Z",
         }
-    if variant_key == "base":
-        index[char_id]["folder"] = str(folder)
     else:
-        index[char_id].setdefault("variants", {})
-        human_label = "Super EZA" if is_super else f"EZA step {step}" if step is not None else "EZA"
-        index[char_id]["variants"][variant_key] = {
-            "url": url,
-            "folder": str(folder),
-            "eza": eza,
-            "step": step,
-            "is_super_eza": is_super,
-            "label": human_label,
-            "saved_at": datetime.utcnow().isoformat() + "Z",
-        }
+        # Always keep this form-id’s identity current
+        node["folder"] = str(folder)
+        if display_name:
+            node["display_name"] = display_name
+        if rarity:
+            node["rarity"] = rarity
+        if type_token_upper:
+            node["type"] = type_token_upper
+
+    if variant_key not in node["variants"]:
+        node["variants"].append(variant_key)
+
     save_index(index)
 
 # ------------ Helpers -------------
@@ -166,20 +220,6 @@ def extract_character_id_from_url(url: str) -> Optional[str]:
     m = CARD_ID_IN_HREF_RE.search(url)
     return m.group(1) if m else None
 
-def id_int(url_or_id: str) -> Optional[int]:
-    if url_or_id.isdigit():
-        return int(url_or_id)
-    cid = extract_character_id_from_url(url_or_id) or ""
-    return int(cid) if cid.isdigit() else None
-
-def with_id(base_url: str, new_id: int) -> str:
-    p = urlparse(base_url)
-    parts = p.path.split("/")
-    # /cards/{id}
-    parts[-1] = str(new_id)
-    new_path = "/".join(parts)
-    return urlunparse((p.scheme, p.netloc, new_path, "", "", ""))
-
 def extract_ids_from_col5_images(page_html: str) -> List[str]:
     soup = BeautifulSoup(page_html, "lxml")
     required = {"row", "cursor-pointer", "unselectable", "border", "border-2", "border-dark", "margin-top-bottom-5"}
@@ -197,6 +237,17 @@ def extract_ids_from_col5_images(page_html: str) -> List[str]:
     ids: List[str] = []
     seen: Set[str] = set()
     for sub in tiles[1:]:
+        # Try by link first
+        a = sub.find("a", href=CARD_ID_IN_HREF_RE)
+        if a:
+            href = a.get("href") or ""
+            mid = CARD_ID_IN_HREF_RE.search(href)
+            if mid:
+                cid = mid.group(1)
+                if cid not in seen:
+                    seen.add(cid)
+                    ids.append(cid)
+                continue
         img = sub.find("img")
         if not img:
             continue
@@ -244,16 +295,6 @@ def super_eza_step_for_rarity(rarity: Optional[str]) -> Optional[int]:
         return 8
     return None
 
-def regular_eza_steps_for_rarity(rarity: Optional[str]) -> List[int]:
-    if not rarity:
-        return []
-    r = rarity.upper()
-    if r == "LR":
-        return [1, 2, 3]
-    if r == "UR":
-        return [1, 2, 3, 4, 5, 6, 7]
-    return []
-
 def build_variant_key(eza: bool, step: Optional[int]) -> str:
     if not eza:
         return "base"
@@ -261,16 +302,12 @@ def build_variant_key(eza: bool, step: Optional[int]) -> str:
         return "eza"
     return f"eza_step_{step}"
 
-def label_variant_suffix_from_flags(variant_key: str, is_super: bool, step: Optional[int]) -> str:
-    if variant_key == "base":
-        return ""
-    if is_super:
-        return " - Super EZA"
-    if variant_key.startswith("eza_step_") and step is not None:
-        return f" - EZA step {step}"
-    if variant_key == "eza":
-        return " - EZA"
-    return " - " + variant_key
+def build_form_variant_key(form_id: str, eza: bool, step: Optional[int]) -> str:
+    if not eza:
+        return f"form_{form_id}_base"
+    if step is None:
+        return f"form_{form_id}_eza"
+    return f"form_{form_id}_eza_step_{step}"
 
 def normalize_to_base_url(url: str) -> str:
     p = urlparse(url)
@@ -287,6 +324,18 @@ def make_variant_url(base_url: str, eza: bool, step: Optional[int]) -> str:
         q["eza"] = "false"
     new_query = urlencode(q, doseq=True)
     return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+
+def build_variant_label(display_name: Optional[str],
+                        form_id: Optional[str],
+                        family_base_id: Optional[str],
+                        eza: bool,
+                        step: Optional[int]) -> str:
+    dn = display_name or "Unknown"
+    part = "Base" if not eza else (f"EZA Step {step}" if step is not None else "EZA")
+    if family_base_id is None or (form_id and form_id == family_base_id):
+        return f"{dn} — {part}"
+    # Non-base form: include id so labels stay unique across same names
+    return f"{dn} (#" + (form_id or "?") + f") — {part}"
 
 # ------------ TEXT parsing -------------
 def _split_sections(page_text: str) -> Dict[str, List[str]]:
@@ -327,7 +376,7 @@ def _clean_leader(block: List[str]) -> Optional[str]:
 def _clean_super_like(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
     if not block:
         return None, None
-    name = block[0] if block else None
+    name = block[0]
     rest = block[1:]
     eff_parts: List[str] = []
     for ln in rest:
@@ -382,6 +431,8 @@ def _li_text_with_inline_markers(li: Tag) -> str:
                     parts.append(" down")
                 elif PASSIVE_ICON_ONCE in src or PASSIVE_ICON_PERMA in src:
                     continue
+                else:
+                    continue
             else:
                 parts.append(node.get_text(" ", strip=False))
     return _condense_spaces("".join(parts))
@@ -394,13 +445,17 @@ def _li_icons(li: Tag) -> Tuple[bool, bool, List[str], List[str]]:
     for im in li.find_all("img"):
         src = (im.get("src") or "").lower()
         if PASSIVE_ICON_ONCE in src:
-            once = True; tokens.append(PASSIVE_ICON_ONCE)
+            once = True
+            tokens.append(PASSIVE_ICON_ONCE)
         elif PASSIVE_ICON_PERMA in src:
-            permanent = True; tokens.append(PASSIVE_ICON_PERMA)
+            permanent = True
+            tokens.append(PASSIVE_ICON_PERMA)
         elif PASSIVE_ARROW_UP in src:
-            arrows.append("up"); tokens.append(PASSIVE_ARROW_UP)
+            arrows.append("up")
+            tokens.append(PASSIVE_ARROW_UP)
         elif PASSIVE_ARROW_DOWN in src:
-            arrows.append("down"); tokens.append(PASSIVE_ARROW_DOWN)
+            arrows.append("down")
+            tokens.append(PASSIVE_ARROW_DOWN)
         else:
             m = re.search(r"/([a-z0-9_]+)\.(?:png|jpg|jpeg|gif|webp)$", src)
             if m:
@@ -411,9 +466,11 @@ def parse_passive_lines_from_dom(soup: BeautifulSoup) -> Tuple[List[Dict[str, ob
     content = _find_passive_content_div(soup)
     if not content:
         return [], ""
+
     lines: List[Dict[str, object]] = []
     current_context: Optional[str] = None
     in_basic_scope: bool = False
+
     for child in content.descendants:
         if isinstance(child, Tag):
             if child.name in {"strong", "b"}:
@@ -424,6 +481,7 @@ def parse_passive_lines_from_dom(soup: BeautifulSoup) -> Tuple[List[Dict[str, ob
                         continue
                     current_context = _condense_spaces(txt)
                     in_basic_scope = False
+
             if child.name == "li":
                 once, permanent, arrows, tokens = _li_icons(child)
                 text = _li_text_with_inline_markers(child)
@@ -442,6 +500,7 @@ def parse_passive_lines_from_dom(soup: BeautifulSoup) -> Tuple[List[Dict[str, ob
                     "arrows": arrows,
                     "icons": tokens,
                 })
+
     parts: List[str] = []
     last_ctx = object()
     for it in lines:
@@ -496,13 +555,15 @@ def _group_passive_lines_fallback(lines: List[str]) -> str:
     ]
     def is_leading(s: str) -> bool:
         return any(re.search(p, s, flags=re.IGNORECASE) for p in leading_patterns)
+
     groups: List[List[str]] = []
     cur: List[str] = []
     for ln in lines:
         if is_leading(ln) and cur:
             groups.append(cur); cur = [ln]
         else:
-            cur.append(ln) if cur else cur.append(ln)
+            if not cur: cur = [ln]
+            else: cur.append(ln)
     if cur:
         groups.append(cur)
     out_parts: List[str] = []
@@ -515,7 +576,9 @@ def _group_passive_lines_fallback(lines: List[str]) -> str:
         clause = re.sub(r"^(For every [^.]+?)(?!:)\s", r"\1: ", clause, flags=re.IGNORECASE)
         out_parts.append(clause)
     effect = "; ".join(out_parts)
-    return re.sub(r"\s*;\s*", "; ", effect).strip()
+    effect = re.sub(r"\s*;\s*", "; ", effect).strip()
+    effect = re.sub(r"^\s*Basic effect\(s\):\s*", "", effect, flags=re.IGNORECASE)
+    return effect
 
 # ------------ Active/Activation/Categories/Stats/Release -------------
 def _clean_active(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
@@ -619,7 +682,7 @@ def _parse_release(page_text: str) -> Tuple[Optional[str], Optional[str]]:
 
 def _parse_release_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     def grab_block(b_label: str) -> Optional[str]:
-        b = soup.find("b", string=re.compile(rf"^\s*{re.escape(b_label)}\s*$", re.IGNORECASE))
+        b = soup.find("b", string=re.compile(r"^\s*{0}\s*$".format(re.escape(b_label)), re.IGNORECASE))
         if not b:
             return None
         row = b.find_parent("div", class_=re.compile(r"\brow\b"))
@@ -631,7 +694,8 @@ def _parse_release_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str
             text = nxt.get_text("\n", strip=True)
             if text:
                 return _condense_spaces(text.replace("\n", " "))
-            nxt = nxt.find_next_sibling("div"); hops += 1
+            nxt = nxt.find_next_sibling("div")
+            hops += 1
         return None
 
     rd_text = grab_block("Release Date")
@@ -718,7 +782,8 @@ def detect_rarity_from_dom(soup: BeautifulSoup, image_urls_fallback: List[str]) 
         if m:
             return rarity_map.get(m.group(1).lower())
     for url in image_urls_fallback or []:
-        m = re.search(r"cha_rare(?:_sm)?_(lr|ur|ssr|sr|r|n)\.png", url.lower())
+        low = url.lower()
+        m = re.search(r"cha_rare(?:_sm)?_(lr|ur|ssr|sr|r|n)\.png", low)
         if m:
             return rarity_map.get(m.group(1).lower())
     return None
@@ -745,30 +810,43 @@ def parse_obtain_type(soup: BeautifulSoup) -> Optional[str]:
                 return "Summonable"
     return None
 
-# ------------ Passive extras -------------
+# ------------ Passive extras (transform/exchange) -------------
 def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, Optional[str]], Dict[str, Optional[str]]]:
+    """
+    Preserve full 'Reversible Exchange' clause for the exchange condition.
+    Remove transform/exchange clauses from the displayed passive 'effect' to avoid duplication.
+    """
     if not passive_effect:
         return passive_effect, {"can_transform": False, "condition": None}, {"can_exchange": False, "condition": None}
+
     clauses = [c.strip() for c in re.split(r"\s*;\s*", passive_effect) if c.strip()]
-    keep: List[str] = []; transform: List[str] = []; exchange: List[str] = []
+    keep: List[str] = []
+    transform_clauses: List[str] = []
+    exchange_clauses: List[str] = []
+
     for c in clauses:
         low = c.lower()
         if "reversible exchange" in low:
-            exchange.append(c); continue
-        if re.search(r"\btransforms?\b|transformation", low):
-            transform.append(c); continue
+            exchange_clauses.append(c)
+            continue
+        if re.search(r"\btransforms?\b", low) or "transformation" in low:
+            transform_clauses.append(c)
+            continue
         keep.append(c)
-    def pick(cands: List[str]) -> Optional[str]:
-        if not cands: return None
-        pref = [x for x in cands if re.search(r"\b(when|starting|from the|turn|entry|once only)\b", x, re.IGNORECASE)]
-        return _condense_spaces(max(pref or cands, key=len))
-    cleaned = "; ".join(keep).strip()
-    tr = pick(transform); ex = pick(exchange)
-    if tr:
-        tr = re.sub(r"^\s*(Transforms|Transformation)\s*", "", tr, flags=re.IGNORECASE).strip()
-    if ex:
-        ex = re.sub(r"^\s*(and|or|,|;)\s*", "", ex).strip()
-    return cleaned, {"can_transform": bool(tr), "condition": tr}, {"can_exchange": bool(ex), "condition": ex}
+
+    def pick_longest(cands: List[str]) -> Optional[str]:
+        if not cands:
+            return None
+        best = max(cands, key=lambda s: len(s or ""))
+        return _condense_spaces(best)
+
+    transform_condition_raw = pick_longest(transform_clauses)
+    exchange_condition_raw = pick_longest(exchange_clauses)
+
+    cleaned_effect = "; ".join(keep).strip()
+    transformation = {"can_transform": bool(transform_condition_raw), "condition": transform_condition_raw or None}
+    reversible_exchange = {"can_exchange": bool(exchange_condition_raw), "condition": exchange_condition_raw or None}
+    return cleaned_effect, transformation, reversible_exchange
 
 # ------------ Domains / Standby / Finish -------------
 def detect_type_suffix_from_classes(cls_list: List[str]) -> Optional[str]:
@@ -800,7 +878,6 @@ def parse_domains(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
                 effect_text = deep.get_text(" ", strip=True); break
             effect_row = effect_row.find_next_sibling("div"); hops += 1
         domains.append({"name": domain_name, "effect": effect_text, "type": (type_suffix.upper() if type_suffix else None)})
-    # de-dupe
     seen = set(); uniq = []
     for d in domains:
         key = (d.get("name") or "", d.get("effect") or "")
@@ -811,16 +888,16 @@ def parse_domains(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
 def collect_effect_and_conditions(content_div: Tag, cond_label_regex: re.Pattern) -> Tuple[str, Optional[str]]:
     if not content_div:
         return "", None
-    effect_lines: List[str] = []; cond_lines: List[str] = []; collecting = False
+    effect_lines: List[str] = []; cond_lines: List[str] = []; collecting_conditions = False
     for node in content_div.descendants:
         if isinstance(node, Tag) and node.name == "b" and node.string and cond_label_regex.search(node.string.strip()):
-            collecting = True; continue
+            collecting_conditions = True; continue
         if isinstance(node, Tag) and node.name == "hr":
             continue
         if isinstance(node, NavigableString):
             text = str(node).strip()
             if not text: continue
-            (cond_lines if collecting else effect_lines).append(text)
+            (cond_lines if collecting_conditions else effect_lines).append(text)
     effect = _condense_spaces(" ".join(effect_lines))
     effect = re.sub(r"(Standby|Finish)\s+Skill\s+Condition\(s\)\s*$", "", effect, flags=re.IGNORECASE).strip()
     condition = _condense_spaces(" ".join(cond_lines)) if cond_lines else None
@@ -830,7 +907,7 @@ def collect_effect_and_conditions(content_div: Tag, cond_label_regex: re.Pattern
     return effect, (condition or None)
 
 def parse_skill_blocks(soup: BeautifulSoup, header_label: str, cond_label: str) -> List[Dict[str, Optional[str]]]:
-    results: List[Dict[str, Optional[str]]] = []
+    results: List[Dict[str, Optional[str]]]= []
     bnodes = soup.find_all("b", string=re.compile(rf"^\s*{re.escape(header_label)}\s*$", re.IGNORECASE))
     for bnode in bnodes:
         title_row = bnode.find_parent("div", class_=re.compile(r"\brow\b"))
@@ -860,45 +937,45 @@ def parse_finish_skills(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
     return parse_skill_blocks(soup, header_label="Finish Skill", cond_label="Finish Skill Condition(s)")
 
 # ------------ EZA detection -------------
-def eza_exists_from_dom(soup: BeautifulSoup) -> bool:
-    rows = soup.find_all("div", class_=re.compile(r"\brow\b"))
-    for r in rows:
-        cls = " ".join(r.get("class") or [])
-        if "cursor-pointer" not in cls:
-            continue
-        bolds = [b.get_text(strip=True).upper() for b in r.find_all("b")]
-        if "PRE-EZA" in bolds and "EZA" in bolds:
-            return True
+def discover_eza_steps_from_dropdown(soup: BeautifulSoup) -> List[int]:
+    steps: List[int] = []
+    for span in soup.select("div.multiselect ul.multiselect__content li.multiselect__element span.multiselect__option span"):
+        txt = (span.get_text(strip=True) or "").strip()
+        if txt.isdigit():
+            steps.append(int(txt))
+    return sorted(set(steps))
+
+def has_eza_dropdown(soup: BeautifulSoup) -> bool:
+    if not soup.select_one("div.multiselect"):
+        return False
+    if discover_eza_steps_from_dropdown(soup):
+        return True
+    single = soup.select_one("div.multiselect__tags span.multiselect__single")
+    if single and (single.get_text(strip=True) or "").strip().isdigit():
+        return True
     return False
 
-def parse_max_eza_step_from_dom(soup: BeautifulSoup) -> Optional[int]:
-    nums: List[int] = []
-    for span in soup.select("div.multiselect__content-wrapper ul.multiselect__content li.multiselect__element span.multiselect__option span"):
-        try:
-            nums.append(int(span.get_text(strip=True)))
-        except Exception:
-            pass
-    if nums:
-        return max(nums)
+def discover_eza_steps_with_fallback(soup: BeautifulSoup, rarity_hint: Optional[str]) -> List[int]:
+    steps = discover_eza_steps_from_dropdown(soup)
+    if steps:
+        # Backfill 1..max to avoid missing middle steps
+        return list(range(1, max(steps) + 1))
     single = soup.select_one("div.multiselect__tags span.multiselect__single")
-    if single:
-        try:
-            return int(single.get_text(strip=True))
-        except Exception:
-            pass
-    return None
-
-def compute_eza_step_plan(rarity: Optional[str], max_step: Optional[int]) -> Tuple[List[int], Optional[int]]:
-    if not rarity or not max_step:
-        return [], None
-    r = rarity.upper()
-    if r == "UR":
-        return (list(range(1, 8)), 8) if max_step >= 8 else (list(range(1, min(max_step, 7) + 1)), None)
-    if r == "LR":
-        return ([1, 2, 3], 4) if max_step >= 4 else (list(range(1, min(max_step, 3) + 1)), None)
-    return [], None
+    if not single:
+        return []
+    v = (single.get_text(strip=True) or "").strip()
+    if not v.isdigit():
+        return []
+    cur = int(v)
+    # If rarity is known, ensure full expected span (UR: 1..8 inc. super, LR: 1..4 inc. super)
+    if rarity_hint and rarity_hint.upper() == "UR":
+        return list(range(1, max(cur, 8) + 1))
+    if rarity_hint and rarity_hint.upper() == "LR":
+        return list(range(1, max(cur, 4) + 1))
+    return list(range(1, cur + 1))
 
 # ------------ Assets downloader -------------
+EXT_FILE_PATTERN = re.compile(r"\.(png|jpg|jpeg|gif|webp)$", re.IGNORECASE)
 def _url_to_asset_rel(url: str) -> Optional[Path]:
     try:
         parsed = urlparse(url)
@@ -918,8 +995,10 @@ def download_assets_for_card(image_urls: List[str]) -> List[str]:
     ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
     rel_paths: List[str] = []
     seen_rel: Set[str] = set()
+
     sess = requests.Session()
     sess.headers.update(REQUEST_HEADERS)
+
     for u in image_urls or []:
         rel = _url_to_asset_rel(u)
         if rel is None:
@@ -928,10 +1007,14 @@ def download_assets_for_card(image_urls: List[str]) -> List[str]:
         if rel_str in seen_rel:
             continue
         seen_rel.add(rel_str)
+
         target = ASSETS_ROOT / rel
         target.parent.mkdir(parents=True, exist_ok=True)
+
         if target.exists() and target.stat().st_size > 0:
-            rel_paths.append(rel_str); continue
+            rel_paths.append(rel_str)
+            continue
+
         try:
             with sess.get(u, stream=True, timeout=30) as r:
                 r.raise_for_status()
@@ -942,10 +1025,142 @@ def download_assets_for_card(image_urls: List[str]) -> List[str]:
             rel_paths.append(rel_str)
         except Exception as e:
             logging.warning("Asset failed: %s -> %s", u, e)
+
     return rel_paths
 
-# ------------ Scraping core -------------
-def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, object]) -> Dict[str, object]:
+# ------------ NEW: Asset classification -------------
+CARD_FILE_ID_RE = re.compile(r"/card/(\d+)/", re.IGNORECASE)
+LOCALE_RE = re.compile(r"/(en|jp|kr|tw|cn)/", re.IGNORECASE)
+
+def _extract_card_id_from_rel(rel: str) -> Optional[str]:
+    p = rel.replace("\\", "/")
+    m = CARD_FILE_ID_RE.search(p)
+    if m:
+        return m.group(1)
+    m2 = CARD_ID_IN_SRC_RE.search(p)
+    return m2.group(1) if m2 else None
+
+def _extract_locale_from_rel(rel: str) -> Optional[str]:
+    p = rel.replace("\\", "/")
+    m = LOCALE_RE.search(p)
+    return m.group(1).lower() if m else None
+
+def classify_single_asset(rel: str) -> Dict[str, Optional[str]]:
+    """
+    Returns a dict with fields: path, category, subtype, card_id, locale, note
+    Categories: card_art, thumbnail, ui, category_label, event_banner, equipment, site, other
+    """
+    p = rel.replace("\\", "/").lower()
+
+    # Site / branding
+    if "dokkan-info-logo" in p:
+        return {"path": rel, "category": "site", "subtype": "logo", "card_id": None, "locale": None, "note": "DokkanInfo branding"}
+    if "/venatus" in p or "ad" in p and "/image/" in p:
+        return {"path": rel, "category": "site", "subtype": "ad", "card_id": None, "locale": None, "note": "Ad asset"}
+
+    # UI elements
+    if "cha_rare_sm_" in p or "cha_rare_" in p:
+        return {"path": rel, "category": "ui", "subtype": "rarity_icon", "card_id": None, "locale": None, "note": None}
+    if "/cha_type_icon_" in p:
+        return {"path": rel, "category": "ui", "subtype": "type_icon", "card_id": None, "locale": None, "note": None}
+    if "/character_thumb_bg/" in p:
+        return {"path": rel, "category": "ui", "subtype": "thumb_bg", "card_id": None, "locale": None, "note": None}
+    if "/ingame/battle/skill_dialog/" in p:
+        return {"path": rel, "category": "ui", "subtype": "passive_mark", "card_id": None, "locale": None, "note": None}
+    if "/ingame/common/condition/st_" in p:
+        return {"path": rel, "category": "ui", "subtype": "condition_icon", "card_id": None, "locale": None, "note": None}
+    if "/charamenu/dokkan/" in p:
+        return {"path": rel, "category": "ui", "subtype": "menu_icon", "card_id": None, "locale": None, "note": None}
+
+    # Category chips
+    if "/card_category/label/" in p:
+        lab = re.search(r"card_category_label_(\d+)_", p)
+        return {"path": rel, "category": "category_label", "subtype": lab.group(1) if lab else None, "card_id": None, "locale": _extract_locale_from_rel(rel), "note": None}
+
+    # Event banners
+    if "/ingame/events/" in p:
+        return {"path": rel, "category": "event_banner", "subtype": "zbattle" if "zbattle" in p else "event", "card_id": None, "locale": _extract_locale_from_rel(rel), "note": None}
+
+    # Equipment
+    if "/item/equipment/" in p or "/layout/en/image/item/equipment/" in p:
+        st = "item" if "/equ_item_" in p else "thumb_bg"
+        return {"path": rel, "category": "equipment", "subtype": st, "card_id": None, "locale": _extract_locale_from_rel(rel), "note": None}
+
+    # Thumbnails
+    if "/character/thumb/" in p:
+        cid = _extract_card_id_from_rel(rel)
+        return {"path": rel, "category": "thumbnail", "subtype": "card_thumb", "card_id": cid, "locale": _extract_locale_from_rel(rel), "note": None}
+
+    # Card art (primary target)
+    if "/character/card/" in p:
+        cid = _extract_card_id_from_rel(rel)
+        loc = _extract_locale_from_rel(rel)
+        file = p.rsplit("/", 1)[-1]
+        subtype = None
+        note = None
+        if cid and file == f"{cid}.png":
+            subtype = "full_card"
+        elif "_bg." in file:
+            subtype = "bg"
+        elif "_character." in file:
+            subtype = "character"
+        elif "_circle." in file:
+            subtype = "circle"
+        elif "_effect." in file:
+            subtype = "effect"
+        elif "cutin" in file:
+            subtype = "cutin"
+        elif "_sp02_name." in file:
+            subtype = "super_name_alt"
+        elif "_sp02_phrase." in file:
+            subtype = "super_phrase_alt"
+        elif "_sp_name." in file:
+            subtype = "super_name"
+        elif "_sp_phrase." in file:
+            subtype = "super_phrase"
+        else:
+            subtype = "card_asset"
+        return {"path": rel, "category": "card_art", "subtype": subtype, "card_id": cid, "locale": loc, "note": note}
+
+    # Fallback
+    return {"path": rel, "category": "other", "subtype": None, "card_id": _extract_card_id_from_rel(rel), "locale": _extract_locale_from_rel(rel), "note": None}
+
+def build_assets_index(rel_paths: List[str]) -> Dict[str, List[Dict[str, Optional[str]]]]:
+    buckets: Dict[str, List[Dict[str, Optional[str]]]] = {}
+    seen_paths: Set[str] = set()
+    for rel in rel_paths or []:
+        if rel in seen_paths:
+            continue
+        seen_paths.add(rel)
+        item = classify_single_asset(rel)
+        cat = item["category"] or "other"
+        buckets.setdefault(cat, []).append(item)
+    # stable sort by subtype then path for readability
+    for cat in buckets:
+        buckets[cat].sort(key=lambda x: (x.get("subtype") or "", x.get("path") or ""))
+    return buckets
+
+def merge_assets_index(dst: Dict[str, List[dict]], src: Dict[str, List[dict]]) -> Dict[str, List[dict]]:
+    if not dst:
+        dst = {}
+    if not src:
+        return dst
+    for cat, items in src.items():
+        existing = dst.setdefault(cat, [])
+        have = {x.get("path") for x in existing}
+        for it in items:
+            if it.get("path") not in have:
+                existing.append(it)
+        existing.sort(key=lambda x: (x.get("subtype") or "", x.get("path") or ""))
+    return dst
+
+# ------------ Scraping core (builds a single variant dict) -------------
+def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, object]) -> Tuple[Dict[str, object], Dict[str, object]]:
+    """
+    Returns (unit_level_fields, variant_record)
+    unit_level_fields carries display_name/rarity/type/source_base_url + union assets (+ assets_index)
+    variant_record is a single item for variants[]
+    """
     soup = BeautifulSoup(page_html, "lxml")
     page_text = soup.get_text("\n", strip=True)
     sections = _split_sections(page_text)
@@ -957,17 +1172,22 @@ def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, obje
     if not super_name:
         mS = re.search(r"Super Attack\s+([\s\S]*?)\s+Ultra Super Attack", page_text, flags=re.IGNORECASE)
         if mS:
-            sn, se = _clean_super_like([ln.strip() for ln in mS.group(1).splitlines() if ln.strip()])
-            super_name = super_name or sn; super_effect = super_effect or se
+            block = [ln.strip() for ln in mS.group(1).splitlines() if ln.strip()]
+            sn, se = _clean_super_like(block)
+            super_name = super_name or sn
+            super_effect = super_effect or se
 
     if not ultra_name:
         mU = re.search(
             r"Ultra Super Attack\s+([\s\S]*?)\s+(Passive Skill|Active Skill|Link Skills|Categories|Stats|Transformation Condition\(s\))",
-            page_text, flags=re.IGNORECASE,
+            page_text,
+            flags=re.IGNORECASE,
         )
         if mU:
-            un, ue = _clean_super_like([ln.strip() for ln in mU.group(1).splitlines() if ln.strip()])
-            ultra_name = ultra_name or un; ultra_effect = ultra_effect or ue
+            block = [ln.strip() for ln in mU.group(1).splitlines() if ln.strip()]
+            un, ue = _clean_super_like(block)
+            ultra_name = ultra_name or un
+            ultra_effect = ultra_effect or ue
 
     passive_lines, _ = parse_passive_lines_from_dom(soup)
     passive_marked = render_passive_effect_with_markers(passive_lines)
@@ -990,44 +1210,36 @@ def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, obje
     stats_dom = _parse_stats_table_dom(soup)
     stats = {**stats_textual, **stats_dom}
 
-    eza_dom_marker = any(isinstance(v, dict) and any(k.startswith("EZA") for k in v.keys()) for v in stats_dom.values())
-
     rel_dt_dom, rel_tz_dom, eza_rel_dom = _parse_release_dom(soup)
-    if rel_dt_dom: release_date, tz = rel_dt_dom, rel_tz_dom
-    else:         release_date, tz = _parse_release(page_text)
+    if rel_dt_dom:
+        release_date, tz = rel_dt_dom, rel_tz_dom
+    else:
+        release_date, tz = _parse_release(page_text)
 
+    # Collect and download images
     image_urls = []
     seen = set()
     for img in soup.find_all("img"):
         src = img.get("src")
-        if not src: continue
+        if not src:
+            continue
         absu = urljoin(page_url, src)
         if absu not in seen:
-            seen.add(absu); image_urls.append(absu)
+            seen.add(absu)
+            image_urls.append(absu)
     assets_rel_paths = download_assets_for_card(image_urls)
+    assets_index = build_assets_index(assets_rel_paths)
 
     rarity = detect_rarity_from_dom(soup, image_urls)
     type_token = detect_type_token_from_dom(soup)
     type_token_upper = type_token.upper() if type_token else None
 
-    type_icon = None
-    for url in image_urls:
-        if "cha_type_icon_" in url.lower():
-            type_icon = url.split("/")[-1]; break
-
-    obtain_type = parse_obtain_type(soup)
-
     h1 = soup.select_one("h1")
-    base_display_name = (h1.get_text(strip=True) if (h1 and h1.get_text(strip=True)) else
-                         (soup.title.string.strip() if (soup.title and soup.title.string) else ""))
-    page_title = soup.title.string.strip() if soup.title and soup.title.string else ""
-
-    prefix_parts = []
-    if rarity: prefix_parts.append(rarity)
-    if type_token_upper: prefix_parts.append(f"[{type_token_upper}]")
-    prefix = " ".join(prefix_parts)
-    display_name_with_type = f"{prefix} {base_display_name}".strip() if prefix else base_display_name
-    display_name_with_type_bracketed = f"{prefix} [{base_display_name}]".strip() if prefix else f"[{base_display_name}]"
+    base_display_name = (
+        h1.get_text(strip=True)
+        if (h1 and h1.get_text(strip=True))
+        else (soup.title.string.strip() if (soup.title and soup.title.string) else "")
+    )
 
     char_id = extract_character_id_from_url(page_url)
 
@@ -1035,123 +1247,164 @@ def scrape_card_from_html(page_html: str, page_url: str, variant: Dict[str, obje
     standby_skill = parse_standby_skill(soup)
     finish_skills = parse_finish_skills(soup)
 
-    eza_exists = eza_exists_from_dom(soup)
-
-    meta = {
-        "page_title": page_title,
+    # ---- unit-level fields ----
+    unit_fields = {
+        "unit_id": char_id,
+        "form_id": char_id,
         "display_name": base_display_name,
-        "display_name_with_type": display_name_with_type,
-        "display_name_with_type_bracketed": display_name_with_type_bracketed,
-        "character_id": char_id,
+        "rarity": rarity,
+        "type": type_token_upper,
+        "source_base_url": normalize_to_base_url(page_url),
+        "assets": assets_rel_paths[:],       # list (back-compat)
+        "assets_index": assets_index.copy(), # categorized for union
+    }
+
+    # ---- variant record ----
+    variant_record = {
+        "key": variant.get("key", "base"),
+        "eza": bool(variant.get("eza")),
+        "step": variant.get("step"),
+        "is_super_eza": False,  # set later
+        "source_url": page_url,
         "release_date": release_date,
         "timezone": tz,
         "eza_release_date": eza_rel_dom,
-
-        "leader_skill": leader_skill,
-        "super_attack": {"name": super_name, "effect": super_effect},
-        "ultra_super_attack": {"name": ultra_name, "effect": ultra_effect},
-
-        "passive_skill": {
-            "name": passive_name,
-            "effect": effect_for_scan,
-            "lines": passive_lines,
+        "obtain_type": parse_obtain_type(soup),
+        "kit": {
+            "leader_skill": leader_skill,
+            "super_attack": {"name": super_name, "effect": super_effect},
+            "ultra_super_attack": {"name": ultra_name, "effect": ultra_effect},
+            "passive_skill": {
+                "name": passive_name,
+                "effect": effect_for_scan,
+                "lines": passive_lines,
+            },
+            "transformation": transformation,
+            "reversible_exchange": reversible_exchange,
+            "transformation_conditions": transformation_conditions,
+            "active_skill": {"name": active_name, "effect": active_effect, "activation_conditions": activation_conditions},
+            "standby_skill": standby_skill,
+            "finish_skills": finish_skills,
+            "link_skills": link_skills,
+            "categories": categories,
+            "stats": stats,
+            "domains": domains,
         },
-        "transformation": transformation,
-        "reversible_exchange": reversible_exchange,
-        "transformation_conditions": _clean_activation(sections.get("Transformation Condition(s)") or []),
-
-        "active_skill": {"name": active_name, "effect": active_effect, "activation_conditions": activation_conditions},
-        "standby_skill": standby_skill,
-        "finish_skills": finish_skills,
-        "link_skills": link_skills,
-        "categories": categories,
-        "stats": stats,
-        "domains": domains,
-
-        "source_url": page_url,
-        "rarity_detected": rarity,
-        "type_token": type_token,
-        "type_token_upper": type_token_upper,
-        "type_icon_filename": type_icon,
-        "obtain_type": obtain_type,
-        "assets": assets_rel_paths,
-
-        "variant": {
-            "key": variant.get("key", "base"),
-            "eza": bool(variant.get("eza")),
-            "step": variant.get("step"),
-            "is_super_eza": False,  # set after rarity known
-            "eza_exists_on_page": eza_exists,
-            "is_eza_variant_dom": eza_dom_marker,
-        },
+        "assets": assets_rel_paths,      # list (back-compat)
+        "assets_index": assets_index,    # NEW per-variant
     }
-    return meta
 
-def write_card_outputs_and_update_index(meta: Dict[str, object], index: Dict[str, dict]) -> None:
-    base_display_name = meta.get("display_name") or "Unknown Card"
-    display_name_with_type = meta.get("display_name_with_type") or base_display_name
-    display_name_with_type_bracketed = meta.get("display_name_with_type_bracketed") or f"[{base_display_name}]"
-    rarity = meta.get("rarity_detected")
-    type_token_upper = meta.get("type_token_upper")
-    char_id = meta.get("character_id") or "unknown"
+    return unit_fields, variant_record
 
-    variant = meta.get("variant") or {}
-    variant_key = variant.get("key", "base")
-    is_super = bool(variant.get("is_super_eza"))
-    step = variant.get("step")
+# ------------ Single-folder write/merge -------------
+def merge_variant_into_unit_json(folder: Path, unit_fields: Dict[str, object], variant_record: Dict[str, object]) -> Dict[str, object]:
+    meta_path = folder / "METADATA.json"
+    if meta_path.exists():
+        try:
+            current = json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            current = {}
+    else:
+        current = {}
 
-    suffix = label_variant_suffix_from_flags(variant_key, is_super=is_super, step=step)
-    folder_name = sanitize_filename(f"{display_name_with_type_bracketed} - {char_id}{suffix}")
+    # seed structure
+    if not current:
+        current = {
+            "unit_id": unit_fields.get("unit_id"),
+            "form_id": unit_fields.get("form_id"),
+            "display_name": unit_fields.get("display_name"),
+            "rarity": unit_fields.get("rarity"),
+            "type": unit_fields.get("type"),
+            "source_base_url": unit_fields.get("source_base_url"),
+            "variants": [],
+            "assets": [],
+            "assets_index": {},   # NEW: top-level union
+        }
+
+    # refresh top-level fields if missing (don't overwrite once set)
+    for k in ("display_name", "rarity", "type", "source_base_url"):
+        if not current.get(k) and unit_fields.get(k):
+            current[k] = unit_fields[k]
+
+    # union assets (list)
+    def _union(a: List[str], b: List[str]) -> List[str]:
+        seen = set(a or [])
+        out = list(a or [])
+        for x in b or []:
+            if x not in seen:
+                seen.add(x); out.append(x)
+        return out
+
+    current["assets"] = _union(current.get("assets") or [], unit_fields.get("assets") or [])
+
+    # union assets_index (dict of lists)
+    current["assets_index"] = merge_assets_index(current.get("assets_index") or {}, unit_fields.get("assets_index") or {})
+
+    # upsert variant by key
+    key = variant_record.get("key")
+    variants: List[dict] = current.get("variants") or []
+    replaced = False
+    for i, v in enumerate(variants):
+        if v.get("key") == key:
+            variants[i] = variant_record
+            replaced = True
+            break
+    if not replaced:
+        variants.append(variant_record)
+    current["variants"] = variants
+
+    meta_path.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
+    return current
+
+def ensure_unit_folder(unit_fields: Dict[str, object]) -> Path:
+    disp = unit_fields.get("display_name") or "Unknown Card"
+    rarity = unit_fields.get("rarity")
+    t = unit_fields.get("type")
+    cid = unit_fields.get("unit_id") or "unknown"
+    prefix_parts = []
+    if rarity: prefix_parts.append(rarity)
+    if t: prefix_parts.append(f"[{t}]")
+    prefix = " ".join(prefix_parts)
+    disp_with_type_bracketed = f"{prefix} [{disp}]" if prefix else f"[{disp}]"
+    folder_name = sanitize_filename(f"{disp_with_type_bracketed} - {cid}")
     card_dir = OUTROOT / folder_name
     card_dir.mkdir(parents=True, exist_ok=True)
 
-    (card_dir / "METADATA.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    src = meta.get("source_url") or ""
-    (card_dir / "ATTRIBUTION.txt").write_text(
-        "Data and image assets collected from DokkanInfo.\n"
-        f"Source page: {src}\n"
-        "Site: https://dokkaninfo.com\n\n"
-        "Notes:\n"
-        "- Personal/educational use.\n"
-        "- Respect the site's Terms and original owners' rights.\n"
-        "- If you share output, credit: “Data/images via dokkaninfo.com”.\n",
-        encoding="utf-8",
-    )
-
-    upsert_variant_in_index(
-        index=index,
-        char_id=char_id,
-        base_display_name=base_display_name,
-        display_name_with_type=display_name_with_type,
-        display_name_with_type_bracketed=display_name_with_type_bracketed,
-        rarity=rarity,
-        type_token_upper=type_token_upper,
-        variant_key=variant_key,
-        folder=card_dir,
-        url=meta.get("source_url") or "",
-        eza=bool(variant.get("eza")),
-        step=step,
-        is_super=is_super,
-    )
-    logging.info("Saved %s (%s) -> %s", char_id, "Super EZA" if is_super else variant_key, card_dir)
+    attr = card_dir / "ATTRIBUTION.txt"
+    if not attr.exists():
+        src = unit_fields.get("source_base_url") or ""
+        attr.write_text(
+            "Data and image assets collected from DokkanInfo.\n"
+            f"Source base: {src}\n"
+            "Site: https://dokkaninfo.com\n\n"
+            "Notes:\n"
+            "- Personal/educational use.\n"
+            "- Respect the site's Terms and original owners' rights.\n"
+            "- If you share output, credit: “Data/images via dokkaninfo.com”.\n",
+            encoding="utf-8",
+        )
+    return card_dir
 
 # ------------ Main -------------
 def main():
     log_path = setup_logging()
-    logging.info("Starting DokkanInfo scraper (headed) — Transformations + EZA sequential steps + DOM EZA guard + canonical EZA ID resolver")
+    logging.info("Starting DokkanInfo scraper (headed) — EZA via dropdown + single-folder variants + transformations")
     OUTROOT.mkdir(parents=True, exist_ok=True)
     ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
+
     index = load_index()
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         context = browser.new_context(
-            user_agent=USER_AGENT, locale="en-US", viewport={"width": 1400, "height": 900},
+            user_agent=USER_AGENT,
+            locale="en-US",
+            viewport={"width": 1400, "height": 900},
         )
         page = context.new_page()
 
-        def goto_ok(url: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        def goto_ok(url: str):
+            """Navigate and return (ok_flag, html_or_none, final_url_str)."""
             try:
                 resp = page.goto(url, wait_until="domcontentloaded", timeout=TIMEOUT)
                 ok = bool(resp and resp.ok)
@@ -1167,168 +1420,285 @@ def main():
                 logging.warning("Navigation error for %s -> %s", url, e)
                 return False, None, None
 
-        # --- Canonical EZA anchor resolver (id, id+1, id-1) ---
-        def resolve_canonical_eza_anchor(base_clean_url: str) -> Tuple[Optional[str], Optional[int], Optional[str]]:
-            """
-            Try this form's id, then id+1, then id-1 for eza=true&step=1.
-            Return (canonical_base_url, detected_max_step, html_used_for_detection)
-            Only returns a URL if final page still has eza=true&step=1 AND EZA columns exist.
-            """
-            cid = id_int(base_clean_url)
-            if cid is None:
-                return None, None, None
-            candidates = [cid, cid + 1, cid - 1]
-            tried: Set[int] = set()
-            for cand in candidates:
-                if cand in tried or cand <= 0:
-                    continue
-                tried.add(cand)
-                step1 = make_variant_url(with_id(base_clean_url, cand), eza=True, step=1)
-                ok, html, final_url = goto_ok(step1)
-                if not ok or not html or not final_url:
-                    continue
-                fin_eza, fin_step = parse_variant_from_url(final_url)
-                if not (fin_eza and fin_step == 1):
-                    # some forms drop query; not a true EZA step page
-                    continue
-                soup = BeautifulSoup(html, "lxml")
-                stats_dom = _parse_stats_table_dom(soup)
-                has_eza_cols = any(isinstance(v, dict) and any(k.startswith("EZA") for k in v.keys()) for v in stats_dom.values())
-                if not has_eza_cols:
-                    continue
-                max_step = parse_max_eza_step_from_dom(soup)
-                canonical_base = normalize_to_base_url(final_url)
-                return canonical_base, max_step, html
-            return None, None, None
-
-        def scrape_one(url: str, rarity_hint: Optional[str] = None, discover_forms: bool = False):
+        def scrape_one_variant(url: str,
+                               rarity_hint: Optional[str] = None,
+                               force_folder: Optional[Path] = None,
+                               variant_key_override: Optional[str] = None,
+                               family_base_id: Optional[str] = None) -> Tuple[Optional[str], Optional[str], Optional[Path], bool, Optional[str]]:
+            """Scrape a single page into a variant record and merge (optionally into an existing folder)."""
             req_eza_flag, req_step_i = parse_variant_from_url(url)
-            variant_key = build_variant_key(req_eza_flag, req_step_i)
-            cid = extract_character_id_from_url(url) or "unknown"
-
-            if is_variant_already_indexed(index, cid, variant_key):
-                logging.info("Skip %s %s: already indexed.", cid, variant_key)
-                return cid, None, None, [], False
-
             ok, html, final_url = goto_ok(url)
             if not ok or not html:
-                logging.info("Skipping %s (%s) due to non-OK load.", cid, variant_key)
-                return None, None, None, [], False
+                return None, None, None, False, None
 
-            fin_eza_flag, fin_step_i = parse_variant_from_url(final_url or "")
-            if req_eza_flag != fin_eza_flag or req_step_i != fin_step_i:
-                logging.info("Final URL params mismatch for %s -> requested eza=%s,step=%s but final eza=%s,step=%s; skipping.",
-                             url, req_eza_flag, req_step_i, fin_eza_flag, fin_step_i)
-                return None, None, None, [], False
-
-            meta = scrape_card_from_html(html, final_url or url, variant={
-                "key": variant_key, "eza": req_eza_flag, "step": req_step_i, "is_super_eza": False,
+            unit_fields, variant_record = scrape_variant_from_html(html, final_url or url, variant={
+                "key": build_variant_key(req_eza_flag, req_step_i),
+                "eza": req_eza_flag,
+                "step": req_step_i,
             })
 
-            rarity = meta.get("rarity_detected") or rarity_hint
-            super_step = super_eza_step_for_rarity(rarity)
-            is_super = bool(req_eza_flag and req_step_i is not None and super_step is not None and req_step_i == super_step)
+            # override key for transformation/foreign forms if needed
+            if variant_key_override:
+                variant_record["key"] = variant_key_override
 
-            if req_eza_flag:
-                is_eza_variant_dom = bool((meta.get("variant") or {}).get("is_eza_variant_dom"))
-                if not is_eza_variant_dom:
-                    logging.info("EZA markers not found in DOM for %s (step=%s). Skipping variant.", cid, req_step_i)
-                    return None, None, None, [], False
+            # variant-level identity + label for readability
+            this_form_id = unit_fields.get("unit_id")
+            this_display_name = unit_fields.get("display_name")
+            variant_record["form_id"] = this_form_id
+            # Prefer current rarity/type; fallback to hints
+            variant_record["rarity"] = unit_fields.get("rarity") or rarity_hint
+            variant_record["type"] = unit_fields.get("type")
+            variant_record["display_name"] = this_display_name
+            variant_record["variant_label"] = build_variant_label(
+                display_name=this_display_name,
+                form_id=this_form_id,
+                family_base_id=family_base_id,
+                eza=variant_record.get("eza"),
+                step=variant_record.get("step"),
+            )
 
-            meta["variant"]["is_super_eza"] = is_super
-            write_card_outputs_and_update_index(meta, index)
-            eza_exists_flag = bool(meta["variant"].get("eza_exists_on_page"))
+            # label Super EZA if applicable
+            rarity_use = variant_record["rarity"]
+            sstep = super_eza_step_for_rarity(rarity_use)
+            if variant_record.get("eza") and variant_record.get("step") is not None and sstep is not None:
+                variant_record["is_super_eza"] = (variant_record["step"] == sstep)
 
-            related_ids = extract_ids_from_col5_images(html) if discover_forms else []
-            return meta.get("character_id"), rarity, eza_exists_flag, related_ids, True
+            # folder + merge
+            folder = force_folder or ensure_unit_folder(unit_fields)
+            merged = merge_variant_into_unit_json(folder, unit_fields, variant_record)
 
-        def scrape_all_variants_for_base(form_base_url: str):
+            # update index (per form id)
+            index_add_variant(index,
+                              unit_fields.get("unit_id") or "unknown",
+                              folder,
+                              unit_fields.get("display_name") or merged.get("display_name") or "Unknown",
+                              unit_fields.get("rarity") or merged.get("rarity"),
+                              unit_fields.get("type") or merged.get("type"),
+                              variant_record.get("key"))
+
+            logging.info("Saved %s (%s) -> %s",
+                         unit_fields.get("unit_id"), variant_record.get("key"), folder)
+            return unit_fields.get("unit_id"), merged.get("rarity") or unit_fields.get("rarity"), folder, True, html
+
+        # -------- canonical neighbor resolution + discovery --------
+        def _extract_card_int_id(url: str) -> Optional[int]:
+            m = CARD_ID_IN_HREF_RE.search(url)
+            return int(m.group(1)) if m else None
+
+        def _url_for_id(base_clean_url: str, nid: int) -> str:
+            p = urlparse(base_clean_url)
+            path = re.sub(r"/cards/\d+", f"/cards/{nid}", p.path)
+            return urlunparse((p.scheme, p.netloc, path, "", "", ""))
+
+        def resolve_canonical_and_discover_steps(base_clean_url: str, rarity_hint: Optional[str]) -> Tuple[
+            str, List[int]]:
             """
-            Per form:
-              1) Base (eza=false) on the form's own ID
-              2) If base shows the EZA toggle, resolve CANONICAL EZA ID (id, id+1, id-1)
-              3) From that canonical ID: base (eza=false) -> regular steps (ascending) -> Super EZA (if picker says so)
+            Try base form first; if no EZA, probe neighbor +1 then -1 (DokkanInfo sometimes
+            puts the working EZA UI on an adjacent id). We ONLY accept EZA if the page shows
+            hard evidence (release block or EZA stats headers).
             """
-            # (1) Form base first
-            base_url = make_variant_url(form_base_url, eza=False, step=None)
-            cid, rarity, eza_exists, related_ids, ok = scrape_one(base_url, discover_forms=True)
-            if not cid:
-                return None, [], None
+            candidates: List[str] = [base_clean_url]
+            cid = _extract_card_int_id(base_clean_url)
+            if cid is not None:
+                candidates += [
+                    _url_for_id(base_clean_url, cid + 1),
+                    _url_for_id(base_clean_url, cid - 1),
+                ]
 
-            if eza_exists:
-                # (2) Resolve canonical EZA anchor for this form (id, id+1, id-1)
-                canonical_base, max_step, html_used = resolve_canonical_eza_anchor(form_base_url)
-                if not canonical_base:
-                    logging.info("EZA toggle present but no valid EZA anchor found for %s; skipping EZA for this form.", form_base_url)
-                    return cid, related_ids, rarity
+            tried: Set[str] = set()
+            for cand in candidates:
+                if cand in tried:
+                    continue
+                tried.add(cand)
 
-                if canonical_base != normalize_to_base_url(form_base_url):
-                    logging.info("Canonical EZA base for form resolved to %s (from %s)", canonical_base, form_base_url)
+                # Force EZA view to load potential EZA-only UI
+                step1_url = make_variant_url(cand, eza=True, step=1)
+                ok1, html1, _ = goto_ok(step1_url)
+                if not ok1 or not html1:
+                    continue
 
-                # (3a) Save canonical base (eza=false) for that EZA anchor ID
-                scrape_one(make_variant_url(canonical_base, eza=False, step=None))
+                soup1 = BeautifulSoup(html1, "lxml")
 
-                # (3b) Decide plan from multiselect; fallback to rarity plan if picker missing
-                if max_step is None and html_used:
-                    # Shouldn't happen because resolver required EZA columns, but be safe
-                    soup = BeautifulSoup(html_used, "lxml")
-                    max_step = parse_max_eza_step_from_dom(soup)
+                # HARD EVIDENCE gate
+                if not has_eza_evidence(soup1):
+                    logging.info("No EZA evidence found for %s (skipping EZA).", cand)
+                    continue
 
-                regular_plan, super_step_planned = compute_eza_step_plan(rarity, max_step)
-                if not regular_plan:
-                    regular_plan = regular_eza_steps_for_rarity(rarity)
-                    logging.info("Picker missing; fallback to rarity plan %s", regular_plan)
-                else:
-                    logging.info("Detected EZA steps via picker: steps=%s super=%s for %s", regular_plan, super_step_planned, canonical_base)
+                # Safe step discovery
+                steps = discover_eza_steps_safe(soup1, rarity_hint=rarity_hint)
+                if steps:
+                    if cand != base_clean_url:
+                        logging.info("Canonical base for form resolved to %s (from %s)", cand, base_clean_url)
+                    logging.info("Discovered EZA steps %s for %s", steps, cand)
+                    return cand, steps
 
-                # (3c) Run steps; stop at first failure
-                all_regular_ok = True
-                for st in regular_plan:
-                    step_url = make_variant_url(canonical_base, eza=True, step=st)
-                    c2, _, _, _, ok2 = scrape_one(step_url, rarity_hint=rarity)
-                    if not ok2:
-                        logging.info("Regular EZA step %s failed or missing for %s; stopping further steps.", st, canonical_base)
-                        all_regular_ok = False
-                        break
+            logging.info("No EZA found for %s", base_clean_url)
+            return base_clean_url, []
+
+        def has_eza_stats_headers(soup: BeautifulSoup) -> bool:
+            """True if the Stats table shows EZA columns."""
+            for th in soup.find_all("th"):
+                txt = (th.get_text(" ", strip=True) or "").upper()
+                # Typical headers we already map in _parse_stats_table_dom
+                if "EZA" in txt or "EZA B." in txt or "EZA 100%" in txt:
+                    return True
+            return False
+
+        def has_eza_release_block(soup: BeautifulSoup) -> bool:
+            """True if the page exposes an 'EZA Release Date' block."""
+            _, _, eza_rel_dt = _parse_release_dom(soup)
+            return bool(eza_rel_dt)
+
+        def has_eza_evidence(soup: BeautifulSoup) -> bool:
+            """Final gate: we only consider EZA if there is hard evidence on the page."""
+            return has_eza_release_block(soup) or has_eza_stats_headers(soup)
+
+        def discover_eza_steps_safe(soup: BeautifulSoup, rarity_hint: Optional[str]) -> List[int]:
+            """
+            Read the EZA step dropdown ONLY if we have EZA evidence.
+            Backfill 1..max. If there's only a single visible value, respect rarity_hint
+            to extend to the expected cap (UR=8, LR=4).
+            """
+            if not has_eza_evidence(soup):
+                return []
+
+            steps = discover_eza_steps_from_dropdown(soup)
+            if steps:
+                return list(range(1, max(steps) + 1))
+
+            # very rare: single tag visible (no list rendered)
+            single = soup.select_one("div.multiselect__tags span.multiselect__single")
+            if single:
+                v = (single.get_text(strip=True) or "").strip()
+                if v.isdigit():
+                    cur = int(v)
+                    if rarity_hint and rarity_hint.upper() == "UR":
+                        return list(range(1, max(cur, 8) + 1))
+                    if rarity_hint and rarity_hint.upper() == "LR":
+                        return list(range(1, max(cur, 4) + 1))
+                    return list(range(1, cur + 1))
+
+            return []
+
+        def discover_family_ids_bfs(start_html: Optional[str], start_id: str) -> List[str]:
+            """
+            BFS across the 'tile strip' so we don't miss transformations/variations shown only on sub-pages.
+            """
+            family: Set[str] = {start_id}
+            queue: List[str] = []
+            seen_pages: Set[str] = set()
+
+            # seed from start_html if available
+            if start_html:
+                for rid in extract_ids_from_col5_images(start_html):
+                    if rid not in family:
+                        family.add(rid)
+                        queue.append(rid)
+
+            while queue and len(family) < MAX_FAMILY_SIZE:
+                rid = queue.pop(0)
+                url = normalize_to_base_url(f"{BASE}/cards/{rid}")
+                if url in seen_pages:
+                    continue
+                seen_pages.add(url)
+                ok, html, fin = goto_ok(make_variant_url(url, eza=False, step=None))
+                if not ok or not html:
+                    continue
+                more = extract_ids_from_col5_images(html)
+                for mid in more:
+                    if mid not in family and len(family) < MAX_FAMILY_SIZE:
+                        family.add(mid)
+                        queue.append(mid)
+            return sorted(family)
+
+        def scrape_all_variants_for_base(base_clean_url: str, global_processed: Set[str]):
+            """
+            Per family:
+              1) scrape base (eza=false) => create folder
+              2) resolve canonical base for EZA dropdown + discover steps => scrape 1..max steps
+              3) BFS discover transformations/variations => scrape each as variants into SAME folder
+              returns (base_id, processed_ids_set, rarity)
+            """
+            # If this base id already processed (as part of another family), skip
+            base_id = extract_character_id_from_url(base_clean_url) or ""
+            if base_id in global_processed:
+                logging.info("Skipping %s; already processed in another family.", base_id)
+                return None, set(), None
+
+            # 1) base first
+            base_url = make_variant_url(base_clean_url, eza=False, step=None)
+            cid, rarity, folder, ok, html_base = scrape_one_variant(base_url, rarity_hint=None, family_base_id=None)
+            if not cid or not folder:
+                return None, set(), None
+
+            # Mark base as processed
+            processed_ids: Set[str] = {cid}
+
+            # 2) EZA steps for BASE (canonicalized) — write into same folder
+            resolved_base, steps = resolve_canonical_and_discover_steps(base_clean_url, rarity_hint=rarity)
+            for st in steps:
+                step_url = make_variant_url(resolved_base, eza=True, step=st)
+                scrape_one_variant(step_url, rarity_hint=rarity, force_folder=folder,
+                                   variant_key_override=f"eza_step_{st}", family_base_id=cid)
+                time.sleep(SLEEP_BETWEEN_CARDS)
+
+            # 3) Family discovery (transformations/variations)
+            family_ids = discover_family_ids_bfs(html_base, cid)
+
+            # Scrape each related id (including base again in list, but we skip it)
+            for rid in family_ids:
+                if rid == cid:
+                    continue
+                if rid in processed_ids:
+                    continue
+                related_base = normalize_to_base_url(f"{BASE}/cards/{rid}")
+
+                # related base (as variant)
+                rcid, rrarity, _, rok, rhtml = scrape_one_variant(
+                    make_variant_url(related_base, eza=False, step=None),
+                    rarity_hint=None,
+                    force_folder=folder,
+                    variant_key_override=build_form_variant_key(rid, eza=False, step=None),
+                    family_base_id=cid
+                )
+                if rcid:
+                    processed_ids.add(rcid)
+
+                # EZA steps for related
+                r_resolved, r_steps = resolve_canonical_and_discover_steps(related_base, rarity_hint=rrarity)
+                for st in r_steps:
+                    scrape_one_variant(
+                        make_variant_url(r_resolved, eza=True, step=st),
+                        rarity_hint=rrarity,
+                        force_folder=folder,
+                        variant_key_override=build_form_variant_key(rid, eza=True, step=st),
+                        family_base_id=cid
+                    )
                     time.sleep(SLEEP_BETWEEN_CARDS)
 
-                # (3d) Super EZA last (only if picker said it exists) AND all regular succeeded
-                if super_step_planned is not None and all_regular_ok:
-                    super_url = make_variant_url(canonical_base, eza=True, step=super_step_planned)
-                    c3, _, _, _, ok3 = scrape_one(super_url, rarity_hint=rarity)
-                    if not ok3:
-                        logging.info("Super EZA not available (or failed) at step=%s for %s", super_step_planned, canonical_base)
+            # mark all processed in global set so index-mode won't double-process
+            global_processed.update(processed_ids)
+            return cid, processed_ids, rarity
 
-            return cid, related_ids, rarity
+        # -------- Execution modes --------
+        processed_global: Set[str] = set()
 
-        # ------ Run modes ------
         if SEED_URLS:
-            logging.info("Seed mode: %d URL(s) — base → EZA (canonical id) → Super EZA; include transformations.", len(SEED_URLS))
-            visited_forms: Set[str] = set()
-
+            logging.info("Seed mode: %d URL(s) — base → dropdown steps; includes transformations.", len(SEED_URLS))
             for base_any in SEED_URLS:
                 base_clean = normalize_to_base_url(base_any)
-                base_cid, related_ids, rarity = scrape_all_variants_for_base(base_clean)
-
-                for rid in related_ids or []:
-                    if rid in visited_forms:
-                        continue
-                    visited_forms.add(rid)
-                    form_base = normalize_to_base_url(f"{BASE}/cards/{rid}")
-                    scrape_all_variants_for_base(form_base)
-
+                base_cid, family_ids, rarity = scrape_all_variants_for_base(base_clean, processed_global)
             browser.close()
             logging.info("Run completed. Log file: %s", log_path)
             return
 
         # -------- Index crawl mode --------
-        new_bases_saved = 0
-        total_forms_saved = 0
-        seen_card_ids_global: Set[str] = set()
+        bases_saved = 0
+        total_saved = 0
         current_index_url = INDEX_URL
         pages_done = 0
 
-        while pages_done < MAX_PAGES and new_bases_saved < MAX_NEW_CARDS:
+        while pages_done < MAX_PAGES:
             try:
                 logging.info("Opening index page: %s", current_index_url)
                 page.goto(current_index_url, wait_until="domcontentloaded", timeout=TIMEOUT)
@@ -1350,10 +1720,8 @@ def main():
             links = []
             seen_href = set()
             for h in card_hrefs:
-                if not h or not h.startswith("/cards/"):
-                    continue
-                if h in seen_href:
-                    continue
+                if not h or not h.startswith("/cards/"): continue
+                if h in seen_href: continue
                 seen_href.add(h)
                 links.append(urljoin(BASE, h))
 
@@ -1370,37 +1738,31 @@ def main():
             logging.info("Found %d card links on this page.", len(links))
 
             for i, card_url in enumerate(links, start=1):
-                if pages_done >= MAX_PAGES or new_bases_saved >= MAX_NEW_CARDS:
-                    break
-
                 base_clean = normalize_to_base_url(card_url)
-                base_cid = extract_character_id_from_url(base_clean)
-
-                if base_cid and base_cid in seen_card_ids_global:
+                base_id = extract_character_id_from_url(base_clean) or ""
+                if base_id in processed_global:
+                    logging.info("Skipping %s from index; already processed in a previous family.", base_id)
                     continue
+
+                base_cid, processed_ids, rarity = scrape_all_variants_for_base(base_clean, processed_global)
+
+                # Update counters
                 if base_cid:
-                    seen_card_ids_global.add(base_cid)
+                    total_saved += 1
+                    if COUNT_MODE == "bases":
+                        bases_saved += 1
 
-                already_indexed = is_variant_already_indexed(load_index(), base_cid or "", "base")
-
-                got_base_cid, related_ids, rarity = scrape_all_variants_for_base(base_clean)
-
-                if not already_indexed or INCLUDE_ALREADY_INDEXED_IN_COUNT:
-                    if got_base_cid:
-                        new_bases_saved += 1
-                        logging.info("Progress: %d/%d base cards saved.", new_bases_saved, MAX_NEW_CARDS)
-
-                for rid in related_ids or []:
-                    if pages_done >= MAX_PAGES or (COUNT_TRANSFORMATIONS_TOWARD_MAX and new_bases_saved >= MAX_NEW_CARDS):
-                        break
-                    form_base = normalize_to_base_url(f"{BASE}/cards/{rid}")
-                    c_form, _, _ = scrape_all_variants_for_base(form_base)
-                    if c_form:
-                        total_forms_saved += 1
-                        if COUNT_TRANSFORMATIONS_TOWARD_MAX:
-                            if not (is_variant_already_indexed(load_index(), rid, "base") and not INCLUDE_ALREADY_INDEXED_IN_COUNT):
-                                new_bases_saved += 1
-                                logging.info("Progress (including forms): %d/%d", new_bases_saved, MAX_NEW_CARDS)
+                # stop conditions
+                if COUNT_MODE == "total" and total_saved >= MAX_NEW_CARDS:
+                    logging.info("Reached MAX_NEW_CARDS=%d (total). Stopping.", MAX_NEW_CARDS)
+                    browser.close()
+                    logging.info("Run completed. Log file: %s", log_path)
+                    return
+                if COUNT_MODE == "bases" and bases_saved >= MAX_NEW_CARDS:
+                    logging.info("Reached MAX_NEW_CARDS=%d (bases). Stopping.", MAX_NEW_CARDS)
+                    browser.close()
+                    logging.info("Run completed. Log file: %s", log_path)
+                    return
 
                 time.sleep(SLEEP_BETWEEN_CARDS)
 
