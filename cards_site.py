@@ -2768,7 +2768,7 @@ const unitGrid=$("#unitGrid"), selectedTray=$("#selectedTray"), unitHint=$("#uni
 const minBoostSel=$("#minBoost"), includeAllTypes=$("#includeAllTypes");
 const leaderGrid=$("#leaderGrid"), stateNote=$("#stateNote"), shareLink=$("#shareLink");
 const clearSel=$("#clearSel");
-const MAX_SELECTED = 6;
+const MAX_SELECTED = 5;
 let selected = []; // array of unit IDs
 
 /* Helpers */
