@@ -2578,7 +2578,7 @@ a{color:var(--accent); text-decoration:none}
 .btn:hover{ border-color:#38506f }
 :root[data-theme="light"] .btn{ background:#fff; color:#0b1623; border-color:#c7d5ea }
 
-.cols{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px}
+.cols{display:grid; grid-template-columns: 1fr 1.2fr; gap:16px}
 @media (max-width: 1200px){ .cols{ grid-template-columns:1fr } }
 
 .panel{background:var(--card); border:1px solid #1e2a3a; border-radius:12px; padding:12px}
@@ -2588,11 +2588,11 @@ a{color:var(--accent); text-decoration:none}
 .input, .select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radius:10px; padding:8px 10px}
 :root[data-theme="light"] .input, :root[data-theme="light"] .select{ background:#fff; color:#0b1623; border-color:#c7d5ea }
 .select{cursor:pointer}
+.switch{display:flex; gap:6px; align-items:center; font-size:12px; opacity:.9}
+
 .grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; margin-top:10px}
 .card{background:linear-gradient(180deg, #0f151d, #0b1016); border:1px solid #1b2636; border-radius:14px; overflow:hidden; position:relative; transition:.12s}
 :root[data-theme="light"] .card{ background:#fff; border-color:#dbe7ff }
-.card:hover{ transform:translateY(-2px); border-color:#2a3b54 }
-.card.sel{ outline:2px solid rgba(91,209,255,.6); box-shadow:0 0 0 4px rgba(91,209,255,.15) inset }
 .card .img{background:#0c121a}
 :root[data-theme="light"] .card .img{ background:#eef3fb }
 .card .img img{width:100%; height:auto; display:block}
@@ -2609,109 +2609,69 @@ a{color:var(--accent); text-decoration:none}
 .button:hover{border-color:#38506f}
 :root[data-theme="light"] .button{ background:#fff; color:#0b1623; border-color:#c7d5ea }
 
-.pin{display:flex; gap:8px; align-items:center; background:var(--slot); border:1px solid #223144; border-radius:10px; padding:6px}
-:root[data-theme="light"] .pin{ background:#f2f6ff; border-color:#dbe7ff }
-.pin img{width:60px; height:auto; border-radius:8px; background:#0b1118}
-:root[data-theme="light"] .pin img{ background:#eef3fb }
-.pin .name{font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.card.sel{ outline:2px solid rgba(91,209,255,.55) }
+.card.dim{ opacity:.35; filter:grayscale(.3) }
+.badge{position:absolute; top:8px; right:8px; font-size:11px; background:#0b1118; color:#d2e4ff; border:1px solid #1f2b3b; padding:3px 7px; border-radius:999px}
 
-.centerTop{display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+.tray{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+.tag{display:flex; gap:6px; align-items:center; padding:5px 9px; border-radius:999px; background:#0d1724; border:1px solid #223246; color:#d8e8ff; font-size:12px; max-width:280px}
+:root[data-theme="light"] .tag{ background:#fff; border-color:#dbe7ff; color:#0b1623 }
+.tag .x{cursor:pointer; opacity:.8}
+
+.centerTop{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
 .note{opacity:.85; font-size:12px}
-.count{opacity:.85; font-size:12px}
+.small{font-size:12px; opacity:.9}
+.hr{height:1px; background:linear-gradient(90deg, transparent, #2b3d57 40%, #2b3d57 60%, transparent); margin:10px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
     <h1>👑 Leader Finder</h1>
-    <a class="btn" href="/">← Back to all units</a>
+    <a class="btn" href="/">← All units</a>
     <a class="btn" href="/team">🧩 Team Builder</a>
     <button class="btn" id="themeBtn">🌓 Theme</button>
   </div>
 
   <div class="cols">
-    <!-- A -->
+    <!-- LEFT: pick units -->
     <div class="panel">
-      <div class="h2">Pick Unit A</div>
-      <div class="pin" id="pinA" style="display:none"></div>
+      <div class="h2">Pick Units (multi-select)</div>
       <div class="controls">
-        <input class="input" id="qA" placeholder="Search name, ID, type, category…" />
+        <input class="input" id="qUnits" placeholder="Search name, ID, type, category…" style="flex:1; min-width:240px" />
         <label>Type
-          <select class="select" id="tA">
+          <select class="select" id="tUnits">
             <option value="">All</option>
             <option>AGL</option><option>TEQ</option><option>INT</option><option>STR</option><option>PHY</option>
           </select>
         </label>
-        <label>Favorites only <input type="checkbox" id="fA"></label>
+        <label class="switch">Favorites <input type="checkbox" id="fUnits"></label>
+        <button class="btn" id="clearSel">Clear</button>
       </div>
-      <div class="grid" id="gridA"></div>
+      <div class="tray" id="selectedTray"></div>
+      <div class="grid" id="unitGrid"></div>
+      <div class="small" id="unitHint" style="margin-top:6px; opacity:.75">Tip: Click a card to toggle selection (up to 6). Greyed cards would result in no leaders at current settings.</div>
     </div>
 
-    <!-- CENTER: Leaders -->
+    <!-- RIGHT: leaders -->
     <div class="panel">
       <div class="centerTop">
-        <div class="h2" style="margin:0">Leaders covering both</div>
+        <div class="h2" style="margin:0">Leaders covering all selected</div>
         <div class="controls">
-          <label>Min Boost
-            <select class="select" id="minBoost">
-              <option value="0">Any</option>
-              <option value="200">200%+</option>
-              <option value="220">220%+</option>
-            </select>
-          </label>
-
-          <!-- NEW: Leader filters -->
-          <label>Main %
-            <select class="select" id="leadMain">
-              <option value="0">Any</option>
-              <option value="170">170%+</option>
-              <option value="200">200%+</option>
-              <option value="220">220%+</option>
-            </select>
-          </label>
-          <label>All Types only <input type="checkbox" id="leadAll"></label>
-          <label>Min Ki
-            <select class="select" id="leadKi">
-              <option value="0">Any</option>
-              <option value="3">+3</option>
-              <option value="4">+4</option>
-              <option value="5">+5</option>
-              <option value="7">+7</option>
-            </select>
-          </label>
-          <label>Sort
-            <select class="select" id="leadSort">
-              <option value="coverage">Coverage → Boost</option>
-              <option value="main">Main %</option>
-              <option value="rarity">LR → UR → SSR</option>
-              <option value="name">Name (A→Z)</option>
-            </select>
-          </label>
-
-          <button class="btn" id="swapAB" title="Swap A and B">⇄ Swap</button>
+          <label>Min Boost</label>
+          <select class="select" id="minBoost">
+            <option value="170" selected>170%+</option>
+            <option value="200">200%+</option>
+            <option value="220">220%+</option>
+            <option value="0">Any</option>
+          </select>
+          <label class="switch"><input type="checkbox" id="includeAllTypes"> Include All-Types</label>
           <button class="btn" id="shareLink">Copy share link</button>
         </div>
       </div>
-      <div class="note" id="picksInfo">No picks yet.</div>
-      <div class="count" id="leadCount" style="margin-top:6px"></div>
-      <div class="grid" id="gridCenter"></div>
-    </div>
 
-    <!-- B -->
-    <div class="panel">
-      <div class="h2">Pick Unit B</div>
-      <div class="pin" id="pinB" style="display:none"></div>
-      <div class="controls">
-        <input class="input" id="qB" placeholder="Search name, ID, type, category…" />
-        <label>Type
-          <select class="select" id="tB">
-            <option value="">All</option>
-            <option>AGL</option><option>TEQ</option><option>INT</option><option>STR</option><option>PHY</option>
-          </select>
-        </label>
-        <label>Favorites only <input type="checkbox" id="fB"></label>
-      </div>
-      <div class="grid" id="gridB"></div>
+      <div class="note" id="stateNote">Select 2–6 units to begin.</div>
+      <div class="grid" id="leaderGrid" style="margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -2721,7 +2681,8 @@ const UNITS = {{ units|tojson }};
 const $ = (s,root=document)=>root.querySelector(s);
 const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
 
-(function theme(){
+/* theme */
+(function(){
   const root = document.documentElement;
   const saved = localStorage.getItem("dokkan.theme") || "dark";
   root.setAttribute("data-theme", saved);
@@ -2732,261 +2693,294 @@ const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
   });
 })();
 
+/* favorites */
 const isFav = u => { try{ return (JSON.parse(localStorage.getItem("dokkan.favs")||"[]")).includes(u.id); }catch{ return false; } };
 
-/* ---- Leader parsing (same shape as in Team Builder) ---- */
-function parseLeaderSkill(text){
-  const res = {primary:[], secondary:[], ki:null, main_pct:null, add_pct:null, secondary_total:null, has_secondary:false, all_types:false, flat_total_max:null};
-  if(!text) return res;
-  const t = text.replace(/\s+/g,' ').trim();
-  res.all_types = /all types?/i.test(t);
-  const kis = Array.from(t.matchAll(/Ki\s*\+(\d+)/ig)).map(m=>parseInt(m[1],10));
-  res.ki = kis.length ? Math.max(...kis) : null;
-
-  const idx = t.toLowerCase().indexOf("plus an additional");
-  const head = idx>=0 ? t.slice(0,idx) : t; const tail = idx>=0 ? t.slice(idx) : "";
-  const headPcts = Array.from(head.matchAll(/\+(\d+)%/g)).map(m=>parseInt(m[1],10));
-  res.main_pct = headPcts.length ? Math.max(...headPcts) : null;
-  res.primary = Array.from(head.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
-  if(tail){ res.has_secondary = true;
-    res.secondary = Array.from(tail.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
-    const adds = Array.from(tail.matchAll(/\+(\d+)%/g)).map(m=>parseInt(m[1],10));
-    if(adds.length){ res.add_pct = Math.max(...adds); }
-    if(res.main_pct!=null && res.add_pct!=null){ res.secondary_total = res.main_pct + res.add_pct; }
-  }
-  const all = Array.from(t.matchAll(/\+(\d+)%/g)).map(m=>parseInt(m[1],10));
-  if(all.length) res.flat_total_max = Math.max(...all);
-  return res;
+/* ====== Parsing leader skills (ATK/DEF-aware) ====== */
+function extractKiMax(text){
+  const kis = Array.from(text.matchAll(/Ki\s*\+(\d+)/ig)).map(m=>parseInt(m[1],10));
+  return kis.length ? Math.max(...kis) : null;
 }
-function maxBoostForUnit(leaderUnit, unit){
-  const p = parseLeaderSkill(leaderUnit.leader_skill||"");
-  if(!p) return 0;
-  if(p.all_types){
-    return p.main_pct ?? p.flat_total_max ?? 0;
+function extractAtkDefPct(segment){
+  // Heuristic: take the highest % that is within ~35 chars of "ATK" or "DEF" or "ATK & DEF" or "HP, ATK & DEF"
+  const cand = Array.from(segment.matchAll(/\+(\d+)%/g)).map(m=>{
+    const pct = parseInt(m[1],10);
+    const i = m.index;
+    const win = segment.slice(Math.max(0,i-40), i+40).toUpperCase();
+    const hasAtkDef = /ATK\s*&\s*DEF|ATK\s*,?\s*DEF|ATK|DEF/.test(win) || /HP\s*,\s*ATK\s*&\s*DEF/.test(win);
+    return {pct, ok: hasAtkDef};
+  }).filter(x=>x.ok).map(x=>x.pct);
+  return cand.length ? Math.max(...cand) : null;
+}
+function parseLeaderSkill(textRaw){
+  const out = {all_types:false, ki:null, primary:[], secondary:[], main_atkdef:null, add_atkdef:null, secondary_total_atkdef:null};
+  if(!textRaw) return out;
+  const t = textRaw.replace(/Key/g,"Ki").replace(/\s+/g,' ').trim();
+  out.all_types = /all types?/i.test(t);
+  out.ki = extractKiMax(t);
+
+  // Split main vs "plus an additional ..."
+  const idx = t.toLowerCase().indexOf("plus an additional");
+  const head = idx>=0 ? t.slice(0,idx) : t;
+  const tail = idx>=0 ? t.slice(idx) : "";
+
+  out.main_atkdef = extractAtkDefPct(head);
+  out.primary = Array.from(head.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
+
+  if(tail){
+    out.secondary = Array.from(tail.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
+    out.add_atkdef = extractAtkDefPct(tail);
+    if(out.main_atkdef!=null && out.add_atkdef!=null){
+      out.secondary_total_atkdef = out.main_atkdef + out.add_atkdef;
+    }
   }
-  const set = new Set(unit.categories||[]);
-  const hasPrimary = p.primary.some(c=>set.has(c));
-  if(!hasPrimary) return 0;
-  let total = p.main_pct ?? 0;
-  if(p.has_secondary && p.secondary && p.add_pct){
-    const hasSec = p.secondary.some(c=>set.has(c));
-    if(hasSec){ total = Math.max(total, (p.secondary_total || 0)); }
+  return out;
+}
+
+/* Compute unit's ATK/DEF boost under leader */
+function atkdefBoostForUnit(parsedLeader, unit){
+  if(!parsedLeader) return 0;
+  if(parsedLeader.all_types){
+    return parsedLeader.main_atkdef || 0;
   }
-  total = Math.max(total, p.flat_total_max || 0);
+  const cats = new Set(unit.categories||[]);
+  const hitPrimary = (parsedLeader.primary||[]).some(c=>cats.has(c));
+  if(!hitPrimary) return 0;
+  let total = parsedLeader.main_atkdef || 0;
+  if(parsedLeader.secondary && parsedLeader.add_atkdef){
+    const hitSec = parsedLeader.secondary.some(c=>cats.has(c));
+    if(hitSec){
+      total = Math.max(total, parsedLeader.secondary_total_atkdef || total);
+    }
+  }
   return total;
 }
 
-/* --- Pickers --- */
-const qA=$("#qA"), tA=$("#tA"), fA=$("#fA");
-const qB=$("#qB"), tB=$("#tB"), fB=$("#fB");
-const gridA=$("#gridA"), gridB=$("#gridB"), gridCenter=$("#gridCenter");
+/* Pre-parse all leaders once */
+const PARSED = {};
+UNITS.forEach(u=>{
+  PARSED[u.id] = parseLeaderSkill(u.leader_skill || "");
+});
 
-const minBoost=$("#minBoost"), picksInfo=$("#picksInfo"), shareLink=$("#shareLink"), swapAB=$("#swapAB");
-const pinA=$("#pinA"), pinB=$("#pinB");
+/* ====== UI State ====== */
+const qUnits=$("#qUnits"), tUnits=$("#tUnits"), fUnits=$("#fUnits");
+const unitGrid=$("#unitGrid"), selectedTray=$("#selectedTray"), unitHint=$("#unitHint");
+const minBoostSel=$("#minBoost"), includeAllTypes=$("#includeAllTypes");
+const leaderGrid=$("#leaderGrid"), stateNote=$("#stateNote"), shareLink=$("#shareLink");
+const clearSel=$("#clearSel");
+const MAX_SELECTED = 6;
+let selected = []; // array of unit IDs
 
-/* NEW: leader filter controls */
-const leadMain = $("#leadMain");
-const leadAll = $("#leadAll");
-const leadKi = $("#leadKi");
-const leadSort = $("#leadSort");
-const leadCount = $("#leadCount");
+/* Helpers */
+function idToUnit(id){ return UNITS.find(u=>u.id===id) || null; }
+function dedupe(arr){ return Array.from(new Set(arr)); }
+function selectionValid(){ return selected.length>=2; }
 
-let pickA=null, pickB=null;
-
-function pinSelected(slot, unit){
-  const el = slot==="A"? pinA : pinB;
-  if(!unit){ el.style.display="none"; el.innerHTML=""; return; }
-  el.style.display="";
-  el.innerHTML = `<img src="${unit.img || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt="">
-                  <div class="name" title="${unit.name}">${unit.name}</div>`;
-}
-
-function renderPickGrid(targetGrid, q, t, fav, onPick, pickedId){
-  const qv = (q.value||"").toLowerCase().trim();
-  const tv = t.value;
-  const fv = fav.checked;
-  let arr = UNITS.filter(u=>{
-    const okT = tv? (u.type===tv) : true;
-    const okF = fv? isFav(u) : true;
+/* Unit library render + click-to-select */
+function filterUnits(){
+  const q = (qUnits.value||"").toLowerCase().trim();
+  const t = tUnits.value;
+  const fav = fUnits.checked;
+  return UNITS.filter(u=>{
+    const okT = t ? (u.type===t) : true;
+    const okF = fav ? isFav(u) : true;
     let okQ = true;
-    if(qv){
+    if(q){
       const cats = (u.categories||[]).join(" ").toLowerCase();
-      okQ = u.name.toLowerCase().includes(qv) || u.id.includes(qv) || (u.type||"").toLowerCase().includes(qv) || cats.includes(qv);
+      okQ = u.name.toLowerCase().includes(q) || u.id.includes(q) || (u.type||"").toLowerCase().includes(q) || cats.includes(q);
     }
     return okT && okF && okQ;
-  });
-  arr.sort((a,b)=> a.rarity_rank - b.rarity_rank || a.name.localeCompare(b.name));
+  }).sort((a,b)=> a.rarity_rank - b.rarity_rank || a.name.localeCompare(b.name));
+}
 
-  targetGrid.innerHTML = "";
-  arr.slice(0,100).forEach(u=>{
-    const badge = u.rarity==="LR" ? `<span class="pill">LR</span>` :
-                   u.rarity==="UR" ? `<span class="pill">UR</span>` : `<span class="pill">SSR</span>`;
+function leadersForSelection(ids){
+  const min = parseInt(minBoostSel.value,10)||0;
+  const includeAT = includeAllTypes.checked;
+  const cand = UNITS.filter(u=>{
+    if(!(u.leader_skill||"").trim()) return false;
+    if(!includeAT && PARSED[u.id]?.all_types) return false;
+    return true;
+  });
+  const ok = [];
+  for(const L of cand){
+    const parsed = PARSED[L.id];
+    let allOK = true;
+    const boosts = [];
+    for(const id of ids){
+      const u = idToUnit(id);
+      const b = atkdefBoostForUnit(parsed, u);
+      boosts.push(b);
+      if(!(b>=min && b>0)){ allOK=false; break; }
+    }
+    if(allOK){
+      const main = parsed.main_atkdef || 0;
+      const ki = parsed.ki || 0;
+      const minAcross = boosts.length? Math.min(...boosts) : 0;
+      ok.push({L, main, ki, boosts, minAcross});
+    }
+  }
+  ok.sort((a,b)=>
+    b.minAcross - a.minAcross || b.main - a.main || (a.L.rarity_rank - b.L.rarity_rank) || a.L.name.localeCompare(b.L.name)
+  );
+  return ok;
+}
+
+function renderUnitGrid(){
+  const list = filterUnits();
+  const min = parseInt(minBoostSel.value,10)||0;
+  const includeAT = includeAllTypes.checked;
+  const current = new Set(selected);
+
+  // Pre-compute “would break results” dimming
+  let currentLeaders = selectionValid()? leadersForSelection(selected) : null;
+  unitGrid.innerHTML = "";
+  list.slice(0,200).forEach(u=>{
     const el = document.createElement("article");
-    el.className="card" + (pickedId && pickedId===u.id ? " sel":"");
+    el.className = "card";
+    el.dataset.id = u.id;
+    if(current.has(u.id)) el.classList.add("sel");
+
+    // If adding this unit makes leaders empty, dim it
+    if(selectionValid()){
+      const nextSel = current.has(u.id) ? selected.filter(x=>x!==u.id) : dedupe([...selected, u.id]).slice(0,MAX_SELECTED);
+      const bad = nextSel.length>=2 && leadersForSelection(nextSel).length===0;
+      if(!current.has(u.id) && bad) el.classList.add("dim");
+    }
+
+    const rarity = u.rarity || '';
     el.innerHTML = `
       <div class="img"><img src="${u.img || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt=""></div>
       <div class="body">
-        <div class="pills"><span class="pill">${u.type||''}</span>${badge}</div>
+        <div class="pills"><span class="pill">${u.type||''}</span><span class="pill">${rarity}</span></div>
         <div class="ctitle" title="${u.name}">${u.name}</div>
-        <div class="cactions">
-          <button class="button choose" data-id="${u.id}">Choose</button>
-          <a class="button" href="/unit/${u.id}" target="_blank">Details ↗</a>
-        </div>
-      </div>`;
-    targetGrid.appendChild(el);
+      </div>
+      ${current.has(u.id) ? '<div class="badge">Selected</div>' : ''}
+    `;
+    unitGrid.appendChild(el);
   });
-
-  // Click ANYWHERE on the card (except links) to choose; still supports the button.
-  targetGrid.addEventListener("click", e=>{
-    const link = e.target.closest("a"); if(link) return;
-    const chooseBtn = e.target.closest(".choose");
-    const card = e.target.closest(".card");
-    const host = chooseBtn || card;
-    if(!host) return;
-    const id = (chooseBtn?.dataset.id) || card.querySelector(".choose")?.dataset.id;
-    if(!id) return;
-    const unit = UNITS.find(x=>x.id===id);
-    onPick(unit);
-  }, {once:true});
 }
 
-function setPickA(u){
-  pickA = u; pinSelected("A", u); if(u){ qA.value = u.name; }
-  renderPickGrid(gridA,qA,tA,fA,(v)=> setPickA(v), pickA?.id);
-  renderLeaders(); syncShare();
-}
-function setPickB(u){
-  pickB = u; pinSelected("B", u); if(u){ qB.value = u.name; }
-  renderPickGrid(gridB,qB,tB,fB,(v)=> setPickB(v), pickB?.id);
-  renderLeaders(); syncShare();
+function renderSelectedTray(){
+  selectedTray.innerHTML = selected.map(id=>{
+    const u = idToUnit(id);
+    return `<span class="tag" data-id="${u.id}" title="${u.name}">
+      <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${u.name}</span>
+      <span class="x" title="Remove">✕</span>
+    </span>`;
+  }).join("");
 }
 
-/* ---- Leader results ---- */
+/* Leaders grid (clean middle) */
 function renderLeaders(){
-  gridCenter.innerHTML = "";
-  leadCount.textContent = "";
-  if(!(pickA && pickB)){
-    picksInfo.textContent = "Pick Unit A and Unit B to see leaders here.";
+  if(!selectionValid()){
+    stateNote.textContent = selected.length? "Pick at least one more unit." : "Select 2–6 units to begin.";
+    leaderGrid.innerHTML = "";
     return;
   }
-  const min = parseInt(minBoost.value,10)||0;
-  const mainMin = parseInt(leadMain.value,10)||0;
-  const allOnly = leadAll.checked;
-  const kiMin = parseInt(leadKi.value,10)||0;
+  const picks = leadersForSelection(selected);
+  stateNote.textContent = picks.length ? `Showing ${picks.length} leaders` : "No leaders match. Adjust min boost or include All-Types.";
+  leaderGrid.innerHTML = "";
 
-  picksInfo.innerHTML = `
-    <span class="chip">A: ${pickA.name}</span>
-    <span class="chip">B: ${pickB.name}</span>
-    <span class="chip">Min Boost: ${min||'Any'}%</span>
-  `;
+  picks.slice(0,150).forEach(x=>{
+    const u = x.L;
+    const chips = [
+      `<span class="pill">ATK/DEF ${x.main || 0}%</span>`,
+      x.ki ? `<span class="pill">Ki +${x.ki}</span>` : "",
+      PARSED[u.id]?.all_types ? `<span class="pill">All-Types</span>` : ""
+    ].filter(Boolean).join("");
 
-  const candidates = UNITS.filter(u => (u.leader_skill||"").trim());
-  const ok = [];
-  for(const L of candidates){
-    const p = parseLeaderSkill(L.leader_skill||"");
-    if(mainMin && (p.main_pct||0) < mainMin) continue;
-    if(allOnly && !p.all_types) continue;
-    if(kiMin && (p.ki||0) < kiMin) continue;
+    // build team param (best effort)
+    const teamParam = selected.filter(id=>id!==u.id).join(",");
 
-    const aBoost = maxBoostForUnit(L, pickA);
-    const bBoost = maxBoostForUnit(L, pickB);
-    if(aBoost>=min && bBoost>=min && aBoost>0 && bBoost>0){
-      ok.push({L, p, aBoost, bBoost});
-    }
-  }
-
-  // sorting
-  if(leadSort.value==="main"){
-    ok.sort((a,b)=> (b.p.main_pct||0) - (a.p.main_pct||0)
-      || a.L.rarity_rank - b.L.rarity_rank
-      || a.L.name.localeCompare(b.L.name));
-  }else if(leadSort.value==="name"){
-    ok.sort((a,b)=> a.L.name.localeCompare(b.L.name));
-  }else if(leadSort.value==="rarity"){
-    ok.sort((a,b)=> a.L.rarity_rank - b.L.rarity_rank || a.L.name.localeCompare(b.L.name));
-  }else{
-    // coverage→total boost
-    ok.sort((a,b)=> (b.aBoost+b.bBoost)-(a.aBoost+a.bBoost)
-      || a.L.rarity_rank - b.L.rarity_rank
-      || a.L.name.localeCompare(b.L.name));
-  }
-
-  leadCount.textContent = `${ok.length} leader${ok.length===1?"":"s"} found`;
-
-  if(!ok.length){
-    gridCenter.innerHTML = `<div class="note">No leaders found with current settings.</div>`;
-    return;
-  }
-
-  ok.slice(0,160).forEach(x=>{
-    const u = x.L, p = x.p;
-    const allTag = p.all_types ? `<span class="pill">All Types</span>` : "";
-    const kiTag = p.ki!=null ? `<span class="pill">Ki +${p.ki}</span>` : "";
-    const mainTag = `<span class="pill">Main ${p.main_pct??"?"}%</span>`;
     const el = document.createElement("article");
     el.className="card";
     el.innerHTML = `
       <div class="img"><img src="${u.img || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt=""></div>
       <div class="body">
-        <div class="pills"><span class="pill">${u.type||''}</span><span class="pill">${u.rarity}</span>${mainTag}${kiTag}${allTag}</div>
+        <div class="pills">${chips}</div>
         <div class="ctitle" title="${u.name}">${u.name}</div>
-        <div class="chips" style="margin-top:6px">
-          <span class="chip">A: ${x.aBoost}%</span>
-          <span class="chip">B: ${x.bBoost}%</span>
-        </div>
+        <div class="chips" style="margin-top:6px"><span class="chip">Min across picks: ${x.minAcross}%</span><span class="chip">${selected.length} / ${selected.length} covered</span></div>
         <div class="cactions" style="margin-top:6px">
           <a class="button" href="/unit/${u.id}" target="_blank">Details ↗</a>
-          <a class="button" href="/team?leader=${u.id}&min=${min}" target="_blank">Use as Leader ↗</a>
+          <a class="button" href="/team?leader=${u.id}&min=${parseInt(minBoostSel.value,10)||0}${teamParam?`&team=${teamParam}`:''}" target="_blank">Use as Leader ↗</a>
         </div>
       </div>`;
-    gridCenter.appendChild(el);
+    leaderGrid.appendChild(el);
   });
-
-  syncShare();
 }
 
-/* wiring */
-[qA,tA,fA].forEach(el=> el.addEventListener("input", ()=> renderPickGrid(gridA,qA,tA,fA,(u)=> setPickA(u), pickA?.id )));
-[qB,tB,fB].forEach(el=> el.addEventListener("input", ()=> renderPickGrid(gridB,qB,tB,fB,(u)=> setPickB(u), pickB?.id )));
-[minBoost, leadMain, leadAll, leadKi, leadSort].forEach(el=> el.addEventListener("change", ()=>{ renderLeaders(); syncShare(); }));
-shareLink.addEventListener("click", ()=>{ syncShare(); navigator.clipboard?.writeText(location.href); shareLink.textContent="Link copied!"; setTimeout(()=>shareLink.textContent="Copy share link", 1200); });
-swapAB.addEventListener("click", ()=>{ const A = pickA, B = pickB; if(B) setPickA(B); if(A) setPickB(A); });
-
-/* initial render & restore */
-renderPickGrid(gridA,qA,tA,fA,(u)=> setPickA(u), null);
-renderPickGrid(gridB,qB,tB,fB,(u)=> setPickB(u), null);
-
-(function restore(){
-  const p = new URLSearchParams(location.search);
-  const A = p.get("A"), B = p.get("B");
-  if(A){ pickA = UNITS.find(x=>x.id===A)||null; }
-  if(B){ pickB = UNITS.find(x=>x.id===B)||null; }
-
-  const min = parseInt(p.get("min")||"0",10)||0; if(min){ minBoost.value = String(min); }
-  const main = parseInt(p.get("main")||"0",10)||0; if(main){ leadMain.value = String(main); }
-  const all = p.get("all")==="1"; leadAll.checked = all;
-  const kim = parseInt(p.get("ki")||"0",10)||0; if(kim){ leadKi.value = String(kim); }
-  const sort = p.get("sort")||"coverage"; leadSort.value = sort;
-
-  if(pickA){ pinSelected("A", pickA); qA.value = pickA.name; }
-  if(pickB){ pinSelected("B", pickB); qB.value = pickB.name; }
-  renderPickGrid(gridA,qA,tA,fA,(u)=> setPickA(u), pickA?.id);
-  renderPickGrid(gridB,qB,tB,fB,(u)=> setPickB(u), pickB?.id);
+/* Event delegation — stable, no once:true */
+unitGrid.addEventListener("click", (e)=>{
+  const card = e.target.closest(".card");
+  if(!card) return;
+  const id = card.dataset.id;
+  if(selected.includes(id)){
+    selected = selected.filter(x=>x!==id);
+  }else{
+    if(selected.length>=MAX_SELECTED){ return; }
+    selected = dedupe([...selected, id]);
+  }
+  renderSelectedTray();
+  renderUnitGrid();
   renderLeaders();
-})();
+  syncShare();
+});
+
+selectedTray.addEventListener("click", (e)=>{
+  const t = e.target.closest(".tag .x");
+  if(!t) return;
+  const id = t.parentElement.dataset.id;
+  selected = selected.filter(x=>x!==id);
+  renderSelectedTray();
+  renderUnitGrid();
+  renderLeaders();
+  syncShare();
+});
+
+/* filters */
+[qUnits, tUnits, fUnits].forEach(el=> el.addEventListener("input", ()=>{ renderUnitGrid(); }));
+[minBoostSel, includeAllTypes].forEach(el=> el.addEventListener("change", ()=>{
+  renderUnitGrid();
+  renderLeaders();
+  syncShare();
+}));
+clearSel.addEventListener("click", ()=>{
+  selected = [];
+  renderSelectedTray();
+  renderUnitGrid();
+  renderLeaders();
+  syncShare();
+});
 
 /* share */
 function syncShare(){
   const p = new URLSearchParams();
-  if(pickA) p.set("A", pickA.id);
-  if(pickB) p.set("B", pickB.id);
-  const min = parseInt(minBoost.value,10)||0; if(min) p.set("min", String(min));
-  const main = parseInt(leadMain.value,10)||0; if(main) p.set("main", String(main));
-  if(leadAll.checked) p.set("all","1");
-  const kim = parseInt(leadKi.value,10)||0; if(kim) p.set("ki", String(kim));
-  if(leadSort.value!=="coverage") p.set("sort", leadSort.value);
+  if(selected.length) p.set("sel", selected.join(","));
+  const min = parseInt(minBoostSel.value,10)||0;
+  if(min) p.set("min", String(min));
+  if(includeAllTypes.checked) p.set("alltypes","1");
   history.replaceState(null, "", "?"+p.toString());
 }
+$("#shareLink").addEventListener("click", ()=>{
+  syncShare();
+  navigator.clipboard?.writeText(location.href);
+  shareLink.textContent="Link copied!";
+  setTimeout(()=> shareLink.textContent="Copy share link", 1200);
+});
+
+/* init + restore */
+(function restore(){
+  const p = new URLSearchParams(location.search);
+  const sel = (p.get("sel")||"").split(",").map(s=>s.trim()).filter(Boolean);
+  const min = parseInt(p.get("min")||"170",10)||170;
+  const all = p.get("alltypes")==="1";
+  selected = sel.filter(idToUnit).slice(0,MAX_SELECTED);
+  minBoostSel.value = String(min);
+  includeAllTypes.checked = !!all;
+})();
+renderSelectedTray();
+renderUnitGrid();
+renderLeaders();
 </script>
 </body>
 </html>
