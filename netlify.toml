@@ -1,0 +1,13 @@
+[build]
+  command = "python3 -m pip install -r requirements.txt && python3 build_static.py"
+  publish = "dist"
+
+[build.environment]
+  PYTHON_VERSION = "3.9"
+  PYTHONUNBUFFERED = "1"
+
+# (optional) If you ever add client routes, keep SPA fallback commented:
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200

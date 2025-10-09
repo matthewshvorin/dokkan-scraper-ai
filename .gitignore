@@ -1,28 +1,81 @@
-# Byte-compiled / cache
+# -------------------------------------
+# Python bytecode / caches
+# -------------------------------------
 __pycache__/
 *.py[cod]
+*.pyc
 *.pyo
 *.pyd
-*.pyc
 
-# Virtual env
+# Compiled extensions (if any)
+*.so
+*.dylib
+*.dll
+
+# -------------------------------------
+# Virtual environments
+# -------------------------------------
 .venv/
 venv/
 env/
 
-# OS / Editor
+# -------------------------------------
+# OS / Editor junk
+# -------------------------------------
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Python tooling
+# -------------------------------------
+# Python tooling / build outputs
+# -------------------------------------
 *.egg-info/
-dist/
+.eggs/
 build/
+dist/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Testing / type checking / lint caches
+.pytest_cache/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
 
 # Logs
 *.log
 
-# Jupyter
+# Notebooks
 .ipynb_checkpoints/
+
+# -------------------------------------
+# Netlify
+# Ignore local CLI state, but keep state.json if you use it to link a site
+# -------------------------------------
+.netlify/*
+!.netlify/state.json
+
+# -------------------------------------
+# Node (in case you add local CLI or tooling later)
+# -------------------------------------
+node_modules/
+.npm/
+npm-debug.log*
+yarn-error.log*
+
+# -------------------------------------
+# Environment & secrets
+# -------------------------------------
+.env
+.env.*
+*.env
