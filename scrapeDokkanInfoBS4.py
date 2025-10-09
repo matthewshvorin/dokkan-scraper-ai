@@ -97,14 +97,17 @@ REQUEST_HEADERS = {"User-Agent": USER_AGENT, "Referer": BASE}
 TIMEOUT = 60_000
 SLEEP_BETWEEN_CARDS = 0
 MAX_PAGES = 200
-MAX_NEW_CARDS = 54     # limit how many BASE families to save if COUNT_MODE="bases"; if "total", counts forms incl. transformations
+MAX_NEW_CARDS = 200     # limit how many BASE families to save if COUNT_MODE="bases"; if "total", counts forms incl. transformations
 COUNT_MODE = "bases"    # "bases" or "total"
 
 MAX_FAMILY_SIZE = 40    # safety cap for BFS across transformations/variations
 
+# NEW: Skip already-scraped families entirely (uses CARDS_INDEX.json and on-disk folders)
+SKIP_EXISTING = True
+
 # ---- Seed test ----
 SEED_URLS: List[str] = [
- #"https://dokkaninfo.com/cards/1014761",
+ #"https://dokkaninfo.com/cards/1010441",
 ]
 
 HEADERS = [
@@ -200,6 +203,39 @@ def index_add_variant(index: Dict[str, dict],
         node["variants"].append(variant_key)
 
     save_index(index)
+
+# ------------ NEW: existing detection / skipping -------------
+EXISTING_ID_FROM_FOLDER_RE = re.compile(r"-\s*(\d+)$")
+
+def _parse_unit_id_from_folder_name(name: str) -> Optional[str]:
+    m = EXISTING_ID_FROM_FOLDER_RE.search(name)
+    return m.group(1) if m else None
+
+def collect_existing_unit_ids(outroot: Path, index: Dict[str, dict]) -> Set[str]:
+    existing: Set[str] = set()
+    # From index (authoritative if present)
+    existing.update([k for k in (index or {}).keys()])
+    # From disk folders
+    if outroot.exists():
+        for child in outroot.iterdir():
+            if not child.is_dir():
+                continue
+            # Try METADATA.json first
+            meta = child / "METADATA.json"
+            cid: Optional[str] = None
+            if meta.exists():
+                try:
+                    data = json.loads(meta.read_text(encoding="utf-8"))
+                    cid_val = data.get("unit_id") or data.get("form_id")
+                    if cid_val:
+                        cid = str(cid_val)
+                except Exception:
+                    cid = None
+            if not cid:
+                cid = _parse_unit_id_from_folder_name(child.name)
+            if cid:
+                existing.add(cid)
+    return existing
 
 # ------------ Helpers -------------
 def sanitize_filename(name: str) -> str:
@@ -365,6 +401,39 @@ def _dedup_sentences(text: str) -> str:
             seen.add(p)
             out.append(p)
     return " ".join(out)
+
+def _text_before_after_step_scope(soup: BeautifulSoup) -> Tuple[str, str]:
+    """
+    Returns (base_text, eza_text):
+      - base_text: concatenated visible-ish text BEFORE the first EZA step multiselect
+      - eza_text:  concatenated visible-ish text AFTER  the first EZA step multiselect
+    If no multiselect is found, base_text = whole page, eza_text = "".
+    """
+    step_node = soup.select_one("div.multiselect")
+    # choose a traversal root that exists
+    root = soup.body if soup.body else soup
+
+    # If no EZA step UI is present, treat the entire page as base scope
+    if not step_node:
+        return (root.get_text("\n", strip=True), "")
+
+    before_parts: List[str] = []
+    after_parts: List[str] = []
+    in_after = False
+
+    # Walk the document in order and split text around the first multiselect node
+    for node in root.descendants:
+        if node is step_node:
+            in_after = True
+            continue
+        if isinstance(node, NavigableString):
+            txt = str(node)
+            if txt and txt.strip():
+                (after_parts if in_after else before_parts).append(txt)
+
+    base_text = "\n".join(before_parts)
+    eza_text = "\n".join(after_parts)
+    return base_text, eza_text
 
 def _clean_leader(block: List[str]) -> Optional[str]:
     if not block:
@@ -533,6 +602,7 @@ def render_passive_effect_with_markers(lines: List[Dict[str, object]]) -> str:
     return re.sub(r"\s*;\s*", "; ", "; ".join(rendered)).strip()
 
 # ---------- Passive fallback ----------
+
 def _group_passive_lines_fallback(lines: List[str]) -> str:
     if not lines:
         return ""
@@ -581,6 +651,7 @@ def _group_passive_lines_fallback(lines: List[str]) -> str:
     return effect
 
 # ------------ Active/Activation/Categories/Stats/Release -------------
+
 def _clean_active(block: List[str]) -> Tuple[Optional[str], Optional[str]]:
     if not block:
         return None, None
@@ -773,6 +844,7 @@ def _clean_categories_python(cats: List[str]) -> List[str]:
     return out
 
 # ------------ Rarity, Type, Obtain Type -------------
+
 def detect_rarity_from_dom(soup: BeautifulSoup, image_urls_fallback: List[str]) -> Optional[str]:
     rarity_map = {"lr": "LR", "ur": "UR", "ssr": "SSR", "sr": "SR", "r": "R", "n": "N"}
     node = soup.select_one("div.card-icon-item.card-icon-item-rarity.card-info-above-thumb img[src]")
@@ -811,6 +883,7 @@ def parse_obtain_type(soup: BeautifulSoup) -> Optional[str]:
     return None
 
 # ------------ Passive extras (transform/exchange) -------------
+
 def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, Optional[str]], Dict[str, Optional[str]]]:
     """
     Preserve full 'Reversible Exchange' clause for the exchange condition.
@@ -849,6 +922,7 @@ def extract_transform_and_exchange(passive_effect: str) -> Tuple[str, Dict[str, 
     return cleaned_effect, transformation, reversible_exchange
 
 # ------------ Domains / Standby / Finish -------------
+
 def detect_type_suffix_from_classes(cls_list: List[str]) -> Optional[str]:
     t = None
     for cls in cls_list or []:
@@ -937,6 +1011,27 @@ def parse_finish_skills(soup: BeautifulSoup) -> List[Dict[str, Optional[str]]]:
     return parse_skill_blocks(soup, header_label="Finish Skill", cond_label="Finish Skill Condition(s)")
 
 # ------------ EZA detection -------------
+
+def discover_eza_steps_on_page_soup(soup: Optional[BeautifulSoup], rarity_hint: Optional[str]) -> Tuple[List[int], Optional[int]]:
+    """
+    UI-driven EZA detection on the current page:
+    - EZA considered present if either dropdown exists or a PRE-EZA / EZA toggle is visible.
+    - Steps are derived from the dropdown (with existing fallback).
+    - No neighbor-ID probing.
+    """
+    if not soup:
+        return [], None
+    has_toggle = bool(
+        soup.find("b", string=lambda s: isinstance(s, str) and s.strip().upper() == "PRE-EZA") and
+        soup.find("b", string=lambda s: isinstance(s, str) and s.strip().upper() == "EZA")
+    )
+    if not (has_eza_dropdown(soup) or has_toggle):
+        return [], None
+    steps = discover_eza_steps_with_fallback(soup, rarity_hint=rarity_hint)
+    max_step = max(steps) if steps else None
+    return steps, max_step
+
+
 def discover_eza_steps_from_dropdown(soup: BeautifulSoup) -> List[int]:
     steps: List[int] = []
     for span in soup.select("div.multiselect ul.multiselect__content li.multiselect__element span.multiselect__option span"):
@@ -976,6 +1071,7 @@ def discover_eza_steps_with_fallback(soup: BeautifulSoup, rarity_hint: Optional[
 
 # ------------ Assets downloader -------------
 EXT_FILE_PATTERN = re.compile(r"\.(png|jpg|jpeg|gif|webp)$", re.IGNORECASE)
+
 def _url_to_asset_rel(url: str) -> Optional[Path]:
     try:
         parsed = urlparse(url)
@@ -1155,6 +1251,7 @@ def merge_assets_index(dst: Dict[str, List[dict]], src: Dict[str, List[dict]]) -
     return dst
 
 # ------------ Scraping core (builds a single variant dict) -------------
+
 def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, object]) -> Tuple[Dict[str, object], Dict[str, object]]:
     """
     Returns (unit_level_fields, variant_record)
@@ -1162,7 +1259,13 @@ def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, o
     variant_record is a single item for variants[]
     """
     soup = BeautifulSoup(page_html, "lxml")
-    page_text = soup.get_text("\n", strip=True)
+
+    # NEW: scope text to the correct variant side (base vs EZA)
+    req_eza_flag = bool(variant.get("eza"))
+    base_text_scope, eza_text_scope = _text_before_after_step_scope(soup)
+    page_text = (eza_text_scope if req_eza_flag else base_text_scope) or soup.get_text("\n", strip=True)
+
+    # Parse headers from the scoped text only (prevents EZA blocks overriding base)
     sections = _split_sections(page_text)
 
     leader_skill = _clean_leader(sections.get("Leader Skill") or [])
@@ -1297,6 +1400,7 @@ def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, o
     return unit_fields, variant_record
 
 # ------------ Single-folder write/merge -------------
+
 def merge_variant_into_unit_json(folder: Path, unit_fields: Dict[str, object], variant_record: Dict[str, object]) -> Dict[str, object]:
     meta_path = folder / "METADATA.json"
     if meta_path.exists():
@@ -1380,12 +1484,13 @@ def ensure_unit_folder(unit_fields: Dict[str, object]) -> Path:
             "Notes:\n"
             "- Personal/educational use.\n"
             "- Respect the site's Terms and original owners' rights.\n"
-            "- If you share output, credit: “Data/images via dokkaninfo.com”.\n",
+            '- If you share output, credit: “Data/images via dokkaninfo.com”.\n',
             encoding="utf-8",
         )
     return card_dir
 
 # ------------ Main -------------
+
 def main():
     log_path = setup_logging()
     logging.info("Starting DokkanInfo scraper (headed) — EZA via dropdown + single-folder variants + transformations")
@@ -1393,6 +1498,9 @@ def main():
     ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
 
     index = load_index()
+    existing_ids = collect_existing_unit_ids(OUTROOT, index)
+    if existing_ids:
+        logging.info("Existing unit families detected: %d", len(existing_ids))
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
@@ -1420,16 +1528,38 @@ def main():
                 logging.warning("Navigation error for %s -> %s", url, e)
                 return False, None, None
 
+        # NEW: make sure the base scrape actually shows PRE-EZA DOM
+        def ensure_pre_eza_mode():
+            """
+            Some pages render in EZA mode by default regardless of ?eza=false.
+            If the PRE-EZA/EZA toggle exists, click PRE-EZA and let DOM settle.
+            """
+            try:
+                if page.locator("div.multiselect").count() > 0 and page.locator("b", has_text="PRE-EZA").count() > 0:
+                    page.locator("b", has_text="PRE-EZA").first.click()
+                    page.wait_for_timeout(500)
+            except Exception as e:
+                logging.debug("ensure_pre_eza_mode() no-op: %s", e)
+
         def scrape_one_variant(url: str,
                                rarity_hint: Optional[str] = None,
                                force_folder: Optional[Path] = None,
                                variant_key_override: Optional[str] = None,
-                               family_base_id: Optional[str] = None) -> Tuple[Optional[str], Optional[str], Optional[Path], bool, Optional[str]]:
+                               family_base_id: Optional[str] = None,
+                               eza_max_step_hint: Optional[int] = None) -> Tuple[Optional[str], Optional[str], Optional[Path], bool, Optional[str]]:
             """Scrape a single page into a variant record and merge (optionally into an existing folder)."""
             req_eza_flag, req_step_i = parse_variant_from_url(url)
             ok, html, final_url = goto_ok(url)
             if not ok or not html:
                 return None, None, None, False, None
+
+            # NEW: If this is the base variant, force UI into PRE-EZA and re-capture HTML
+            if not req_eza_flag:
+                ensure_pre_eza_mode()
+                try:
+                    html = page.content()
+                except Exception:
+                    pass
 
             unit_fields, variant_record = scrape_variant_from_html(html, final_url or url, variant={
                 "key": build_variant_key(req_eza_flag, req_step_i),
@@ -1457,11 +1587,11 @@ def main():
                 step=variant_record.get("step"),
             )
 
-            # label Super EZA if applicable
-            rarity_use = variant_record["rarity"]
-            sstep = super_eza_step_for_rarity(rarity_use)
-            if variant_record.get("eza") and variant_record.get("step") is not None and sstep is not None:
-                variant_record["is_super_eza"] = (variant_record["step"] == sstep)
+            # label Super EZA if applicable (UI-driven)
+            if variant_record.get("eza") and variant_record.get("step") is not None and eza_max_step_hint is not None:
+                # Super EZA if the UI exposes a final step of 8 (UR) or 4 (LR);
+                # mark only that final step as the Super step
+                variant_record["is_super_eza"] = (variant_record["step"] == eza_max_step_hint and eza_max_step_hint in (4, 8))
 
             # folder + merge
             folder = force_folder or ensure_unit_folder(unit_fields)
@@ -1625,21 +1755,43 @@ def main():
                 logging.info("Skipping %s; already processed in another family.", base_id)
                 return None, set(), None
 
+            # NEW: hard skip if we've already scraped this family on disk or index
+            if SKIP_EXISTING and base_id in existing_ids:
+                logging.info("Skipping %s; already exists in index/disk.", base_id)
+                global_processed.add(base_id)
+                return None, set(), None
+
             # 1) base first
             base_url = make_variant_url(base_clean_url, eza=False, step=None)
             cid, rarity, folder, ok, html_base = scrape_one_variant(base_url, rarity_hint=None, family_base_id=None)
             if not cid or not folder:
                 return None, set(), None
 
+            # Track as existing now to avoid repeats later in the crawl
+            existing_ids.add(cid)
+
             # Mark base as processed
             processed_ids: Set[str] = {cid}
 
-            # 2) EZA steps for BASE (canonicalized) — write into same folder
-            resolved_base, steps = resolve_canonical_and_discover_steps(base_clean_url, rarity_hint=rarity)
+            # 2) EZA steps (UI-driven) — write into same folder
+            soup_base = BeautifulSoup(html_base, "lxml") if html_base else None
+            steps, eza_max_step = discover_eza_steps_on_page_soup(soup_base, rarity_hint=rarity)
+
+            # If the PRE-EZA/EZA toggle exists but steps weren't parsed, open the same card with eza=true to read the dropdown
+            if (not steps) and soup_base:
+                has_toggle = bool(
+                    soup_base.find("b", string=lambda s: isinstance(s, str) and s.strip().upper() == "PRE-EZA") and
+                    soup_base.find("b", string=lambda s: isinstance(s, str) and s.strip().upper() == "EZA")
+                )
+                if has_toggle:
+                    ok_eza, html_eza, _ = goto_ok(make_variant_url(base_clean_url, eza=True, step=1))
+                    if ok_eza and html_eza:
+                        steps, eza_max_step = discover_eza_steps_on_page_soup(BeautifulSoup(html_eza, "lxml"), rarity_hint=rarity)
+
             for st in steps:
-                step_url = make_variant_url(resolved_base, eza=True, step=st)
+                step_url = make_variant_url(base_clean_url, eza=True, step=st)
                 scrape_one_variant(step_url, rarity_hint=rarity, force_folder=folder,
-                                   variant_key_override=f"eza_step_{st}", family_base_id=cid)
+                                   variant_key_override=f"eza_step_{st}", family_base_id=cid, eza_max_step_hint=eza_max_step)
                 time.sleep(SLEEP_BETWEEN_CARDS)
 
             # 3) Family discovery (transformations/variations)
@@ -1664,15 +1816,29 @@ def main():
                 if rcid:
                     processed_ids.add(rcid)
 
-                # EZA steps for related
-                r_resolved, r_steps = resolve_canonical_and_discover_steps(related_base, rarity_hint=rrarity)
+                # EZA steps for related (UI-driven)
+                soup_rel = BeautifulSoup(rhtml, "lxml") if rhtml else None
+                r_steps, r_eza_max_step = discover_eza_steps_on_page_soup(soup_rel, rarity_hint=rrarity)
+
+                # If toggle exists but no steps parsed, open related page with eza=true
+                if (not r_steps) and soup_rel:
+                    has_toggle_rel = bool(
+                        soup_rel.find("b", string=lambda s: isinstance(s, str) and s.strip().upper() == "PRE-EZA") and
+                        soup_rel.find("b", string=lambda s: isinstance(s, str) and s.strip().upper() == "EZA")
+                    )
+                    if has_toggle_rel:
+                        ok_reza, html_reza, _ = goto_ok(make_variant_url(related_base, eza=True, step=1))
+                        if ok_reza and html_reza:
+                            r_steps, r_eza_max_step = discover_eza_steps_on_page_soup(BeautifulSoup(html_reza, "lxml"), rarity_hint=rrarity)
+
                 for st in r_steps:
                     scrape_one_variant(
-                        make_variant_url(r_resolved, eza=True, step=st),
+                        make_variant_url(related_base, eza=True, step=st),
                         rarity_hint=rrarity,
                         force_folder=folder,
                         variant_key_override=build_form_variant_key(rid, eza=True, step=st),
-                        family_base_id=cid
+                        family_base_id=cid,
+                        eza_max_step_hint=r_eza_max_step
                     )
                     time.sleep(SLEEP_BETWEEN_CARDS)
 
@@ -1687,6 +1853,10 @@ def main():
             logging.info("Seed mode: %d URL(s) — base → dropdown steps; includes transformations.", len(SEED_URLS))
             for base_any in SEED_URLS:
                 base_clean = normalize_to_base_url(base_any)
+                base_id_for_seed = extract_character_id_from_url(base_clean) or ""
+                if SKIP_EXISTING and base_id_for_seed in existing_ids:
+                    logging.info("Seed skip %s; already exists.", base_id_for_seed)
+                    continue
                 base_cid, family_ids, rarity = scrape_all_variants_for_base(base_clean, processed_global)
             browser.close()
             logging.info("Run completed. Log file: %s", log_path)
@@ -1740,8 +1910,10 @@ def main():
             for i, card_url in enumerate(links, start=1):
                 base_clean = normalize_to_base_url(card_url)
                 base_id = extract_character_id_from_url(base_clean) or ""
-                if base_id in processed_global:
-                    logging.info("Skipping %s from index; already processed in a previous family.", base_id)
+
+                # Global skip for existing
+                if SKIP_EXISTING and base_id in existing_ids:
+                    logging.info("Index skip %s; already exists in index/disk.", base_id)
                     continue
 
                 base_cid, processed_ids, rarity = scrape_all_variants_for_base(base_clean, processed_global)
@@ -1749,6 +1921,7 @@ def main():
                 # Update counters
                 if base_cid:
                     total_saved += 1
+                    existing_ids.add(base_cid)
                     if COUNT_MODE == "bases":
                         bases_saved += 1
 
