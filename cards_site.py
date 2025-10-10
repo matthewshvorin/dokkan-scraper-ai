@@ -627,7 +627,6 @@ INDEX_HTML = r"""<!doctype html>
 :root{
   --bg:#0b0f14; --card:#101720; --ink:#e9f2ff; --muted:#9fb0c7; --accent:#5bd1ff; --accent-2:#9bffdd;
   --chip:#182330; --chip-border:#223144; --cardw: 360px;
-  --agl:#3b82f6; --teq:#10b981; --int:#8b5cf6; --str:#ef4444; --phy:#f59e0b;
 }
 :root[data-theme="light"]{
   --bg:#f7faff; --card:#ffffff; --ink:#0b1623; --muted:#3e526d; --accent:#0d7bd0; --accent-2:#0ab39b;
@@ -678,6 +677,20 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
 .btn:hover{ border-color:#38506f }
 :root[data-theme="light"] .btn{ background:#fff; color:#0b1623; border-color:#c7d5ea }
 
+/* segmentation control */
+.seg{display:inline-flex; gap:0; border:1px solid #223246; border-radius:999px; overflow:hidden}
+:root[data-theme="light"] .seg{ border-color:#c7d5ea }
+.seg .segbtn{padding:6px 10px; background:transparent; color:var(--ink); border:0; cursor:pointer; font-size:12px}
+.seg .segbtn.active{ background:#0d1724 }
+:root[data-theme="light"] .seg .segbtn.active{ background:#eef3fb }
+
+/* active filter bar */
+.afbar{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 0}
+.rchip{display:inline-flex; align-items:center; gap:6px; background:#0b1118; border:1px solid #1f2b3b; color:#d2e4ff; font-size:12px; padding:5px 8px; border-radius:999px}
+.rchip b{opacity:.8; font-weight:600}
+.rchip .x{cursor:pointer; opacity:.85}
+:root[data-theme="light"] .rchip{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+
 /* grid cards */
 .grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(var(--cardw), 1fr)); gap:14px}
 .card{
@@ -690,7 +703,7 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
 .thumb-wrap a{display:block}
 .thumb-wrap img{ width:100%; height:auto; display:block; filter:drop-shadow(0 12px 22px rgba(0,0,0,.55)) }
 .type-ring{ position:absolute; inset:auto 8px 8px auto; width:14px; height:14px; border-radius:50%; border:2px solid currentColor; opacity:.9 }
-.type-agl{ color:var(--agl) } .type-teq{ color:var(--teq) } .type-int{ color:var(--int) } .type-str{ color:var(--str) } .type-phy{ color:var(--phy) }
+.type-agl{ color:var(--agl,#3b82f6) } .type-teq{ color:var(--teq,#10b981) } .type-int{ color:var(--int,#8b5cf6) } .type-str{ color:var(--str,#ef4444) } .type-phy{ color:var(--phy,#f59e0b) }
 
 /* favorite star */
 .fav{ position:absolute; top:8px; right:8px; z-index:2; width:30px; height:30px; border-radius:50%; border:1px solid #2a3b54; background:#0c121a; display:flex;align-items:center;justify-content:center; cursor:pointer; transition:.15s }
@@ -775,9 +788,12 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
             <option value="seza">S-EZA</option>
           </select>
         </label>
-        <label class="help">Tip: Click any art to open details</label>
+        <label class="help">Tip: Shift-click a chip to select <em>only</em> that item.</label>
       </div>
+      <!-- Active filter bar -->
+      <div class="afbar" id="activeFilterBar"></div>
     </div>
+
     <div class="panel">
       <div class="row">
         <span class="label">Mechanics:</span>
@@ -792,24 +808,40 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
           <span class="chip" data-v="Revival">Revival</span>
         </div>
       </div>
-      <div class="row" style="margin-top:8px">
+
+      <div class="row" style="margin-top:8px; align-items:center">
         <span class="facet-title">Categories:</span>
+        <div class="seg" id="catMode">
+          <button class="segbtn active" data-mode="any" title="Match ANY selected category">Any</button>
+          <button class="segbtn" data-mode="all" title="Match ALL selected categories">All</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px">
         <div class="chips" id="facetCats">
           {% for name, cnt in top_cats %}
             <span class="chip" data-cat="{{ name|e }}" title="{{ cnt }} units">{{ name }}</span>
           {% endfor %}
         </div>
       </div>
-      <div class="row" style="margin-top:8px">
+
+      <div class="row" style="margin-top:12px; align-items:center">
         <span class="facet-title">Links:</span>
+        <div class="seg" id="linkMode">
+          <button class="segbtn active" data-mode="any" title="Match ANY selected link">Any</button>
+          <button class="segbtn" data-mode="all" title="Match ALL selected links">All</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px">
         <div class="chips" id="facetLinks">
           {% for name, cnt in top_links %}
             <span class="chip" data-link="{{ name|e }}" title="{{ cnt }} units">{{ name }}</span>
           {% endfor %}
         </div>
       </div>
+
       <div class="row" style="margin-top:8px">
         <button class="btn" id="favFilter">★ Favorites</button>
+        <button class="btn" id="shareFilters">Share filters</button>
         <button class="btn" id="clearFilters">Reset Filters</button>
       </div>
     </div>
@@ -878,7 +910,7 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
 const $ = (s,root=document)=>root.querySelector(s);
 const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
 
-// theme
+/* theme */
 (function(){
   const root = document.documentElement;
   const saved = localStorage.getItem("dokkan.theme") || "dark";
@@ -890,7 +922,7 @@ const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
   });
 })();
 
-// favorites
+/* favorites */
 const FKEY = "dokkan.favs";
 function getFavs(){ try{ return JSON.parse(localStorage.getItem(FKEY)||"[]"); }catch{ return []; } }
 function setFavs(arr){ localStorage.setItem(FKEY, JSON.stringify(Array.from(new Set(arr)))); }
@@ -919,16 +951,18 @@ const fRarity = $("#f-rarity");
 const mech = $("#mech");
 const favFilter = $("#favFilter");
 const clearFilters = $("#clearFilters");
+const shareFilters = $("#shareFilters");
 const artSel = $("#art");
 const facetCats = $("#facetCats");
 const facetLinks = $("#facetLinks");
+const activeFilterBar = $("#activeFilterBar");
 
 // keyboard focus
 document.addEventListener('keydown', (e)=>{
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); q.focus(); q.select(); }
 });
 
-// art mode (persisted; now live-swaps thumbnails)
+// art mode (persist & live swap)
 (function(){
   const saved = localStorage.getItem("dokkan.artmode") || "auto";
   artSel.value = saved;
@@ -951,55 +985,141 @@ document.addEventListener('keydown', (e)=>{
   });
 })();
 
+// facet state
 let mechActive = new Set();
+let catActive = new Set();
+let linkActive = new Set();
+let catMode = localStorage.getItem("dokkan.catmode") || "any";   // "any" | "all"
+let linkMode = localStorage.getItem("dokkan.linkmode") || "any"; // "any" | "all"
+
+// set initial seg buttons
+function initSeg(id, mode){
+  const box = $(id);
+  $$(".segbtn", box).forEach(b=>{
+    b.classList.toggle("active", b.dataset.mode===mode);
+  });
+}
+initSeg("#catMode", catMode);
+initSeg("#linkMode", linkMode);
+
+// facet chip click handlers (toggle; shift-click = only this)
+function handleFacetClick(container, set, key){
+  container.addEventListener("click", (e)=>{
+    const chip = e.target.closest(".chip"); if(!chip) return;
+    const v = (chip.dataset[key]||"").toLowerCase();
+    if(e.shiftKey){
+      // exclusive: select only this one
+      set.clear();
+      $$(".chip", container).forEach(c=>c.classList.remove("active"));
+      set.add(v); chip.classList.add("active");
+    }else{
+      if(set.has(v)){ set.delete(v); chip.classList.remove("active"); }
+      else{ set.add(v); chip.classList.add("active"); }
+    }
+    renderActiveBar();
+    applyFilters();
+    syncShare();
+  });
+}
+
+handleFacetClick(facetCats, catActive, "cat");
+handleFacetClick(facetLinks, linkActive, "link");
+
+// mechanics toggles
 mech.addEventListener("click", (e)=>{
   const chip = e.target.closest(".chip"); if(!chip) return;
   const v = chip.dataset.v;
   if(mechActive.has(v)){ mechActive.delete(v); chip.classList.remove("active"); }
   else{ mechActive.add(v); chip.classList.add("active"); }
+  renderActiveBar();
   applyFilters();
+  syncShare();
 });
 favFilter.addEventListener("click", ()=>{
   favFilter.classList.toggle("active");
-  applyFilters();
+  applyFilters(); syncShare();
 });
 
-// facet filters (OR within facet; AND across facets)
-let catActive = new Set();
-let linkActive = new Set();
-facetCats.addEventListener("click", (e)=>{
-  const chip = e.target.closest(".chip"); if(!chip) return;
-  const name = (chip.dataset.cat||"").toLowerCase();
-  if(catActive.has(name)){ catActive.delete(name); chip.classList.remove("active"); }
-  else{ catActive.add(name); chip.classList.add("active"); }
-  applyFilters();
+// seg controls
+$("#catMode").addEventListener("click", (e)=>{
+  const b = e.target.closest(".segbtn"); if(!b) return;
+  catMode = b.dataset.mode;
+  $$(".segbtn", $("#catMode")).forEach(x=>x.classList.toggle("active", x===b));
+  localStorage.setItem("dokkan.catmode", catMode);
+  applyFilters(); syncShare();
 });
-facetLinks.addEventListener("click", (e)=>{
-  const chip = e.target.closest(".chip"); if(!chip) return;
-  const name = (chip.dataset.link||"").toLowerCase();
-  if(linkActive.has(name)){ linkActive.delete(name); chip.classList.remove("active"); }
-  else{ linkActive.add(name); chip.classList.add("active"); }
-  applyFilters();
+$("#linkMode").addEventListener("click", (e)=>{
+  const b = e.target.closest(".segbtn"); if(!b) return;
+  linkMode = b.dataset.mode;
+  $$(".segbtn", $("#linkMode")).forEach(x=>x.classList.toggle("active", x===b));
+  localStorage.setItem("dokkan.linkmode", linkMode);
+  applyFilters(); syncShare();
 });
 
+// clear / share
 clearFilters.addEventListener("click", ()=>{
-  q.value=""; fType.value=""; fRarity.value=""; mechActive.clear();
+  q.value=""; fType.value=""; fRarity.value="";
+  mechActive.clear(); catActive.clear(); linkActive.clear();
   $$(".chip", mech).forEach(c=>c.classList.remove("active"));
-  favFilter.classList.remove("active");
-  sortSel.value="newest";
-  catActive.clear(); linkActive.clear();
   $$(".chip", facetCats).forEach(c=>c.classList.remove("active"));
   $$(".chip", facetLinks).forEach(c=>c.classList.remove("active"));
-  applyFilters(); sortCards("newest");
+  favFilter.classList.remove("active");
+  sortSel.value="newest";
+  catMode="any"; linkMode="any";
+  initSeg("#catMode", catMode); initSeg("#linkMode", linkMode);
+  renderActiveBar();
+  applyFilters(); sortCards("newest"); syncShare();
+});
+
+shareFilters.addEventListener("click", ()=>{
+  syncShare();
+  navigator.clipboard?.writeText(location.href);
+  shareFilters.textContent="Link copied!"; setTimeout(()=>shareFilters.textContent="Share filters", 1200);
 });
 
 function normalize(s){ return (s||"").toLowerCase().trim(); }
+
+// Active filter bar render (removable chips)
+function renderActiveBar(){
+  const chips = [];
+  if(mechActive.size){ mechActive.forEach(v=> chips.push({k:"Mechanic", v})); }
+  if(catActive.size){ catActive.forEach(v=> chips.push({k:"Category", v})); }
+  if(linkActive.size){ linkActive.forEach(v=> chips.push({k:"Link", v})); }
+  if(fType.value){ chips.push({k:"Type", v:fType.value}); }
+  if(fRarity.value){ chips.push({k:"Rarity", v:fRarity.value}); }
+  if(q.value.trim()){ chips.push({k:"Search", v:q.value.trim()}); }
+
+  if(!chips.length){ activeFilterBar.innerHTML=""; return; }
+
+  activeFilterBar.innerHTML = chips.map((c,i)=>`
+    <span class="rchip" data-kind="${c.k}" data-val="${(c.v||'').toString()}">
+      <b>${c.k}</b> ${c.v} <span class="x" title="Remove">×</span>
+    </span>
+  `).join("");
+
+  activeFilterBar.addEventListener("click",(e)=>{
+    const x = e.target.closest(".x"); if(!x) return;
+    const r = x.closest(".rchip"); if(!r) return;
+    const kind = r.dataset.kind, val = r.dataset.val.toLowerCase();
+    if(kind==="Mechanic"){ mechActive.delete(val); $$('.chip[data-v="'+val+'"]', mech).forEach(c=>c.classList.remove("active")); }
+    if(kind==="Category"){ catActive.delete(val); $$('.chip[data-cat]', facetCats).forEach(c=>{ if((c.dataset.cat||"").toLowerCase()===val) c.classList.remove("active"); }); }
+    if(kind==="Link"){ linkActive.delete(val); $$('.chip[data-link]', facetLinks).forEach(c=>{ if((c.dataset.link||"").toLowerCase()===val) c.classList.remove("active"); }); }
+    if(kind==="Type"){ fType.value=""; }
+    if(kind==="Rarity"){ fRarity.value=""; }
+    if(kind==="Search"){ q.value=""; }
+    renderActiveBar();
+    applyFilters();
+    syncShare();
+  }, {once:true});
+}
 
 function applyFilters(){
   const txt = normalize(q.value);
   const tFilter = fType.value;
   const rFilter = fRarity.value;
   const favOnly = favFilter.classList.contains("active");
+  const catArr = Array.from(catActive);
+  const linkArr = Array.from(linkActive);
   let cards = $$(".card", grid);
   let visible = 0;
 
@@ -1008,31 +1128,34 @@ function applyFilters(){
     const name = normalize(el.dataset.name);
     const type = (el.dataset.type||"").toUpperCase();
     const rarity=(el.dataset.rarity||"").toUpperCase();
-    const cats = normalize(el.dataset.cats);
-    const links= normalize(el.dataset.links);
+    const catsStr = normalize(el.dataset.cats);
+    const linksStr= normalize(el.dataset.links);
     const mech = el.dataset.mech || "";
 
     let ok = true;
 
     if(txt){
       ok = name.includes(txt) || id.includes(txt) || type.toLowerCase().includes(txt)
-           || rarity.toLowerCase().includes(txt) || cats.includes(txt) || links.includes(txt);
+           || rarity.toLowerCase().includes(txt) || catsStr.includes(txt) || linksStr.includes(txt);
     }
     if(ok && tFilter){ ok = type === tFilter.toUpperCase(); }
     if(ok && rFilter){ ok = rarity === rFilter.toUpperCase(); }
     if(ok && mechActive.size){
       for(const need of mechActive){ if(!mech.includes(need)){ ok=false; break; } }
     }
-    if(ok && catActive.size){
-      // OR within categories: must match at least one selected cat
-      let hit = false;
-      for(const c of catActive){ if(cats.includes(c)){ hit = true; break; } }
-      ok = hit;
+    if(ok && catArr.length){
+      if(catMode==="any"){
+        ok = catArr.some(c=> catsStr.includes(c));
+      }else{ // all
+        ok = catArr.every(c=> catsStr.includes(c));
+      }
     }
-    if(ok && linkActive.size){
-      let hit = false;
-      for(const l of linkActive){ if(links.includes(l)){ hit = true; break; } }
-      ok = hit;
+    if(ok && linkArr.length){
+      if(linkMode==="any"){
+        ok = linkArr.some(l=> linksStr.includes(l));
+      }else{
+        ok = linkArr.every(l=> linksStr.includes(l));
+      }
     }
     if(ok && favOnly){ ok = isFav(id); }
 
@@ -1041,6 +1164,7 @@ function applyFilters(){
   }
   count.textContent = visible + " units";
 }
+
 function sortCards(mode){
   const cards = $$(".card", grid);
   const keyers = {
@@ -1058,10 +1182,11 @@ function sortCards(mode){
 [q, sortSel, fType, fRarity].forEach(el=>{
   el.addEventListener('input', ()=>{
     if(el===sortSel){ sortCards(sortSel.value); }
-    else{ applyFilters(); }
+    else{ renderActiveBar(); applyFilters(); syncShare(); }
   });
 });
 
+// random
 $("#randomBtn").addEventListener("click", ()=>{
   const cards = $$(".card").filter(c=>c.style.display!=="none");
   if(!cards.length) return;
@@ -1069,8 +1194,51 @@ $("#randomBtn").addEventListener("click", ()=>{
   window.location.href = "/unit/" + pick.dataset.id;
 });
 
+// share state in URL
+function syncShare(){
+  const p = new URLSearchParams();
+  if(q.value.trim()) p.set("q", q.value.trim());
+  if(fType.value) p.set("type", fType.value);
+  if(fRarity.value) p.set("rarity", fRarity.value);
+  if(mechActive.size) p.set("mech", Array.from(mechActive).join(","));
+  if(catActive.size){ p.set("cats", Array.from(catActive).join(",")); p.set("catm", catMode); }
+  if(linkActive.size){ p.set("links", Array.from(linkActive).join(",")); p.set("linkm", linkMode); }
+  if(favFilter.classList.contains("active")) p.set("fav","1");
+  p.set("sort", sortSel.value);
+  history.replaceState(null, "", "?"+p.toString());
+}
+
+// restore from URL
+(function restore(){
+  const p = new URLSearchParams(location.search);
+  if(p.get("q")) q.value = p.get("q");
+  if(p.get("type")) fType.value = p.get("type");
+  if(p.get("rarity")) fRarity.value = p.get("rarity");
+  const mechStr = p.get("mech");
+  if(mechStr){
+    mechStr.split(",").forEach(m=>{ if(m){ mechActive.add(m); }});
+    $$(".chip", mech).forEach(c=>{ if(mechActive.has(c.dataset.v)) c.classList.add("active"); });
+  }
+  const catStr = p.get("cats"); const _catm = p.get("catm");
+  if(_catm){ catMode = _catm; initSeg("#catMode", catMode); }
+  if(catStr){
+    catStr.split(",").forEach(c=>{ const v=(c||"").toLowerCase(); if(!v) return; catActive.add(v); });
+    $$(".chip", facetCats).forEach(c=>{ if(catActive.has((c.dataset.cat||"").toLowerCase())) c.classList.add("active"); });
+  }
+  const linkStr = p.get("links"); const _linkm = p.get("linkm");
+  if(_linkm){ linkMode = _linkm; initSeg("#linkMode", linkMode); }
+  if(linkStr){
+    linkStr.split(",").forEach(l=>{ const v=(l||"").toLowerCase(); if(!v) return; linkActive.add(v); });
+    $$(".chip", facetLinks).forEach(c=>{ if(linkActive.has((c.dataset.link||"").toLowerCase())) c.classList.add("active"); });
+  }
+  if(p.get("fav")==="1") favFilter.classList.add("active");
+  if(p.get("sort")) sortSel.value = p.get("sort");
+
+  renderActiveBar();
+})();
+
 // initial
-sortCards("newest");
+sortCards(sortSel.value || "newest");
 applyFilters();
 renderFavButtons();
 </script>
