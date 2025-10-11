@@ -1,52 +1,776 @@
-{% extends "base.html" %}
-{% block title %}Dokkan Cards — Catalog{% endblock %}
-{% block content %}
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Dokkan Unit Browser</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+/* (same styles as before; keeping inline for single-file portability) */
+:root{
+  --bg:#0b0f14; --card:#101720; --ink:#e9f2ff; --muted:#9fb0c7; --accent:#5bd1ff; --accent-2:#9bffdd;
+  --chip:#182330; --chip-border:#223144; --cardw: 360px;
+}
+:root[data-theme="light"]{
+  --bg:#f7faff; --card:#ffffff; --ink:#0b1623; --muted:#3e526d; --accent:#0d7bd0; --accent-2:#0ab39b;
+  --chip:#eef3fb; --chip-border:#d9e6f8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:
+    radial-gradient(1200px 800px at 15% -10%, rgba(91,209,255,.10), transparent),
+    radial-gradient(1000px 600px at 100% 0, rgba(155,255,221,.08), transparent),
+    linear-gradient(180deg, #09101a, var(--bg));
+  color:var(--ink); font:14px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial;
+}
+body.party::before{
+  content:""; position:fixed; inset:-20%; pointer-events:none; z-index:9999; opacity:.18;
+  background:conic-gradient(from 0deg,
+    #5bd1ff, #9bffdd, #ffd166, #8b5cf6, #10b981, #ef4444, #f59e0b, #5bd1ff);
+  mix-blend-mode:screen; filter:blur(6px);
+  animation:spin 12s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+a{color:var(--accent); text-decoration:none}
+.wrap{max-width:1400px; margin:0 auto; padding:24px 16px 64px}
+.header{display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap}
+.header h1{font-size:28px; margin:0; letter-spacing:.2px}
+.count{opacity:.85; font-size:14px}
+.searchbar{position:relative; flex:1; min-width:260px}
+.searchbar input{
+  width:100%; padding:12px 40px 12px 12px;
+  border:1px solid #233246; border-radius:12px; background:#0f151d; color:#e9f2ff;
+  outline:none; transition: box-shadow .15s, border-color .15s;
+}
+:root[data-theme="light"] .searchbar input{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.searchbar input:focus{ box-shadow:0 0 0 3px rgba(91,209,255,.25); border-color:#345375 }
+.searchbar .k{position:absolute; right:8px; top:50%; transform:translateY(-50%); opacity:.7; font-size:12px; background:#0b1118; border:1px solid #1f2a3a; padding:2px 6px; border-radius:6px}
+:root[data-theme="light"] .searchbar .k{ background:#eef3fb; border-color:#d9e6f8; color:#3e526d }
 
-<h1 class="page-title">Catalog</h1>
+.controls{
+  display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:12px 0 18px;
+  align-items:start;
+}
+.controls .panel{ align-self:start }
+@media (max-width: 1000px){ .controls{ grid-template-columns:1fr } }
+.panel{background:#0f151d; border:1px solid #1e2a3a; border-radius:12px; padding:10px}
+:root[data-theme="light"] .panel{ background:#fff; border-color:#dbe7ff }
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radius:10px; padding:8px 10px; cursor:pointer}
+:root[data-theme="light"] select{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.label{font-size:12px; opacity:.85}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{background:#0b1118; border:1px solid #1f2b3b; color:#d2e4ff; font-size:12px; padding:5px 9px; border-radius:999px; cursor:pointer; display:inline-flex; align-items:center; gap:6px}
+:root[data-theme="light"] .chip{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.chip.active{border-color:#5bd1ff; color:#ffffff}
+:root[data-theme="light"] .chip.active{ color:#0b1623; box-shadow:0 0 0 2px rgba(13,123,208,.15) inset }
 
-<form class="filters" method="get" action="{{ url_for('home') }}">
-  <input type="search" name="q" placeholder="Search by name…" value="{{ q or '' }}" />
-  <select name="rarity">
-    <option value="">Any Rarity</option>
-    {% for r in ["LR","UR","SSR","SR","R","N"] %}
-      <option value="{{ r }}" {% if rarity==r %}selected{% endif %}>{{ r }}</option>
-    {% endfor %}
-  </select>
-  <select name="type">
-    <option value="">Any Type</option>
-    {% for t in ["AGL","TEQ","INT","STR","PHY"] %}
-      <option value="{{ t }}" {% if type_token==t %}selected{% endif %}>{{ t }}</option>
-    {% endfor %}
-  </select>
-  <button type="submit">Apply</button>
-  <a class="link-reset" href="{{ url_for('home') }}">Reset</a>
-</form>
+/* NEW: icon inside category chips */
+.caticon{  height:28px; border-radius:4px; object-fit:contain; display:inline-block; }
 
-{% if families %}
-<div class="grid">
-  {% for f in families %}
-  <a class="card" href="{{ url_for('card_detail', unit_id=f.unit_id) }}" title="{{ f.display_name }}">
-    <div class="thumb">
-      <img src="{{ f.thumb_url }}" loading="lazy" alt="{{ f.display_name }}">
-      <div class="badge type type-{{ f.type|lower }}">{{ f.type }}</div>
-      <div class="badge rarity rarity-{{ f.rarity|lower }}">{{ f.rarity }}</div>
+.btn{font-size:12px; padding:8px 12px; background:#0f151d; border:1px solid #1e2a3a; border-radius:10px; color:#fff; cursor:pointer}
+.btn:hover{ border-color:#38506f }
+:root[data-theme="light"] .btn{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+
+.seg{display:inline-flex; gap:0; border:1px solid #223246; border-radius:999px; overflow:hidden}
+:root[data-theme="light"] .seg{ border-color:#c7d5ea }
+.seg .segbtn{padding:6px 10px; background:transparent; color:var(--ink); border:0; cursor:pointer; font-size:12px}
+.seg .segbtn.active{ background:#0d1724 }
+:root[data-theme="light"] .seg .segbtn.active{ background:#eef3fb }
+
+.afbar{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 0}
+.rchip{display:inline-flex; align-items:center; gap:6px; background:#0b1118; border:1px solid #1f2b3b; color:#d2e4ff; font-size:12px; padding:5px 8px; border-radius:999px}
+.rchip b{opacity:.8; font-weight:600}
+.rchip .x{cursor:pointer; opacity:.85}
+:root[data-theme="light"] .rchip{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+
+.grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(var(--cardw), 1fr)); gap:14px}
+.ghead{
+  grid-column:1/-1; padding:6px 2px; margin-top:2px; letter-spacing:.5px; font-weight:800; opacity:.9;
+  border-bottom:1px dashed #223246;
+}
+:root[data-theme="light"] .ghead{ border-bottom-color:#c7d5ea }
+.card{
+  position:relative; border:1px solid #1b2636; border-radius:16px; background:linear-gradient(180deg, #0f151d, #0b1016);
+  overflow:hidden; transition: transform .14s ease, box-shadow .14s ease, border-color .14s;
+}
+:root[data-theme="light"] .card{ background:#fff; border-color:#dbe7ff }
+.card:hover{ transform: translateY(-3px); border-color:#2b3d57; box-shadow:0 12px 30px rgba(0,0,0,.25) }
+.thumb-wrap{ background:linear-gradient(180deg, rgba(91,209,255,.07), rgba(155,255,221,.06)); position:relative }
+.thumb-wrap a{display:block}
+.thumb-wrap img{ width:100%; height:auto; display:block; filter:drop-shadow(0 12px 22px rgba(0,0,0,.55)) }
+.type-ring{ position:absolute; inset:auto 8px 8px auto; width:14px; height:14px; border-radius:50%; border:2px solid currentColor; opacity:.9 }
+.type-agl{ color:#3b82f6 } .type-teq{ color:#10b981 } .type-int{ color:#8b5cf6 } .type-str{ color:#ef4444 } .type-phy{ color:#f59e0b }
+
+.fav{ position:absolute; top:8px; right:8px; z-index:2; width:30px; height:30px; border-radius:50%; border:1px solid #2a3b54; background:#0c121a; display:flex;align-items:center;justify-content:center; cursor:pointer; transition:.15s }
+:root[data-theme="light"] .fav{ background:#fff; border-color:#dbe7ff }
+.fav:hover{ border-color:#5bd1ff }
+.fav svg{ width:16px; height:16px; fill:#a9c0df }
+.fav.active svg{ fill:#ffd166 }
+
+.card .content{ padding:12px 12px 14px }
+.title{font-size:16px; font-weight:700; margin:0 0 6px; letter-spacing:.2px}
+.meta{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 8px}
+.meta .pill{font-size:11px; background:#0b1118; padding:4px 8px; border:1px solid #1c2838; border-radius:999px; color:#cfe2ff}
+:root[data-theme="light"] .meta .pill{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.leader, .super{font-size:12px; color:var(--muted)}
+.leader strong, .super strong{color:#cfe2ff}
+.flags{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+.badge{display:inline-flex; align-items:center; gap:6px; font-size:11px; padding:3px 8px; background:#0e151d; border:1px solid #233246; border-radius:999px; color:#cadeff}
+.badge.seza{border-color:#6aa9ff; color:#e2efff}
+.badge.eza{border-color:#2f5f8a; color:#bfe0ff}
+.badge.tr{border-color:#476a3c; color:#d9ffd1}
+.badge.ex{border-color:#6b5a2d; color:#ffe7ac}
+.badge.st{border-color:#6a446e; color:#ffccff}
+.badge.ac{border-color:#3a5f76; color:#cdeaff}
+.badge.gi{border-color:#6b4f2f; color:#ffe5bd}
+.badge.rv{border-color:#355a2e; color:#cdffcc}
+
+.tbar{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap}
+.tbar .button{font-size:12px; padding:8px 12px; background:#0f151d; border:1px solid #1e2a3a; border-radius:10px; color:#fff}
+:root[data-theme="light"] .tbar .button{ background:#fff; border-color:#c7d5ea; color:#0b1623 }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Dokkan Unit Browser</h1>
+    <div class="count" id="count">{{ total }} units</div>
+    <div class="searchbar">
+      <input id="q" placeholder="Search name, ID, type (AGL/TEQ/INT/STR/PHY), rarity (SSR/UR/LR), category, link…  (Ctrl/Cmd + K)" autocomplete="off" />
+      <div class="k">K</div>
     </div>
-    <div class="body">
-      <div class="title">{{ f.display_name }}</div>
-      <div class="meta">
-        <span title="Variants count">Variants: {{ f.variants_count }}</span>
-        <span title="Forms in family">Forms: {{ f.family_size }}</span>
-        {% if f.eza_count %}<span class="chip">EZA: {{ f.eza_count }}</span>{% endif %}
-        {% if f.has_transform %}<span class="chip">Transform</span>{% endif %}
-        {% if f.has_exchange %}<span class="chip">Exchange</span>{% endif %}
-        {% if f.has_standby %}<span class="chip">Standby</span>{% endif %}
+    <a class="btn" href="/team">🧩 Team Builder</a>
+    <a class="btn" href="/finder">👑 Leader Finder</a>
+    <button class="btn" id="randomBtn" title="Alt-click for LR only">🎲 Random</button>
+    <button class="btn" id="themeBtn" title="Toggle theme">🌓 Theme</button>
+    <button class="btn" id="partyBtn" title="Toggle party mode">✨ Party</button>
+  </div>
+
+  <div class="controls">
+    <div class="panel">
+      <div class="row">
+        <span class="facet-title">Mechanics:</span>
+        <div class="chips" id="mech">
+          <span class="chip" data-v="EZA">EZA</span>
+          <span class="chip" data-v="SEZA">SEZA</span>
+          <span class="chip" data-v="Transforms">Transforms</span>
+          <span class="chip" data-v="Exchange">Exchange</span>
+          <span class="chip" data-v="Standby">Standby</span>
+          <span class="chip" data-v="Active">Active</span>
+          <span class="chip" data-v="Giant Form">Giant Form</span>
+          <span class="chip" data-v="Revival">Revival</span>
+        </div>
       </div>
-    </div>
-  </a>
+
+      <div class="row" style="margin-top:8px; align-items:center">
+        <span class="facet-title">Categories:</span>
+        <div class="seg" id="catMode">
+          <button class="segbtn active" data-mode="any" title="Match ANY selected category">Any</button>
+          <button class="segbtn" data-mode="all" title="Match ALL selected categories">All</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <div class="chips" id="facetCats">
+  {% for name, cnt in top_cats %}
+    {% set icon = cat_assets.get(name) if cat_assets else None %}
+    <span class="chip cat" data-cat="{{ name|e }}" title="{{ name }} — {{ cnt }} units">
+      {% if icon %}
+        <img class="caticon" src="{{ icon }}" alt="{{ name }}" loading="lazy"
+             onerror="this.onerror=null; this.replaceWith(document.createTextNode('{{ name }}'));">
+      {% else %}
+        {{ name }}
+      {% endif %}
+    </span>
   {% endfor %}
 </div>
-{% else %}
-<p>No families found. Make sure your scraper has written <code>output/cards/*/METADATA.json</code>.</p>
-{% endif %}
 
-{% endblock %}
+      </div>
+
+      <div class="row" style="margin-top:12px; align-items:center">
+        <span class="facet-title">Links:</span>
+        <div class="seg" id="linkMode">
+          <button class="segbtn active" data-mode="any" title="Match ANY selected link">Any</button>
+          <button class="segbtn" data-mode="all" title="Match ALL selected links">All</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <div class="chips" id="facetLinks">
+          {% for name, cnt in top_links %}
+            <span class="chip" data-link="{{ name|e }}" title="{{ cnt }} units">{{ name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="favFilter">★ Favorites</button>
+        <button class="btn" id="shareFilters">Share filters</button>
+        <button class="btn" id="clearFilters">Reset Filters</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <label>Sort
+          <select id="sort">
+            <option value="newest">Newest</option>
+            <option value="name">Name (A→Z)</option>
+            <option value="rarity">Rarity (LR→UR→SSR)</option>
+            <option value="type">Type</option>
+          </select>
+        </label>
+        <label>Type
+          <select id="f-type">
+            <option value="">All</option>
+            <option>AGL</option><option>TEQ</option><option>INT</option><option>STR</option><option>PHY</option>
+          </select>
+        </label>
+        <label>Rarity
+          <select id="f-rarity">
+            <option value="">All</option>
+            <option>SSR</option><option>UR</option><option>LR</option>
+          </select>
+        </label>
+        <label>Art
+          <select id="art">
+            <option value="auto">Auto</option>
+            <option value="regular">Regular</option>
+            <option value="eza">EZA</option>
+            <option value="seza">S-EZA</option>
+          </select>
+        </label>
+        <label>Awakening
+          <select id="awakening" title="Fold hides SSR when UR/LR exists and hides UR when LR exists">
+            <option value="fold" selected>Fold Unawakened</option>
+            <option value="full">Fully Awakened Only</option>
+            <option value="all">Show All</option>
+          </select>
+        </label>
+        <label class="switch" style="display:flex; gap:6px; align-items:center">
+          <input type="checkbox" id="groupRarity" checked> Group by rarity
+        </label>
+        <label class="help">Tips: Shift-click a chip to select <em>only</em> that item. Press <b>Shift+L/U/S</b> to quick filter by rarity. Try the <b>Konami Code</b> 😏</label>
+      </div>
+      <div class="afbar" id="activeFilterBar"></div>
+    </div>
+  </div>
+
+  <div class="grid" id="grid">
+    {% for c in cards %}
+    <article class="card"
+      data-name="{{ c.name|e }}" data-id="{{ c.unit_id|e }}" data-type="{{ c.type or '' }}" data-rarity="{{ c.rarity or '' }}"
+      data-cats="{{ (c.categories or [])|join(' ')|lower() }}" data-links="{{ (c.links or [])|join(' ')|lower() }}"
+      data-mech="{{ (c.flags or [])|join(' ') }}" data-release="{{ c.release_ts or 0 }}">
+      <div class="thumb-wrap">
+        <button class="fav" title="Toggle favorite" data-id="{{ c.unit_id }}"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>
+        <a href="/unit/{{ c.unit_id }}" aria-label="Open details">
+          {% set src_auto = c.img_auto or c.img_regular or c.img_eza or c.img_seza %}
+          <img loading="lazy"
+               src="{{ src_auto or '/assets/dokkaninfo.com/images/dokkan-info-logo.png' }}"
+               data-src-auto="{{ c.img_auto or '' }}"
+               data-src-regular="{{ c.img_regular or '' }}"
+               data-src-eza="{{ c.img_eza or '' }}"
+               data-src-seza="{{ c.img_seza or '' }}"
+               alt="{{ c.name|e }}"
+               onerror="this.onerror=null; this.src='/assets/dokkaninfo.com/images/dokkan-info-logo.png'">
+        </a>
+        <span class="type-ring type-{{ (c.type or '').lower() }}"></span>
+      </div>
+      <div class="content">
+        <h3 class="title"><a href="/unit/{{ c.unit_id }}">{{ c.name }}</a></h3>
+        <div class="meta">
+          {% if c.rarity %}<span class="pill">{{ c.rarity }}</span>{% endif %}
+          {% if c.type %}<span class="pill">{{ c.type }}</span>{% endif %}
+          {% if c.obtain %}<span class="pill">{{ c.obtain }}</span>{% endif %}
+        </div>
+        {% if c.leader %}
+          <div class="leader"><strong>Leader:</strong> {{ c.leader }}</div>
+        {% endif %}
+        {% if c.super1.name or c.super1.effect %}
+          <div class="super"><strong>Super:</strong>
+            {% if c.super1.name %}{{ c.super1.name }} — {% endif %}{{ c.super1.effect }}
+          </div>
+        {% endif %}
+        {% if c.ultra %}
+          <div class="super"><strong>Ultra:</strong>
+            {% if c.ultra.name %}{{ c.ultra.name }} — {% endif %}{{ c.ultra.effect }}
+          </div>
+        {% endif %}
+        {% if c.passive_lines %}
+          <div class="super"><strong>Passive:</strong> {{ c.passive_lines|join(' • ') }}</div>
+        {% endif %}
+        <div class="flags">
+          {% for f in c.flags %}
+            <span class="badge {{ 'seza' if f=='SEZA' else 'eza' if f=='EZA' else 'tr' if f=='Transforms' else 'ex' if f=='Exchange' else 'st' if f=='Standby' else 'ac' if f=='Active' else 'gi' if f=='Giant Form' else 'rv' if f=='Revival' else '' }}">{{ f }}</span>
+          {% endfor %}
+        </div>
+        <div class="tbar">
+          <a class="button" href="/unit/{{ c.unit_id }}">Details</a>
+          {% if c.source %}<a class="button" href="{{ c.source }}" target="_blank" rel="noopener">DokkanInfo ↗</a>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+const $ = (s,root=document)=>root.querySelector(s);
+const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
+
+/* theme + party */
+(function(){
+  const root = document.documentElement;
+  const saved = localStorage.getItem("dokkan.theme") || "dark";
+  root.setAttribute("data-theme", saved);
+  $("#themeBtn").addEventListener("click", ()=>{
+    const cur = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+    root.setAttribute("data-theme", cur);
+    localStorage.setItem("dokkan.theme", cur);
+  });
+  $("#partyBtn").addEventListener("click", ()=>{
+    document.body.classList.toggle("party");
+  });
+})();
+
+/* favorites */
+const FKEY = "dokkan.favs";
+function getFavs(){ try{ return JSON.parse(localStorage.getItem(FKEY)||"[]"); }catch{ return []; } }
+function setFavs(arr){ localStorage.setItem(FKEY, JSON.stringify(Array.from(new Set(arr)))); }
+function isFav(id){ return getFavs().includes(id); }
+function renderFavButtons(){
+  $$(".fav").forEach(b=>{
+    const id = b.dataset.id;
+    if(isFav(id)) b.classList.add("active"); else b.classList.remove("active");
+  });
+}
+document.addEventListener("click", (e)=>{
+  const b = e.target.closest(".fav"); if(!b) return;
+  const id = b.dataset.id;
+  let arr = getFavs();
+  if(arr.includes(id)) arr = arr.filter(x=>x!==id); else arr.push(id);
+  setFavs(arr); renderFavButtons(); applyFilters(); regroup();
+});
+renderFavButtons();
+
+const grid = $("#grid");
+const count = $("#count");
+const q = $("#q");
+const sortSel = $("#sort");
+const fType = $("#f-type");
+const fRarity = $("#f-rarity");
+const mech = $("#mech");
+const favFilter = $("#favFilter");
+const clearFilters = $("#clearFilters");
+const shareFilters = $("#shareFilters");
+const artSel = $("#art");
+const awakeningSel = $("#awakening");
+const groupRarity = $("#groupRarity");
+const facetCats = $("#facetCats");
+const facetLinks = $("#facetLinks");
+const activeFilterBar = $("#activeFilterBar");
+
+// keyboard focus
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); q.focus(); q.select(); }
+});
+
+// art mode (persist & live swap)
+(function(){
+  const saved = localStorage.getItem("dokkan.artmode") || "auto";
+  artSel.value = saved;
+  function applyArt(){
+    const mode = artSel.value;
+    $$(".card .thumb-wrap img").forEach(img=>{
+      const fallback = img.dataset.srcAuto || img.dataset.srcRegular || img.dataset.srcEza || img.dataset.srcSeza || '/assets/dokkaninfo.com/images/dokkan-info-logo.png';
+      let src = '';
+      if(mode==="auto"){ src = img.dataset.srcAuto || fallback; }
+      else if(mode==="regular"){ src = img.dataset.srcRegular || fallback; }
+      else if(mode==="eza"){ src = img.dataset.srcEza || fallback; }
+      else if(mode==="seza"){ src = img.dataset.srcSeza || fallback; }
+      if(img.src !== src && src) img.src = src;
+    });
+  }
+  applyArt();
+  artSel.addEventListener("change", ()=>{
+    localStorage.setItem("dokkan.artmode", artSel.value);
+    applyArt();
+  });
+})();
+
+// facet state
+let mechActive = new Set();
+let catActive = new Set();
+let linkActive = new Set();
+let catMode = localStorage.getItem("dokkan.catmode") || "any";
+let linkMode = localStorage.getItem("dokkan.linkmode") || "any";
+
+// persist awakening/grouping
+(function initAwakAndGroup(){
+  const savedAw = localStorage.getItem("dokkan.awakmode");
+  const savedGrp = localStorage.getItem("dokkan.grouprarity");
+  if(savedAw){ awakeningSel.value = savedAw; }
+  if(savedGrp!=null){ groupRarity.checked = savedGrp==="1"; }
+})();
+
+// set initial seg buttons
+function initSeg(id, mode){
+  const box = $(id);
+  $$(".segbtn", box).forEach(b=>{
+    b.classList.toggle("active", b.dataset.mode===mode);
+  });
+}
+initSeg("#catMode", catMode);
+initSeg("#linkMode", linkMode);
+
+// facet chip click handlers (toggle; shift-click = only this)
+function handleFacetClick(container, set, key){
+  container.addEventListener("click", (e)=>{
+    const chip = e.target.closest(".chip"); if(!chip) return;
+    const v = (chip.dataset[key]||"").toLowerCase();
+    if(e.shiftKey){
+      set.clear();
+      $$(".chip", container).forEach(c=>c.classList.remove("active"));
+      set.add(v); chip.classList.add("active");
+    }else{
+      if(set.has(v)){ set.delete(v); chip.classList.remove("active"); }
+      else{ set.add(v); chip.classList.add("active"); }
+    }
+    renderActiveBar();
+    applyFilters();
+    regroup();
+    syncShare();
+  });
+}
+handleFacetClick(facetCats, catActive, "cat");
+handleFacetClick(facetLinks, linkActive, "link");
+
+// mechanics toggles
+mech.addEventListener("click", (e)=>{
+  const chip = e.target.closest(".chip"); if(!chip) return;
+  const v = chip.dataset.v;
+  if(mechActive.has(v)){ mechActive.delete(v); chip.classList.remove("active"); }
+  else{ mechActive.add(v); chip.classList.add("active"); }
+  renderActiveBar();
+  applyFilters();
+  regroup();
+  syncShare();
+});
+favFilter.addEventListener("click", ()=>{
+  favFilter.classList.toggle("active");
+  applyFilters(); regroup(); syncShare();
+});
+
+// awakening + grouping
+awakeningSel.addEventListener("change", ()=>{
+  localStorage.setItem("dokkan.awakmode", awakeningSel.value);
+  renderActiveBar();
+  applyFilters(); regroup(); syncShare();
+});
+groupRarity.addEventListener("change", ()=>{
+  localStorage.setItem("dokkan.grouprarity", groupRarity.checked ? "1":"0");
+  regroup(); syncShare();
+});
+
+// seg controls
+$("#catMode").addEventListener("click", (e)=>{
+  const b = e.target.closest(".segbtn"); if(!b) return;
+  catMode = b.dataset.mode;
+  $$(".segbtn", $("#catMode")).forEach(x=>x.classList.toggle("active", x===b));
+  localStorage.setItem("dokkan.catmode", catMode);
+  applyFilters(); regroup(); syncShare();
+});
+$("#linkMode").addEventListener("click", (e)=>{
+  const b = e.target.closest(".segbtn"); if(!b) return;
+  linkMode = b.dataset.mode;
+  $$(".segbtn", $("#linkMode")).forEach(x=>x.classList.toggle("active", x===b));
+  localStorage.setItem("dokkan.linkmode", linkMode);
+  applyFilters(); regroup(); syncShare();
+});
+
+// clear / share
+$("#clearFilters").addEventListener("click", ()=>{
+  q.value=""; fType.value=""; fRarity.value="";
+  mechActive.clear(); catActive.clear(); linkActive.clear();
+  $$(".chip", mech).forEach(c=>c.classList.remove("active"));
+  $$(".chip", facetCats).forEach(c=>c.classList.remove("active"));
+  $$(".chip", facetLinks).forEach(c=>c.classList.remove("active"));
+  favFilter.classList.remove("active");
+  sortSel.value="newest";
+  catMode="any"; linkMode="any";
+  awakeningSel.value="fold";
+  groupRarity.checked=true;
+  initSeg("#catMode", catMode); initSeg("#linkMode", linkMode);
+  renderActiveBar();
+  applyFilters(); sortCards("newest"); regroup(); syncShare();
+});
+
+shareFilters.addEventListener("click", ()=>{
+  syncShare();
+  navigator.clipboard?.writeText(location.href);
+  shareFilters.textContent="Link copied!"; setTimeout(()=>shareFilters.textContent="Share filters", 1200);
+});
+
+function normalize(s){ return (s||"").toLowerCase().trim(); }
+function nameKeyFromText(n){
+  return normalize(n)
+    .replace(/\[[^\]]*\]/g," ")  // strip [tags]
+    .replace(/\([^)]*\)/g," ")   // strip (notes)
+    .replace(/[-–•☆★◇]/g," ")
+    .replace(/\s+/g," ").trim();
+}
+
+// Build map for folding: best rarity per normalized name across ALL cards
+const FOLD_MAP = (function(){
+  const rank = {"SSR":0,"UR":1,"LR":2};
+  const map = new Map();
+  $$(".card", grid).forEach(el=>{
+    const key = nameKeyFromText(el.dataset.name||"");
+    const r = (el.dataset.rarity||"").toUpperCase();
+    const cur = map.get(key) ?? -1;
+    const val = rank[r] ?? -1;
+    if(val > cur){ map.set(key, val); }
+  });
+  return map;
+})();
+
+// Active filter bar render (removable chips)
+function renderActiveBar(){
+  const chips = [];
+  if(mechActive.size){ mechActive.forEach(v=> chips.push({k:"Mechanic", v})); }
+  if(catActive.size){ catActive.forEach(v=> chips.push({k:"Category", v})); }
+  if(linkActive.size){ linkActive.forEach(v=> chips.push({k:"Link", v})); }
+  if(fType.value){ chips.push({k:"Type", v:fType.value}); }
+  if(fRarity.value){ chips.push({k:"Rarity", v:fRarity.value}); }
+  if(q.value.trim()){ chips.push({k:"Search", v:q.value.trim()}); }
+  if(awakeningSel.value!=="fold"){
+    const label = awakeningSel.value==="full" ? "Awakening: Full Only" : "Awakening: All";
+    chips.push({k:"Awakening", v: label});
+  }
+  if(groupRarity.checked){ chips.push({k:"Grouping", v:"Rarity"}); }
+
+  if(!chips.length){ activeFilterBar.innerHTML=""; return; }
+
+  activeFilterBar.innerHTML = chips.map((c)=>`
+    <span class="rchip" data-kind="${c.k}" data-val="${(c.v||'').toString()}">
+      <b>${c.k}</b> ${c.v} <span class="x" title="Remove">×</span>
+    </span>
+  `).join("");
+
+  activeFilterBar.onclick = (e)=>{
+    const x = e.target.closest(".x"); if(!x) return;
+    const r = x.closest(".rchip"); if(!r) return;
+    const kind = r.dataset.kind, val = (r.dataset.val||"").toLowerCase();
+    if(kind==="Mechanic"){ mechActive.delete(val); $$('.chip[data-v="'+val+'"]', mech).forEach(c=>c.classList.remove("active")); }
+    if(kind==="Category"){ catActive.delete(val); $$('.chip[data-cat]', facetCats).forEach(c=>{ if((c.dataset.cat||"").toLowerCase()===val) c.classList.remove("active"); }); }
+    if(kind==="Link"){ linkActive.delete(val); $$('.chip[data-link]', facetLinks).forEach(c=>{ if((c.dataset.link||"").toLowerCase()===val) c.classList.remove("active"); }); }
+    if(kind==="Type"){ fType.value=""; }
+    if(kind==="Rarity"){ fRarity.value=""; }
+    if(kind==="Search"){ q.value=""; }
+    if(kind==="Awakening"){ awakeningSel.value="fold"; }
+    if(kind==="Grouping"){ groupRarity.checked=false; }
+    renderActiveBar();
+    applyFilters();
+    regroup();
+    syncShare();
+  };
+}
+
+function applyFilters(){
+  const txt = normalize(q.value);
+  const tFilter = fType.value;
+  const rFilter = fRarity.value;
+  const favOnly = favFilter.classList.contains("active");
+  const catArr = Array.from(catActive);
+  const linkArr = Array.from(linkActive);
+  const awakMode = awakeningSel.value; // "fold" | "full" | "all"
+  let cards = $$(".card", grid);
+  let visible = 0;
+
+  for(const el of cards){
+    const id   = (el.dataset.id||"");
+    const name = el.dataset.name || "";
+    const nkey = nameKeyFromText(name);
+    const type = (el.dataset.type||"").toUpperCase();
+    const rarity=(el.dataset.rarity||"").toUpperCase();
+    const catsStr = normalize(el.dataset.cats);
+    const linksStr= normalize(el.dataset.links);
+    const mech = el.dataset.mech || "";
+
+    let ok = true;
+
+    if(txt){
+      ok = normalize(name).includes(txt) || id.includes(txt) || type.toLowerCase().includes(txt)
+           || rarity.toLowerCase().includes(txt) || catsStr.includes(txt) || linksStr.includes(txt);
+    }
+    if(ok && tFilter){ ok = type === tFilter.toUpperCase(); }
+    if(ok && rFilter){ ok = rarity === rFilter.toUpperCase(); }
+    if(ok && mechActive.size){
+      for(const need of mechActive){ if(!mech.includes(need)){ ok=false; break; } }
+    }
+    if(ok && catArr.length){
+      ok = (catMode==="any") ? catArr.some(c=> catsStr.includes(c))
+                             : catArr.every(c=> catsStr.includes(c));
+    }
+    if(ok && linkArr.length){
+      ok = (linkMode==="any") ? linkArr.some(l=> linksStr.includes(l))
+                              : linkArr.every(l=> linksStr.includes(l));
+    }
+    if(ok && favOnly){ ok = isFav(id); }
+
+    // Awakening logic
+    if(ok){
+      if(awakMode==="full"){
+        ok = (rarity==="UR" || rarity==="LR");
+      }else if(awakeningSel.value==="fold"){
+        const best = FOLD_MAP.get(nkey) ?? -1; // 0=SSR,1=UR,2=LR
+        // hide SSR if UR/LR exists; hide UR if LR exists
+        if(rarity==="SSR"){ ok = !(best>=1); }
+        else if(rarity==="UR"){ ok = !(best>=2); }
+      }
+    }
+
+    el.style.display = ok ? "" : "none";
+    if(ok) visible++;
+  }
+  count.textContent = visible + " units";
+}
+
+function sortCards(mode){
+  const cards = $$(".card", grid);
+  const keyers = {
+    "name": el => (el.dataset.name||"").toLowerCase(),
+    // LR (0) < UR (1) < SSR (2) — we DO NOT reverse for rarity
+    "rarity": el => ({SSR:2,UR:1,LR:0}[(el.dataset.rarity||"").toUpperCase()] ?? 9),
+    "type": el => (el.dataset.type||""),
+    "newest": el => parseInt(el.dataset.release||"0",10),
+  };
+  const key = keyers[mode] || keyers["newest"];
+  cards.sort((a,b)=> key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0);
+  if(mode==="newest"){ cards.reverse(); } // IMPORTANT: don't reverse rarity anymore
+  for(const el of cards){ grid.appendChild(el); }
+}
+
+[q, sortSel, fType, fRarity].forEach(el=>{
+  el.addEventListener('input', ()=>{
+    if(el===sortSel){ sortCards(sortSel.value); regroup(); }
+    else{ renderActiveBar(); applyFilters(); regroup(); syncShare(); }
+  });
+});
+
+// random (Alt-click for LR only)
+$("#randomBtn").addEventListener("click", (e)=>{
+  const onlyLR = e.altKey;
+  const cards = $$(".card").filter(c=>{
+    if(c.style.display==="none") return false;
+    if(onlyLR) return ((c.dataset.rarity||"").toUpperCase()==="LR");
+    return true;
+  });
+  if(!cards.length) return;
+  const pick = cards[Math.floor(Math.random()*cards.length)];
+  window.location.href = "/unit/" + pick.dataset.id;
+});
+
+// share state in URL
+function syncShare(){
+  const p = new URLSearchParams();
+  if(q.value.trim()) p.set("q", q.value.trim());
+  if(fType.value) p.set("type", fType.value);
+  if(fRarity.value) p.set("rarity", fRarity.value);
+  if(mechActive.size) p.set("mech", Array.from(mechActive).join(","));
+  if(catActive.size){ p.set("cats", Array.from(catActive).join(",")); p.set("catm", catMode); }
+  if(linkActive.size){ p.set("links", Array.from(linkActive).join(",")); p.set("linkm", linkMode); }
+  if(favFilter.classList.contains("active")) p.set("fav","1");
+  p.set("sort", sortSel.value);
+  if(awakeningSel.value && awakeningSel.value!=="fold") p.set("awak", awakeningSel.value);
+  if(groupRarity.checked===false) p.set("grp","0"); // default is on
+  history.replaceState(null, "", "?"+p.toString());
+}
+
+// restore from URL
+(function restore(){
+  const p = new URLSearchParams(location.search);
+  if(p.get("q")) q.value = p.get("q");
+  if(p.get("type")) fType.value = p.get("type");
+  if(p.get("rarity")) fRarity.value = p.get("rarity");
+  const mechStr = p.get("mech");
+  if(mechStr){
+    mechStr.split(",").forEach(m=>{ if(m){ mechActive.add(m); }});
+    $$(".chip", mech).forEach(c=>{ if(mechActive.has(c.dataset.v)) c.classList.add("active"); });
+  }
+  const catStr = p.get("cats"); const _catm = p.get("catm");
+  if(_catm){ catMode = _catm; initSeg("#catMode", catMode); }
+  if(catStr){
+    catStr.split(",").forEach(c=>{ const v=(c||"").toLowerCase(); if(!v) return; catActive.add(v); });
+    $$(".chip", facetCats).forEach(c=>{ if(catActive.has((c.dataset.cat||"").toLowerCase())) c.classList.add("active"); });
+  }
+  const linkStr = p.get("links"); const _linkm = p.get("linkm");
+  if(_linkm){ linkMode = _linkm; initSeg("#linkMode", linkMode); }
+  if(linkStr){
+    linkStr.split(",").forEach(l=>{ const v=(l||"").toLowerCase(); if(!v) return; linkActive.add(v); });
+    $$(".chip", facetLinks).forEach(c=>{ if(linkActive.has((c.dataset.link||"").toLowerCase())) c.classList.add("active"); });
+  }
+  if(p.get("fav")==="1") favFilter.classList.add("active");
+  if(p.get("sort")) sortSel.value = p.get("sort");
+  const awak = p.get("awak");
+  if(awak){ awakeningSel.value = awak; }
+  const grp = p.get("grp");
+  if(grp==="0"){ groupRarity.checked = false; }
+
+  renderActiveBar();
+})();
+
+// rarity grouping (LR → UR → SSR)
+function regroup(){
+  $$(".ghead", grid).forEach(h=>h.remove());
+  if(!groupRarity.checked){ return; }
+  const vis = $$(".card", grid).filter(el=> el.style.display!=="none");
+  const groups = {LR:[], UR:[], SSR:[]};
+  vis.forEach(el=>{
+    const r = (el.dataset.rarity||"").toUpperCase();
+    if(groups[r]) groups[r].push(el); else groups.SSR.push(el);
+  });
+  const frag = document.createDocumentFragment();
+  ["LR","UR","SSR"].forEach(label=>{
+    const arr = groups[label];
+    if(!arr || !arr.length) return;
+    const h = document.createElement("div");
+    h.className = "ghead"; h.textContent = `${label} (${arr.length})`;
+    frag.appendChild(h);
+    arr.forEach(el=> frag.appendChild(el));
+  });
+  grid.appendChild(frag);
+}
+
+// initial
+sortCards(sortSel.value || "newest");
+applyFilters();
+regroup();
+renderFavButtons();
+
+/* FUN EXTRAS ---------------------------------------------------------- */
+// Quick rarity filters: Shift+L/U/S
+document.addEventListener('keydown',(e)=>{
+  if(e.shiftKey && !e.ctrlKey && !e.metaKey){
+    const k = e.key.toLowerCase();
+    if(k==='l'){ fRarity.value='LR'; applyFilters(); regroup(); syncShare(); }
+    if(k==='u'){ fRarity.value='UR'; applyFilters(); regroup(); syncShare(); }
+    if(k==='s'){ fRarity.value='SSR'; applyFilters(); regroup(); syncShare(); }
+  }
+});
+// Konami Code toggles party mode
+(function(){
+  const seq = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
+  let idx = 0;
+  document.addEventListener('keydown', (e)=>{
+    const k = e.key.toLowerCase();
+    if(k === seq[idx]){ document.body.classList.toggle('party'); idx=0; }
+    else { idx = (k===seq[0]) ? 1 : 0; }
+  });
+})();
+// N = random pick
+document.addEventListener('keydown',(e)=>{
+  if(e.key.toLowerCase()==='n' && !e.ctrlKey && !e.metaKey){ e.preventDefault(); $("#randomBtn").click(); }
+});
+</script>
+</body>
+</html>

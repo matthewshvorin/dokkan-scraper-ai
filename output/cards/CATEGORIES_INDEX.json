@@ -1,0 +1,1211 @@
+{
+  "73": {
+    "id": "73",
+    "labels": {
+      "en": "GT Bosses"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0073_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "gt-bosses"
+  },
+  "21": {
+    "id": "21",
+    "labels": {
+      "en": "Androids"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0021_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "androids"
+  },
+  "32": {
+    "id": "32",
+    "labels": {
+      "en": "Artificial Life Forms"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0032_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "artificial-life-forms"
+  },
+  "43": {
+    "id": "43",
+    "labels": {
+      "en": "Target: Goku"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0043_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "target-goku"
+  },
+  "50": {
+    "id": "50",
+    "labels": {
+      "en": "Inhuman Deeds"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0050_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "inhuman-deeds"
+  },
+  "59": {
+    "id": "59",
+    "labels": {
+      "en": "Power Absorption"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0059_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "power-absorption"
+  },
+  "83": {
+    "id": "83",
+    "labels": {
+      "en": "Battle of Fate"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0083_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "battle-of-fate"
+  },
+  "85": {
+    "id": "85",
+    "labels": {
+      "en": "Fused Fighters"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0085_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "fused-fighters"
+  },
+  "94": {
+    "id": "94",
+    "labels": {
+      "en": "Uncontrollable Power"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0094_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "uncontrollable-power"
+  },
+  "97": {
+    "id": "97",
+    "labels": {
+      "en": "Mission Execution"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0097_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "mission-execution"
+  },
+  "64": {
+    "id": "64",
+    "labels": {
+      "en": "Corroded Body and Mind"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0064_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "corroded-body-and-mind"
+  },
+  "41": {
+    "id": "41",
+    "labels": {
+      "en": "Terrifying Conquerors"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0041_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "terrifying-conquerors"
+  },
+  "5": {
+    "id": "5",
+    "labels": {
+      "en": "Hybrid Saiyans"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0005_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "hybrid-saiyans"
+  },
+  "89": {
+    "id": "89",
+    "labels": {
+      "en": "Earth-Bred Fighters"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0089_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "earth-bred-fighters"
+  },
+  "46": {
+    "id": "46",
+    "labels": {
+      "en": "Final Trump Card"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0046_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "final-trump-card"
+  },
+  "23": {
+    "id": "23",
+    "labels": {
+      "en": "Transformation Boost"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0023_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "transformation-boost"
+  },
+  "48": {
+    "id": "48",
+    "labels": {
+      "en": "Revenge"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0048_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "revenge"
+  },
+  "62": {
+    "id": "62",
+    "labels": {
+      "en": "Space-Traveling Warriors"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0062_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "space-traveling-warriors"
+  },
+  "13": {
+    "id": "13",
+    "labels": {
+      "en": "Giant Form"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0013_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "giant-form"
+  },
+  "60": {
+    "id": "60",
+    "labels": {
+      "en": "Giant Ape Power"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0060_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "giant-ape-power"
+  },
+  "16": {
+    "id": "16",
+    "labels": {
+      "en": "Movie Bosses"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0016_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "movie-bosses"
+  },
+  "17": {
+    "id": "17",
+    "labels": {
+      "en": "Pure Saiyans"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0017_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "pure-saiyans"
+  },
+  "68": {
+    "id": "68",
+    "labels": {
+      "en": "Gifted Warriors"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0068_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "gifted-warriors"
+  },
+  "92": {
+    "id": "92",
+    "labels": {
+      "en": "Super Bosses"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0092_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "super-bosses"
+  },
+  "47": {
+    "id": "47",
+    "labels": {
+      "en": "Exploding Rage"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0047_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "exploding-rage"
+  },
+  "54": {
+    "id": "54",
+    "labels": {
+      "en": "Rapid Growth"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0054_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "rapid-growth"
+  },
+  "31": {
+    "id": "31",
+    "labels": {
+      "en": "Vegeta's Family"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0031_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "vegeta-s-family"
+  },
+  "33": {
+    "id": "33",
+    "labels": {
+      "en": "Youth"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0033_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "youth"
+  },
+  "96": {
+    "id": "96",
+    "labels": {
+      "en": "Successors"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0096_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "successors"
+  },
+  "7": {
+    "id": "7",
+    "labels": {
+      "en": "Resurrected Warriors"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0007_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "resurrected-warriors"
+  },
+  "69": {
+    "id": "69",
+    "labels": {
+      "en": "Planetary Destruction"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0069_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "planetary-destruction"
+  },
+  "20": {
+    "id": "20",
+    "labels": {
+      "en": "Full Power"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0020_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "full-power"
+  },
+  "24": {
+    "id": "24",
+    "labels": {
+      "en": "Wicked Bloodline"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0024_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "wicked-bloodline"
+  },
+  "76": {
+    "id": "76",
+    "labels": {
+      "en": "Mastered Evolution"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0076_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "mastered-evolution"
+  },
+  "78": {
+    "id": "78",
+    "labels": {
+      "en": "Sworn Enemies"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0078_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "sworn-enemies"
+  },
+  "90": {
+    "id": "90",
+    "labels": {
+      "en": "Power of Wishes"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0090_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "power-of-wishes"
+  },
+  "29": {
+    "id": "29",
+    "labels": {
+      "en": "Movie Heroes"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0029_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "movie-heroes"
+  },
+  "35": {
+    "id": "35",
+    "labels": {
+      "en": "Siblings' Bond"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0035_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "siblings-bond"
+  },
+  "37": {
+    "id": "37",
+    "labels": {
+      "en": "Worthy Rivals"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0037_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "worthy-rivals"
+  },
+  "40": {
+    "id": "40",
+    "labels": {
+      "en": "Bond of Master and Disciple"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0040_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "bond-of-master-and-disciple"
+  },
+  "87": {
+    "id": "87",
+    "labels": {
+      "en": "Bond of Parent and Child"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0087_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "bond-of-parent-and-child"
+  },
+  "88": {
+    "id": "88",
+    "labels": {
+      "en": "Super Heroes"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0088_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "super-heroes"
+  },
+  "25": {
+    "id": "25",
+    "labels": {
+      "en": "Dragon Ball Seekers"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0025_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "dragon-ball-seekers"
+  },
+  "1": {
+    "id": "1",
+    "labels": {
+      "en": "Fusion"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0001_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "fusion"
+  },
+  "39": {
+    "id": "39",
+    "labels": {
+      "en": "Kamehameha"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0039_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "kamehameha"
+  },
+  "67": {
+    "id": "67",
+    "labels": {
+      "en": "Powerful Comeback"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0067_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "powerful-comeback"
+  },
+  "75": {
+    "id": "75",
+    "labels": {
+      "en": "Time Limit"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0075_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "time-limit"
+  },
+  "80": {
+    "id": "80",
+    "labels": {
+      "en": "Accelerated Battle"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0080_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "accelerated-battle"
+  },
+  "95": {
+    "id": "95",
+    "labels": {
+      "en": "Earth-Protecting Heroes"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0095_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "earth-protecting-heroes"
+  },
+  "3": {
+    "id": "3",
+    "labels": {
+      "en": "World Tournament"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0003_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "world-tournament"
+  },
+  "34": {
+    "id": "34",
+    "labels": {
+      "en": "DB Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0034_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "db-saga"
+  },
+  "51": {
+    "id": "51",
+    "labels": {
+      "en": "Earthlings"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0051_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "earthlings"
+  },
+  "65": {
+    "id": "65",
+    "labels": {
+      "en": "Turtle School"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0065_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "turtle-school"
+  },
+  "91": {
+    "id": "91",
+    "labels": {
+      "en": "Tournament Participants"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0091_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "tournament-participants"
+  },
+  "4": {
+    "id": "4",
+    "labels": {
+      "en": "Peppy Gals"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0004_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "peppy-gals"
+  },
+  "6": {
+    "id": "6",
+    "labels": {
+      "en": "Universe Survival Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0006_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "universe-survival-saga"
+  },
+  "27": {
+    "id": "27",
+    "labels": {
+      "en": "Universe 6"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0027_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "universe-6"
+  },
+  "79": {
+    "id": "79",
+    "labels": {
+      "en": "Bond of Friendship"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0079_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "bond-of-friendship"
+  },
+  "8": {
+    "id": "8",
+    "labels": {
+      "en": "Realm of Gods"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0008_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "realm-of-gods"
+  },
+  "9": {
+    "id": "9",
+    "labels": {
+      "en": "Majin Buu Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0009_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "majin-buu-saga"
+  },
+  "70": {
+    "id": "70",
+    "labels": {
+      "en": "Defenders of Justice"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0070_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "defenders-of-justice"
+  },
+  "11": {
+    "id": "11",
+    "labels": {
+      "en": "Low-Class Warrior"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0011_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "low-class-warrior"
+  },
+  "49": {
+    "id": "49",
+    "labels": {
+      "en": "Team Bardock"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0049_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "team-bardock"
+  },
+  "71": {
+    "id": "71",
+    "labels": {
+      "en": "Storied Figures"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0071_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "storied-figures"
+  },
+  "30": {
+    "id": "30",
+    "labels": {
+      "en": "Goku's Family"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0030_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "goku-s-family"
+  },
+  "55": {
+    "id": "55",
+    "labels": {
+      "en": "All-Out Struggle"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0055_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "all-out-struggle"
+  },
+  "45": {
+    "id": "45",
+    "labels": {
+      "en": "Super Saiyan 2"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0045_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "super-saiyan-2"
+  },
+  "66": {
+    "id": "66",
+    "labels": {
+      "en": "Miraculous Awakening"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0066_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "miraculous-awakening"
+  },
+  "81": {
+    "id": "81",
+    "labels": {
+      "en": "Entrusted Will"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0081_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "entrusted-will"
+  },
+  "84": {
+    "id": "84",
+    "labels": {
+      "en": "Power Beyond Super Saiyan"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0084_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "power-beyond-super-saiyan"
+  },
+  "93": {
+    "id": "93",
+    "labels": {
+      "en": "Demonic Power"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0093_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "demonic-power"
+  },
+  "36": {
+    "id": "36",
+    "labels": {
+      "en": "Super Saiyans"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0036_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "super-saiyans"
+  },
+  "28": {
+    "id": "28",
+    "labels": {
+      "en": "Joined Forces"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0028_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "joined-forces"
+  },
+  "52": {
+    "id": "52",
+    "labels": {
+      "en": "Special Pose"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0052_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "special-pose"
+  },
+  "19": {
+    "id": "19",
+    "labels": {
+      "en": "Future Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0019_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "future-saga"
+  },
+  "26": {
+    "id": "26",
+    "labels": {
+      "en": "Time Travelers"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0026_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "time-travelers"
+  },
+  "2": {
+    "id": "2",
+    "labels": {
+      "en": "Shadow Dragon Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0002_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "shadow-dragon-saga"
+  },
+  "72": {
+    "id": "72",
+    "labels": {
+      "en": "GT Heroes"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0072_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "gt-heroes"
+  },
+  "12": {
+    "id": "12",
+    "labels": {
+      "en": "Super Saiyan 3"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0012_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "super-saiyan-3"
+  },
+  "58": {
+    "id": "58",
+    "labels": {
+      "en": "Battle of Wits"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0058_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "battle-of-wits"
+  },
+  "82": {
+    "id": "82",
+    "labels": {
+      "en": "Worldwide Chaos"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0082_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "worldwide-chaos"
+  },
+  "10": {
+    "id": "10",
+    "labels": {
+      "en": "Potara"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0010_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "potara"
+  },
+  "86": {
+    "id": "86",
+    "labels": {
+      "en": "Saiyan Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0086_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "saiyan-saga"
+  },
+  "14": {
+    "id": "14",
+    "labels": {
+      "en": "Planet Namek Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0014_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "planet-namek-saga"
+  },
+  "15": {
+    "id": "15",
+    "labels": {
+      "en": "Ginyu Force"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0015_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "ginyu-force"
+  },
+  "38": {
+    "id": "38",
+    "labels": {
+      "en": "Androids/Cell Saga"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0038_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "androids-cell-saga"
+  },
+  "77": {
+    "id": "77",
+    "labels": {
+      "en": "Legendary Existence"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0077_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "legendary-existence"
+  },
+  "63": {
+    "id": "63",
+    "labels": {
+      "en": "Connected Hope"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0063_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "connected-hope"
+  },
+  "22": {
+    "id": "22",
+    "labels": {
+      "en": "Representatives of Universe 7"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0022_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "representatives-of-universe-7"
+  },
+  "18": {
+    "id": "18",
+    "labels": {
+      "en": "Namekians"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0018_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "namekians"
+  },
+  "44": {
+    "id": "44",
+    "labels": {
+      "en": "Otherworld Warriors"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0044_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "otherworld-warriors"
+  },
+  "57": {
+    "id": "57",
+    "labels": {
+      "en": "Saviors"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0057_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "saviors"
+  },
+  "74": {
+    "id": "74",
+    "labels": {
+      "en": "Heavenly Events"
+    },
+    "assets": [
+      {
+        "path": "dokkaninfo.com\\assets\\global\\en\\card_category\\label\\card_category_label_0074_b_on.png",
+        "locale": "en"
+      }
+    ],
+    "slug": "heavenly-events"
+  }
+}

@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>{{ u.name }} — Dokkan Unit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#0b0f14; --card:#0f151d; --ink:#e9f2ff; --muted:#9fb0c7; --accent:#5bd1ff; --chip:#182330; --chipb:#223144;
+}
+:root[data-theme="light"]{
+  --bg:#f7faff; --card:#ffffff; --ink:#0b1623; --muted:#3e526d; --accent:#0d7bd0; --chip:#eef3fb; --chipb:#d9e6f8;
+}
+*{box-sizing:border-box}
+body{margin:0; background:
+      radial-gradient(1200px 800px at 15% -10%, rgba(91,209,255,.10), transparent),
+      radial-gradient(1000px 600px at 100% 0, rgba(155,255,221,.08), transparent),
+      var(--bg); color:var(--ink); font:14px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial;}
+a{color:var(--accent); text-decoration:none}
+.wrap{max-width:1200px; margin:0 auto; padding:24px 16px 64px}
+.top{display:grid; grid-template-columns: 360px 1fr; gap:18px; align-items:start}
+@media (max-width: 980px){ .top{ grid-template-columns: 1fr } }
+
+.card{background:linear-gradient(180deg, var(--card), #0b1016); border:1px solid #1b2636; border-radius:16px; overflow:hidden}
+:root[data-theme="light"] .card{ background:#fff; border-color:#dbe7ff }
+.card .pad{padding:14px}
+
+.hero{position:relative; background:linear-gradient(135deg, rgba(91,209,255,.10), rgba(155,255,221,.05) 40%, transparent);
+      border-radius:16px; border:1px solid #1b2636; padding:10px; }
+:root[data-theme="light"] .hero{ border-color:#dbe7ff; background:#fff }
+.hero .imgbox{background:#0b1118; border:1px solid #172234; border-radius:12px; display:flex; align-items:center; justify-content:center}
+:root[data-theme="light"] .hero .imgbox{ background:#eef3fb; border-color:#d9e6f8 }
+.hero .imgbox img{width:100%; height:auto; object-fit:contain; display:block; filter:drop-shadow(0 18px 26px rgba(0,0,0,.55))}
+.hmeta{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap}
+.hmeta .pill{font-size:12px; background:#0b1118; padding:5px 9px; border:1px solid #1c2838; border-radius:999px; color:#b5c9e6}
+:root[data-theme="light"] .hmeta .pill{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+
+.hdr{display:flex; justify-content:space-between; align-items:flex-start; gap:12px}
+.hdr h1{font-size:22px; margin:0}
+.flags{display:flex; gap:6px; flex-wrap:wrap}
+.badge{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 8px; background:var(--chip); border:1px solid var(--chipb); border-radius:999px}
+.badge.eza{border-color:#2f5f8a; color:#8fd0ff}
+.badge.tr{border-color:#476a3c; color:#b4ff9b}
+.badge.ex{border-color:#6b5a2d; color:#ffe59c}
+.badge.st{border-color:#6a446e; color:#ffb2ff}
+.badge.ac{border-color:#3a5f76; color:#a4e7ff}
+.badge.gi{border-color:#6b4f2f; color:#ffd6a4}
+.badge.rv{border-color:#355a2e; color:#cdffcc}
+
+.section{margin-top:14px}
+.section h3{margin:0 0 8px; font-size:16px}
+.kv{display:flex; gap:8px; flex-wrap:wrap}
+.kv .kvitem{font-size:12px; color:#b1c5df; background:#0e151d; border:1px solid #19263a; padding:4px 8px; border-radius:8px}
+:root[data-theme="light"] .kv .kvitem{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.box{background:#0f151d; border:1px solid #1b2636; border-radius:12px; padding:12px}
+:root[data-theme="light"] .box{ background:#fff; border-color:#dbe7ff }
+
+.grid2{display:grid; grid-template-columns: 1fr 1fr; gap:14px}
+@media (max-width: 980px){ .grid2{ grid-template-columns: 1fr } }
+.stattbl{width:100%; border-collapse:collapse; overflow:hidden; border-radius:10px}
+.stattbl th, .stattbl td{border:1px solid #1b2636; padding:8px; text-align:left}
+:root[data-theme="light"] .stattbl th, :root[data-theme="light"] .stattbl td{ border-color:#dbe7ff }
+.statlbl{opacity:.8}
+
+.skill{margin:8px 0}
+.skill strong{color:#cfe2ff}
+:root[data-theme="light"] .skill strong{ color:#0b1623 }
+.note{opacity:.8; font-size:12px}
+
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{font-size:12px; background:#0b1118; padding:5px 9px; border:1px solid #1c2838; border-radius:999px; color:#b5c9e6}
+:root[data-theme="light"] .chip{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+
+.actions{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+.button{font-size:12px; padding:8px 12px; background:#0f151d; border:1px solid #1e2a3a; border-radius:8px; color:#fff}
+:root[data-theme="light"] .button{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.button:hover{border-color:#38506f}
+
+/* Forms rail / tabs / steps */
+.forms{display:flex; gap:8px; overflow:auto; padding-bottom:4px; margin:10px 0}
+.formbtn{display:flex; gap:8px; align-items:center; border:1px solid #1b2636; background:#0f151d; color:#e9f2ff; padding:6px; border-radius:10px; cursor:pointer; white-space:nowrap}
+:root[data-theme="light"] .formbtn{ background:#fff; color:#0b1623; border-color:#dbe7ff }
+.formbtn img{width:48px; height:auto; border-radius:8px; background:#0b1118}
+:root[data-theme="light"] .formbtn img{ background:#eef3fb }
+.formbtn.active{ outline:2px solid rgba(91,209,255,.4) }
+
+.tabs{display:flex; gap:8px; margin:8px 0}
+.tab{padding:6px 10px; border:1px solid #1b2636; background:#0f151d; color:#e9f2ff; border-radius:999px; cursor:pointer}
+:root[data-theme="light"] .tab{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.tab.active{ outline:2px solid rgba(91,209,255,.4) }
+
+.steps{display:flex; gap:6px; flex-wrap:wrap; margin:6px 0}
+.step{padding:4px 8px; border:1px solid #1b2636; background:#0f151d; color:#e9f2ff; border-radius:6px; cursor:pointer}
+:root[data-theme="light"] .step{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.step.active{ outline:2px solid rgba(91,209,255,.4) }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hdr">
+      <h1 id="title">{{ u.name }}</h1>
+      <div class="flags">
+        {% for f in u.flags %}
+          <span class="badge {{ 'eza' if f=='EZA' else 'tr' if f=='Transforms' else 'ex' if f=='Exchange' else 'st' if f=='Standby' else 'ac' if f=='Active' else 'gi' if f=='Giant Form' else 'rv' if f=='Revival' else '' }}">{{ f }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="top">
+      <div class="hero">
+        <div class="imgbox">
+          <img id="heroImg" src="{{ u.images.full or u.images.character or '/assets/dokkaninfo.com/images/dokkan-info-logo.png' }}" alt="{{ u.name }}"
+               onerror="this.onerror=null; this.src='/assets/dokkaninfo.com/images/dokkan-info-logo.png'">
+        </div>
+        <div class="hmeta" id="metaPills">
+          {% if u.rarity %}<span class="pill" id="rarityP">{{ u.rarity }}</span>{% endif %}
+          {% if u.type %}<span class="pill" id="typeP">{{ u.type }}</span>{% endif %}
+          {% if u.obtain %}<span class="pill" id="obtainP">{{ u.obtain }}</span>{% endif %}
+          <span class="pill">ID: {{ u.unit_id }}</span>
+          {% if u.release %}<span class="pill" id="relP">Release: {{ u.release }}{% if u.timezone %} {{ u.timezone }}{% endif %}</span>{% endif %}
+        </div>
+        <div class="actions">
+          {% if u.source %}<a class="button" href="{{ u.source }}" target="_blank" rel="noopener">Open on DokkanInfo ↗</a>{% endif %}
+          <a class="button" href="/">← Back to all units</a>
+          <button class="button" id="themeBtn">🌓 Theme</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="pad">
+          <!-- Forms rail -->
+          <div class="forms" id="formsRail"></div>
+
+          <!-- Tabs and steps -->
+          <div class="tabs" id="tabs"></div>
+          <div class="steps" id="steps"></div>
+
+          <div class="grid2">
+            <div>
+              <div class="section">
+                <h3>Leader Skill</h3>
+                <div class="box"><span id="leaderSkill">{{ u.leader_skill or "—" }}</span></div>
+              </div>
+              <div class="section">
+                <h3>Super Attack</h3>
+                <div class="box">
+                  <div class="skill"><strong id="superName">{{ u.super_attack.name if u.super_attack else "—" }}</strong></div>
+                  <div class="skill" id="superEff">{{ u.super_attack.effect if u.super_attack else "" }}</div>
+                </div>
+              </div>
+              <div class="section" id="ultraBlock" style="display:none">
+                <h3>Ultra / 18-Ki</h3>
+                <div class="box">
+                  <div class="skill"><strong id="ultraName">—</strong></div>
+                  <div class="skill" id="ultraEff"></div>
+                </div>
+              </div>
+              <div class="section" id="activeBlock" style="display:none">
+                <h3>Active Skill</h3>
+                <div class="box">
+                  <div class="skill"><strong id="activeName">—</strong></div>
+                  <div class="skill" id="activeEff"></div>
+                  <div class="note" id="activeCond"></div>
+                </div>
+              </div>
+              <div class="section" id="standbyBlock" style="display:none">
+                <h3>Standby Skill</h3>
+                <div class="box">
+                  <div class="skill"><strong id="standbyName">—</strong></div>
+                  <div class="skill" id="standbyEff"></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="section">
+                <h3>Passive</h3>
+                <div class="box" id="passiveBox">—</div>
+              </div>
+              <div class="section">
+                <h3>Stats</h3>
+                <table class="stattbl">
+                  <thead>
+                    <tr><th></th><th>Base</th><th>55%</th><th>100%</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="statlbl">HP</td><td id="hpB">—</td><td id="hp55">—</td><td id="hp100">—</td></tr>
+                    <tr><td class="statlbl">ATK</td><td id="atkB">—</td><td id="atk55">—</td><td id="atk100">—</td></tr>
+                    <tr><td class="statlbl">DEF</td><td id="defB">—</td><td id="def55">—</td><td id="def100">—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="section">
+                <h3>Link Skills</h3>
+                <div class="chips" id="linksBox"></div>
+              </div>
+              <div class="section">
+                <h3>Categories</h3>
+                <div class="chips" id="catsBox"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+const DATA = {{ u|tojson }};
+const $ = (s,root=document)=>root.querySelector(s);
+const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
+
+(function theme(){
+  const root = document.documentElement;
+  const saved = localStorage.getItem("dokkan.theme") || "dark";
+  root.setAttribute("data-theme", saved);
+  $("#themeBtn").addEventListener("click", ()=>{
+    const cur = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+    root.setAttribute("data-theme", cur);
+    localStorage.setItem("dokkan.theme", cur);
+  });
+})();
+
+function textOr(lines, effect){
+  if(Array.isArray(lines) && lines.length){
+    const li = lines.map(ln=>{
+      const t = (ln.text||"").trim(); const c = (ln.context||"").trim();
+      if(t && c) return `<li>${t} — <span class="note">${c}</span></li>`;
+      if(t) return `<li>${t}</li>`;
+      if(c) return `<li><span class="note">${c}</span></li>`;
+      return "";
+    }).filter(Boolean).join("");
+    return `<ul>${li}</ul>`;
+  }
+  return effect || "—";
+}
+
+const formsRail = $("#formsRail");
+const tabs = $("#tabs");
+const steps = $("#steps");
+
+// deep-link state
+function getParams(){
+  const p = new URLSearchParams(location.search);
+  return {
+    form: p.get("form"),
+    mode: p.get("mode"),
+    step: p.get("step") ? parseInt(p.get("step"),10) : null
+  };
+}
+function setParams({form, mode, step}){
+  const p = new URLSearchParams(location.search);
+  if(form) p.set("form", form); else p.delete("form");
+  if(mode) p.set("mode", mode); else p.delete("mode");
+  if(step!=null) p.set("step", String(step)); else p.delete("step");
+  history.replaceState(null, "", "?"+p.toString());
+}
+
+let curForm = null;   // a form object from DATA.forms
+let curMode = "regular"; // "regular" | "eza" | "seza"
+let curStep = null;   // integer or null
+let curVar = null;    // current variant detail
+
+function buildUI(){
+  // forms rail
+  formsRail.innerHTML = "";
+  DATA.forms.forEach((f, idx)=>{
+    const btn = document.createElement("button");
+    btn.className = "formbtn";
+    btn.dataset.idx = idx;
+    btn.dataset.root = f.root;
+    btn.innerHTML = `<img src="${f.thumb || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt="">
+                     <span>${f.title}</span>`;
+    formsRail.appendChild(btn);
+  });
+  // default form: from URL ?form= or base/first
+  const {form, mode, step} = getParams();
+  let initial = null;
+  if(form){
+    initial = DATA.forms.find(f=>f.root===form) || null;
+  }
+  if(!initial){ initial = DATA.forms.find(f=>f.root==="base") || DATA.forms[0]; }
+  selectForm(initial);
+  if(mode && ["regular","eza","seza"].includes(mode)) curMode = mode;
+  updateSteps();
+  if(step!=null) curStep = step;
+  updateActiveStates();
+  pickVariant();
+}
+function selectForm(f){
+  curForm = f;
+  // tabs
+  tabs.innerHTML = "";
+  const t1 = document.createElement("button"); t1.className="tab"; t1.textContent="Regular"; t1.dataset.m="regular"; tabs.appendChild(t1);
+  if(f.has_eza){ const t2=document.createElement("button"); t2.className="tab"; t2.textContent="EZA"; t2.dataset.m="eza"; tabs.appendChild(t2); }
+  if(f.has_seza){ const t3=document.createElement("button"); t3.className="tab"; t3.textContent="S-EZA"; t3.dataset.m="seza"; tabs.appendChild(t3); }
+  if(!["regular","eza","seza"].includes(curMode)) curMode = "regular";
+  curStep = null;
+  updateSteps();
+  updateActiveStates();
+  pickVariant();
+}
+function updateSteps(){
+  steps.innerHTML = "";
+  const list = curMode==="eza" ? curForm.eza_steps : (curMode==="seza" ? curForm.seza_steps : []);
+  if(list && list.length){
+    list.forEach(v=>{
+      const b = document.createElement("button"); b.className="step"; b.textContent = v.step ?? "?"; b.dataset.step = v.step ?? "0";
+      steps.appendChild(b);
+    });
+    // default to highest if needed
+    if(curStep==null){ curStep = list[list.length-1].step ?? null; }
+  }else{
+    curStep = null;
+  }
+}
+function updateActiveStates(){
+  $$(".formbtn", formsRail).forEach((b,i)=>{
+    b.classList.toggle("active", DATA.forms[i]===curForm);
+  });
+  $$(".tab", tabs).forEach(t=> t.classList.toggle("active", t.dataset.m===curMode));
+  $$(".step", steps).forEach(s=> s.classList.toggle("active", parseInt(s.dataset.step,10)===curStep));
+  setParams({form: curForm?.root, mode: curMode, step: curStep});
+}
+function pickVariant(){
+  let v = null;
+  if(curMode==="regular"){ v = curForm.regular; }
+  else if(curMode==="eza"){ v = (curForm.eza_steps||[]).find(x=>x.step===curStep) || (curForm.eza_steps||[]).slice(-1)[0]; }
+  else if(curMode==="seza"){ v = (curForm.seza_steps||[]).find(x=>x.step===curStep) || (curForm.seza_steps||[]).slice(-1)[0]; }
+  curVar = v || curForm.regular || (curForm.eza_steps||[]).slice(-1)[0] || (curForm.seza_steps||[]).slice(-1)[0];
+  renderVariant();
+  updateActiveStates();
+}
+
+formsRail.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".formbtn"); if(!btn) return;
+  selectForm(DATA.forms[parseInt(btn.dataset.idx,10)]);
+});
+tabs.addEventListener("click", (e)=>{
+  const t = e.target.closest(".tab"); if(!t) return;
+  curMode = t.dataset.m;
+  updateSteps();
+  pickVariant();
+});
+steps.addEventListener("click", (e)=>{
+  const s = e.target.closest(".step"); if(!s) return;
+  curStep = parseInt(s.dataset.step,10);
+  pickVariant();
+});
+
+function renderVariant(){
+  if(!curVar) return;
+  // title
+  const disp = (curVar.display_name && curVar.display_name.trim()) ? curVar.display_name.trim() : DATA.name;
+  document.title = `${disp} — Dokkan Unit`;
+  $("#title").textContent = disp;
+
+  // art
+  const art = curVar.images || {};
+  const src = art.full || art.character || "/assets/dokkaninfo.com/images/dokkan-info-logo.png";
+  $("#heroImg").src = src;
+
+  // pills
+  if($("#rarityP")) $("#rarityP").textContent = curVar.rarity || DATA.rarity || "";
+  if($("#typeP")) $("#typeP").textContent = curVar.type || DATA.type || "";
+  if($("#obtainP")) $("#obtainP").textContent = curVar.obtain || DATA.obtain || "";
+  if($("#relP")) $("#relP").textContent = "Release: " + (curVar.release || DATA.release || "");
+
+  // kit sections
+  $("#leaderSkill").textContent = (curVar.leader_skill || "—").replace(/Key/g,"Ki"); // Ki fix
+  const su = curVar.super_attack || null;
+  $("#superName").textContent = su?.name || "—";
+  $("#superEff").textContent = su?.effect || "";
+
+  const ul = curVar.ultra_super_attack || null;
+  $("#ultraBlock").style.display = (ul && (ul.name || ul.effect)) ? "" : "none";
+  if(ul){ $("#ultraName").textContent = ul.name || "—"; $("#ultraEff").textContent = ul.effect || ""; }
+
+  const ac = curVar.active_skill || null;
+  $("#activeBlock").style.display = (ac && (ac.name || ac.effect || ac.activation_conditions || (ac.lines && ac.lines.length))) ? "" : "none";
+  if(ac){ $("#activeName").textContent = ac.name || "—"; $("#activeEff").textContent = ac.effect || ""; $("#activeCond").textContent = ac.activation_conditions || ""; }
+
+  const st = curVar.standby_skill || null;
+  $("#standbyBlock").style.display = (st && (st.name || st.effect || (st.lines && st.lines.length))) ? "" : "none";
+  if(st){ $("#standbyName").textContent = st.name || "—"; $("#standbyEff").textContent = st.effect || ""; }
+
+  const p = curVar.passive_skill || null;
+  $("#passiveBox").innerHTML = p ? textOr(p.lines, p.effect) : "—";
+
+  const stats = curVar.stats || {HP:{},ATK:{},DEF:{}};
+  $("#hpB").textContent = stats.HP?.Base ?? "—";
+  $("#hp55").textContent = stats.HP?.["55%"] ?? "—";
+  $("#hp100").textContent = stats.HP?.["100%"] ?? "—";
+  $("#atkB").textContent = stats.ATK?.Base ?? "—";
+  $("#atk55").textContent = stats.ATK?.["55%"] ?? "—";
+  $("#atk100").textContent = stats.ATK?.["100%"] ?? "—";
+  $("#defB").textContent = stats.DEF?.Base ?? "—";
+  $("#def55").textContent = stats.DEF?.["55%"] ?? "—";
+  $("#def100").textContent = stats.DEF?.["100%"] ?? "—";
+
+  const links = curVar.links || [];
+  $("#linksBox").innerHTML = links.length ? links.map(l=>`<span class="chip">${l}</span>`).join("") : "—";
+  const cats = curVar.categories || [];
+  $("#catsBox").innerHTML = cats.length ? cats.map(c=>`<span class="chip">${c}</span>`).join("") : "—";
+}
+
+buildUI();
+</script>
+</body>
+</html>

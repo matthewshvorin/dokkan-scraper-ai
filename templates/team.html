@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Team Builder — Dokkan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#0b0f14; --card:#0e141d; --ink:#e9f2ff; --muted:#9fb0c7; --accent:#5bd1ff; --accent-2:#9bffdd;
+  --chip:#182330; --chipb:#223144; --slot:#0e1520; --ok:#12d18e; --warn:#ffd166; --bad:#ff6b6b;
+  --shadow:0 10px 30px rgba(0,0,0,.30);
+  --pickCardW: 280px; /* controls picker card width (Small/Med/Large) */
+  --teamW: min(780px, 46vw); /* a bit wider for comfort */
+  --glass-bg: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  --glass-brd: 1px solid rgba(255,255,255,.08);
+}
+:root[data-theme="light"]{
+  --bg:#f7faff; --card:#ffffff; --ink:#0b1623; --muted:#3e526d; --accent:#0d7bd0; --accent-2:#0ab39b;
+  --chip:#eef3fb; --chipb:#d9e6f8; --slot:#f2f6ff; --shadow:0 10px 30px rgba(9,16,26,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:
+    radial-gradient(1200px 800px at 15% -10%, rgba(91,209,255,.10), transparent),
+    radial-gradient(1000px 600px at 100% 0, rgba(155,255,221,.08), transparent),
+    linear-gradient(180deg, #09101a, var(--bg));
+  color:var(--ink); font:14px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial;
+}
+a{color:var(--accent); text-decoration:none}
+.wrap{max-width:1700px; margin:0 auto; padding:24px 16px 64px}
+
+/* header */
+.header{display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap}
+.header h1{font-size:28px; margin:0}
+.btn{font-size:12px; padding:8px 12px; background:#0f151d; border:1px solid #1e2a3a; border-radius:10px; color:#fff; cursor:pointer; transition:.15s}
+.btn:hover{ border-color:#38506f; transform:translateY(-1px) }
+:root[data-theme="light"] .btn{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.btn.ghost{ background:transparent; border-color:#233246 }
+.btn.primary{ border-color:#2a9ed6; box-shadow:0 0 0 3px rgba(91,209,255,.16) inset }
+
+/* layout */
+.cols{
+  display:grid;
+  grid-template-columns: var(--teamW) 1fr;
+  gap:18px;
+  align-items:start;
+}
+@media (max-width: 1150px){
+  :root{ --teamW: 100% }
+  .cols{ grid-template-columns: 1fr }
+}
+
+/* panels - modern glassy */
+.panel{
+  background:var(--glass-bg);
+  border:var(--glass-brd);
+  border-radius:16px;
+  padding:12px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+:root[data-theme="light"] .panel{ backdrop-filter:none }
+
+/* sticky team */
+.panel.team{ position:sticky; top:12px; z-index:1 }
+
+.h2{margin:0 0 8px; font-size:16px}
+.row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.note{opacity:.85; font-size:12px}
+
+/* team board */
+.board{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  margin-top:10px;
+}
+@media (max-width: 560px){
+  .board{ grid-template-columns: 1fr }
+}
+.slot{
+  background:var(--slot);
+  border:1px dashed #2a3c55;
+  border-radius:12px;
+  padding:10px;
+  display:grid;
+  grid-template-columns: 116px 1fr;
+  gap:10px;
+  align-items:center;
+  min-height:122px;
+  transition:border-color .15s, background .15s, transform .05s;
+}
+:root[data-theme="light"] .slot{ border-color:#dbe7ff }
+.slot.dragover{ border-color: var(--accent); background: rgba(91,209,255,.06) }
+.slot .imgwrap{
+  position:relative; border-radius:10px; overflow:hidden;
+  background:#0b1118; border:1px solid #172234; display:flex; align-items:center; justify-content:center;
+}
+:root[data-theme="light"] .slot .imgwrap{ background:#eef3fb; border-color:#d9e6f8 }
+.slot img{ width:100%; height:auto; display:block; object-fit:cover }
+.slot .meta{ display:flex; flex-direction:column; gap:6px; min-width:0 }
+.slot .name{
+  font-weight:800; line-height:1.15;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; text-overflow:ellipsis; max-height:3.2em;
+}
+.slot .sub{ font-size:12px; color:var(--muted); display:flex; gap:6px; flex-wrap:wrap }
+.badge{ display:inline-flex; align-items:center; gap:6px; font-size:11px;
+  padding:3px 8px; background:#0e151d; border:1px solid #233246; border-radius:999px; color:#cadeff }
+:root[data-theme="light"] .badge{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.actions{ display:flex; gap:6px; flex-wrap:wrap }
+.lock.active{ box-shadow:0 0 0 2px rgba(155,255,221,.20) inset }
+
+/* warnings / status */
+.warn{ color:var(--warn) }
+.ok{ color:var(--ok) }
+.bad{ color:var(--bad) }
+
+/* picker controls */
+.controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.input, .select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radius:10px; padding:8px 10px}
+:root[data-theme="light"] .input, :root[data-theme="light"] .select{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.select{cursor:pointer}
+
+/* eligible grid */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--pickCardW), 1fr));
+  gap:14px;
+  margin-top:12px;
+}
+.card{
+  background:linear-gradient(180deg, #0f151d, #0b1016);
+  border:1px solid #1b2636;
+  border-radius:14px;
+  overflow:hidden;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s;
+  position:relative;
+}
+.card:hover{ transform: translateY(-2px); border-color:#2a3b54; box-shadow: var(--shadow) }
+:root[data-theme="light"] .card{ background:#fff; border-color:#dbe7ff }
+.card .img{ background:#0c121a; display:flex; align-items:center; justify-content:center }
+:root[data-theme="light"] .card .img{ background:#eef3fb }
+.card .img img{ width:100%; height:auto; display:block; object-fit:contain; max-height:240px }
+.card .body{ padding:10px }
+.pills{ display:flex; gap:6px; flex-wrap:wrap }
+.pill{ font-size:11px; background:#0b1118; padding:4px 8px; border:1px solid #1c2838; border-radius:999px; color:#cfe2ff }
+:root[data-theme="light"] .pill{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.ctitle{ font-weight:800; margin:4px 0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.chips{ display:flex; gap:6px; flex-wrap:wrap }
+.chip{ background:#0b1118; border:1px solid #1f2b3b; color:#d2e4ff; font-size:12px; padding:5px 9px; border-radius:999px }
+:root[data-theme="light"] .chip{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.cactions{ display:flex; gap:6px; flex-wrap:wrap }
+.button{ font-size:12px; padding:6px 10px; background:#0f151d; border:1px solid #1e2a3a; border-radius:8px; color:#fff; cursor:pointer; transition:.15s }
+.button:hover{border-color:#38506f; transform:translateY(-1px)}
+:root[data-theme="light"] .button{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+
+.card[draggable="true"]{ cursor:grab }
+.card.dragging{ opacity:.75; transform:scale(.98) }
+
+/* active categories from leader */
+.bar{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px }
+.kv{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px }
+.kv .kvitem{ font-size:12px; color:#b1c5df; background:#0e151d; border:1px solid #19263a; padding:4px 8px; border-radius:8px }
+:root[data-theme="light"] .kv .kvitem{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+
+/* divider */
+.hr{ height:1px; background:linear-gradient(90deg, transparent, #2b3d57 40%, #2b3d57 60%, transparent); margin:12px 0 }
+
+/* tag dots */
+.dot{ width:8px; height:8px; border-radius:50%; display:inline-block; background:#2a3b54 }
+.dot.lr{ background:#ffd166 } .dot.ur{ background:#8bffb1 } .dot.ssr{ background:#a7c7ff }
+
+/* best leader chips */
+.lchip{
+  display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+  background:#0d1724; border:1px solid #223246; color:#d8e8ff; font-size:12px; white-space:nowrap;
+}
+:root[data-theme="light"] .lchip{ background:#fff; border-color:#dbe7ff; color:#0b1623 }
+.lchip strong{font-weight:800; max-width:280px; overflow:hidden; text-overflow:ellipsis}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>🧩 Team Builder</h1>
+    <a class="btn" href="/">← Back to all units</a>
+    <a class="btn" href="/finder">👑 Leader Finder</a>
+    <button class="btn" id="themeBtn">🌓 Theme</button>
+  </div>
+
+  <div class="cols">
+    <!-- LEFT: TEAM BOARD (sticky, wider, flexible) -->
+    <div class="panel team" id="teamPanel">
+      <div class="row" style="justify-content:space-between">
+        <div class="h2" style="margin:0">Team Board</div>
+        <div class="row">
+          <button class="btn" id="pickLeaderBtn">Pick Leader</button>
+          <button class="btn primary" id="suggestLeaderBtn" title="Pick the best leader for current team">✨ Suggest Best Leader</button>
+          <button class="btn" id="removeLeaderBtn" disabled>Remove Leader</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:6px">
+        <label class="kvitem">Min Boost
+          <select class="select" id="minBoost">
+            <option value="0">Any</option>
+            <option value="200">200%+</option>
+            <option value="220">220%+</option>
+          </select>
+        </label>
+        <label class="kvitem">Prevent duplicates <input type="checkbox" id="noDup" checked></label>
+        <button class="btn" id="swapModeBtn" title="Swap two slots">⇄ Swap</button>
+        <button class="btn" id="autoFill">✨ Auto-fill best</button>
+      </div>
+
+      <div class="kv" id="leaderInfo" style="margin-top:6px"></div>
+
+      <!-- Dynamic best leaders strip -->
+      <div class="bar" id="bestLeaderStrip"></div>
+
+      <div class="board" id="board">
+        <!-- Leader -->
+        <div class="slot" data-slot="0" draggable="true">
+          <div class="imgwrap"><img id="slot0img" alt="" style="display:none"></div>
+          <div class="meta">
+            <div class="name" id="slot0name">Leader</div>
+            <div class="sub"><span class="badge" id="slot0badge">Pick a leader</span></div>
+            <div class="actions">
+              <button class="button" id="slot0clear" disabled>Clear</button>
+              <a class="button" id="slot0details" target="_blank" style="display:none">Details ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slots 1-5 -->
+        {% for i in range(1,6) %}
+        <div class="slot" data-slot="{{i}}" draggable="true">
+          <div class="imgwrap"><img id="slot{{i}}img" alt="" style="display:none"></div>
+          <div class="meta">
+            <div class="name" id="slot{{i}}name">Empty</div>
+            <div class="sub">
+              <span class="badge" id="slot{{i}}boost">—</span>
+              <span class="badge" id="slot{{i}}syn">Links 0 • Cats 0</span>
+            </div>
+            <div class="actions">
+              <button class="button lock" data-slot="{{i}}" title="Lock this slot">🔒 Lock</button>
+              <button class="button remove" data-slot="{{i}}">Remove</button>
+              <a class="button" id="slot{{i}}details" target="_blank" style="display:none">Details ↗</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Team summary -->
+      <div class="h2">Team Summary</div>
+      <div class="kv" id="teamSummary">
+        <span class="kvitem"><strong>Total Shared Links</strong> <span id="sumLinks">0</span></span>
+        <span class="kvitem"><strong>Avg Links/Pair</strong> <span id="avgLinks">0</span></span>
+        <span class="kvitem"><strong>Members</strong> <span id="countMembers">0</span>/6</span>
+        <span class="kvitem"><strong>Duplicates</strong> <span id="dups" class="ok">0</span></span>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="clearTeam">Clear team</button>
+        <button class="btn" id="shareTeam">Copy share link</button>
+        <button class="btn" id="downloadTeam">Export preset</button>
+        <label class="kvitem">Card size
+          <select class="select" id="cardSize">
+            <option value="260">Small</option>
+            <option value="280" selected>Medium</option>
+            <option value="320">Large</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Presets -->
+      <div class="hr"></div>
+      <div class="h2">Presets</div>
+      <div class="row">
+        <select class="select" id="presetSelect" style="min-width:200px"></select>
+        <button class="btn" id="savePreset">Save current</button>
+        <button class="btn" id="loadPreset" disabled>Load</button>
+        <button class="btn" id="deletePreset" disabled>Delete</button>
+        <input class="input" id="presetName" placeholder="Preset name…" style="flex:1; min-width:160px">
+      </div>
+    </div>
+
+    <!-- RIGHT: PICKER -->
+    <div class="panel picker">
+      <div class="row" style="justify-content:space-between">
+        <div class="h2" style="margin:0">Eligible Teammates</div>
+        <div class="row">
+          <label class="kvitem">Sort
+            <select class="select" id="sort">
+              <option value="boost">Best Boost</option>
+              <option value="synergy">Best Synergy</option>
+              <option value="rarity">LR → UR → SSR</option>
+              <option value="name">Name (A→Z)</option>
+              <option value="type">Type</option>
+            </select>
+          </label>
+          <label class="kvitem">Type
+            <select class="select" id="type">
+              <option value="">All</option>
+              <option>AGL</option><option>TEQ</option><option>INT</option><option>STR</option><option>PHY</option>
+            </select>
+          </label>
+          <label class="kvitem">Rarity
+            <select class="select" id="rarity">
+              <option value="">All</option>
+              <option value="LR">LR</option>
+              <option value="UR">UR</option>
+              <option value="SSR">SSR</option>
+            </select>
+          </label>
+          <label class="kvitem">Favorites <input type="checkbox" id="favOnly"></label>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:6px">
+        <input class="input" id="eligibleQ" placeholder="Search name, ID, category, link…" style="flex:1; min-width:220px">
+        <button class="btn ghost" id="clearFilters">Reset</button>
+      </div>
+
+      <div class="bar" id="activeCats"></div>
+
+      <div class="grid" id="cards"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Leader picker modal -->
+<div class="panel" id="leaderModal" style="position:fixed; inset:40px; display:none; z-index:50; overflow:auto">
+  <div class="row" style="justify-content:space-between">
+    <div class="h2" style="margin:0">Pick a Leader</div>
+    <button class="btn" id="closeLeader">Close</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <input class="input" id="leaderQ" placeholder="Search leaders by name, ID, category…" style="flex:1; min-width:240px" />
+    <label class="kvitem">Type
+      <select class="select" id="leaderType">
+        <option value="">All</option>
+        <option>AGL</option><option>TEQ</option><option>INT</option><option>STR</option><option>PHY</option>
+      </select>
+    </label>
+    <label class="kvitem">Favorites <input type="checkbox" id="leaderFavOnly"></label>
+  </div>
+
+  <!-- Top suggestions appear here when you open the modal -->
+  <div class="bar" id="modalBestStrip" style="margin-top:10px"></div>
+
+  <div class="grid" id="leaderGrid" style="margin-top:12px"></div>
+</div>
+
+<script>
+const UNITS = {{ units|tojson }};
+const $ = (s,root=document)=>root.querySelector(s);
+const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
+
+/* theme */
+(function theme(){
+  const root = document.documentElement;
+  const saved = localStorage.getItem("dokkan.theme") || "dark";
+  root.setAttribute("data-theme", saved);
+  $("#themeBtn").addEventListener("click", ()=>{
+    const cur = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+    root.setAttribute("data-theme", cur);
+    localStorage.setItem("dokkan.theme", cur);
+  });
+})();
+
+const cards = $("#cards");
+const sortSel = $("#sort");
+const typeSel = $("#type");
+const raritySel = $("#rarity");
+const favOnly = $("#favOnly");
+const activeCats = $("#activeCats");
+const eligibleQ = $("#eligibleQ");
+const clearFilters = $("#clearFilters");
+const cardSize = $("#cardSize");
+
+const pickLeaderBtn = $("#pickLeaderBtn");
+const suggestLeaderBtn = $("#suggestLeaderBtn");
+const removeLeaderBtn = $("#removeLeaderBtn");
+const minBoostSel = $("#minBoost");
+const noDup = $("#noDup");
+const swapModeBtn = $("#swapModeBtn");
+const autoFillBtn = $("#autoFill");
+
+const leaderModal = $("#leaderModal");
+const leaderQ = $("#leaderQ");
+const leaderType = $("#leaderType");
+const leaderFavOnly = $("#leaderFavOnly");
+const leaderGrid = $("#leaderGrid");
+const closeLeader = $("#closeLeader");
+
+const leaderInfo = $("#leaderInfo");
+const bestLeaderStrip = $("#bestLeaderStrip");
+const modalBestStrip = $("#modalBestStrip");
+
+const slots = {};
+for(let i=0;i<=5;i++){
+  slots[i] = {
+    wrap: document.querySelector(`.slot[data-slot="${i}"]`),
+    img: $(`#slot${i}img`),
+    name: $(`#slot${i}name`),
+    badge: $(`#slot${i}badge`) || $(`#slot${i}boost`),
+    syn: $(`#slot${i}syn`),
+    clearBtn: $(`#slot${i}clear`) || document.querySelector(`.remove[data-slot="${i}"]`),
+    details: $(`#slot${i}details`),
+    lockBtn: document.querySelector(`.lock[data-slot="${i}"]`),
+    locked: false,
+    id: ""
+  };
+}
+
+/* helpers */
+function isFav(u){ try{ return (JSON.parse(localStorage.getItem("dokkan.favs")||"[]")).includes(u.id); }catch{ return false; } }
+function clamp(txt, max=80){ return (txt||"").length>max ? (txt.slice(0,max-1)+"…") : (txt||""); }
+
+/* parsing + boost (shared with Finder) */
+function parseLeaderSkill(text){
+  const res = {primary:[], secondary:[], ki:null, main_pct:null, add_pct:null, secondary_total:null, has_secondary:false, all_types:false, flat_total_max:null};
+  if(!text) return res;
+  const t = text.replace(/\s+/g,' ').trim();
+  res.all_types = /all types?/i.test(t);
+  const kis = Array.from(t.matchAll(/Ki\s*\+(\d+)/ig)).map(m=>parseInt(m[1],10));
+  res.ki = kis.length ? Math.max(...kis) : null;
+  const idx = t.toLowerCase().indexOf("plus an additional");
+  const head = idx>=0 ? t.slice(0,idx) : t; const tail = idx>=0 ? t.slice(idx) : "";
+  const headPcts = Array.from(head.matchAll(/\+(\d+)%/g)).map(m=>parseInt(m[1],10));
+  res.main_pct = headPcts.length ? Math.max(...headPcts) : null;
+  res.primary = Array.from(head.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
+  if(tail){ res.has_secondary = true;
+    res.secondary = Array.from(tail.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
+    const adds = Array.from(tail.matchAll(/\+(\d+)%/g)).map(m=>parseInt(m[1],10));
+    if(adds.length){ res.add_pct = Math.max(...adds); }
+    if(res.main_pct!=null && res.add_pct!=null){ res.secondary_total = res.main_pct + res.add_pct; }
+  }
+  const all = Array.from(t.matchAll(/\+(\d+)%/g)).map(m=>parseInt(m[1],10));
+  if(all.length) res.flat_total_max = Math.max(...all);
+  return res;
+}
+function maxBoostForUnit(leaderUnit, unit){
+  const p = parseLeaderSkill(leaderUnit.leader_skill||"");
+  if(!p) return 0;
+  if(p.all_types){
+    return p.main_pct ?? p.flat_total_max ?? 0;
+  }
+  const set = new Set(unit.categories||[]);
+  const hasPrimary = p.primary.some(c=>set.has(c));
+  if(!hasPrimary) return 0;
+  let total = p.main_pct ?? 0;
+  if(p.has_secondary && p.secondary && p.add_pct){
+    const hasSec = p.secondary.some(c=>set.has(c));
+    if(hasSec){
+      total = Math.max(total, (p.secondary_total || 0));
+    }
+  }
+  total = Math.max(total, p.flat_total_max || 0);
+  return total;
+}
+function synergyWithLeader(leaderUnit, unit){
+  if(!leaderUnit) return {links:0, cats:0, score:0};
+  const Llinks = new Set(leaderUnit.links || []);
+  const Lcats  = new Set(leaderUnit.categories || []);
+  const links = (unit.links||[]).filter(x=>Llinks.has(x)).length;
+  const cats  = (unit.categories||[]).filter(x=>Lcats.has(x)).length;
+  return {links, cats, score: links*2 + cats};
+}
+function pairSharedLinks(u1,u2){
+  const a = new Set(u1?.links||[]);
+  return (u2?.links||[]).filter(l=>a.has(l)).length;
+}
+
+/* find best leaders for current team members */
+function currentMembers(){
+  const out = [];
+  for(let i=1;i<=5;i++){ if(slots[i].id){ const u = UNITS.find(x=>x.id===slots[i].id); if(u) out.push(u); } }
+  return out;
+}
+function scoreLeaderCandidate(L){
+  const min = parseInt(minBoostSel.value,10)||0;
+  const members = currentMembers();
+  if(!members.length) return null;
+  let covered = 0, boostSum = 0, synSum = 0;
+  for(const m of members){
+    const b = maxBoostForUnit(L, m);
+    if(b >= min && b > 0){ covered++; }
+    boostSum += b;
+    synSum += synergyWithLeader(L, m).score;
+  }
+  // heavy weight on coverage, then boost, then synergy; LR favored slightly
+  const rarityBonus = {"LR":2,"UR":1,"SSR":0}[L.rarity||""] || 0;
+  const score = covered*100000 + boostSum*100 + synSum*5 + rarityBonus;
+  return {L, covered, boostSum, synSum, score, mainpct: (parseLeaderSkill(L.leader_skill||"").main_pct||0)};
+}
+function bestLeaders(limit=6){
+  const cands = UNITS.filter(u => (u.leader_skill||"").trim());
+  const scored = [];
+  for(const L of cands){
+    const s = scoreLeaderCandidate(L);
+    if(s) scored.push(s);
+  }
+  scored.sort((a,b)=> b.score - a.score || a.L.rarity_rank - b.L.rarity_rank || a.L.name.localeCompare(b.L.name));
+  return scored.slice(0, limit);
+}
+function renderBestLeaderStrip(){
+  const picks = bestLeaders(6);
+  if(!picks.length){ bestLeaderStrip.innerHTML = ""; return; }
+  bestLeaderStrip.innerHTML = picks.map(x=>(
+    `<span class="lchip" title="Covers ${x.covered} member(s); main ${x.mainpct}%">
+      <strong>${x.L.name}</strong>
+      <span class="chip">Covers ${x.covered}</span>
+      <span class="chip">Boost Σ ${x.boostSum}%</span>
+      <button class="btn" data-leader="${x.L.id}">Use</button>
+    </span>`
+  )).join("");
+  bestLeaderStrip.addEventListener("click", (e)=>{
+    const b = e.target.closest("button[data-leader]");
+    if(!b) return;
+    const L = UNITS.find(u=>u.id===b.dataset.leader);
+    if(L) setLeader(L);
+  }, {once:true});
+}
+function renderModalBestStrip(){
+  const picks = bestLeaders(5);
+  modalBestStrip.innerHTML = picks.length ? (
+    `<span class="chip" style="opacity:.7">Best now:</span>` +
+    picks.map(x=>`<span class="lchip"><strong>${x.L.name}</strong><span class="chip">${x.covered} cover</span><button class="btn" data-leader="${x.L.id}">Use</button></span>`).join("")
+  ) : "";
+  modalBestStrip.addEventListener("click",(e)=>{
+    const b = e.target.closest("button[data-leader]"); if(!b) return;
+    const L = UNITS.find(u=>u.id===b.dataset.leader); if(L){ setLeader(L); leaderModal.style.display="none"; }
+  }, {once:true});
+}
+
+/* state */
+let leader = null;
+let leaderParsed = null;
+let swapMode = false;
+
+/* UI: leader & board */
+function setLeader(u){
+  leader = u || null;
+  leaderParsed = u ? parseLeaderSkill(u.leader_skill||"") : null;
+  renderLeaderInfo();
+  updateSlot(0, u);
+  removeLeaderBtn.disabled = !u;
+  renderEligible();
+  syncShare();
+  computeTeamSummary();
+}
+function renderLeaderInfo(){
+  leaderInfo.innerHTML = "";
+  if(!leader){ renderBestLeaderStrip(); return; }
+  const p = leaderParsed;
+  const cats = p.primary.length ? p.primary : (p.all_types ? ["All Types"] : []);
+  const sec = p.secondary || [];
+  const nodes = [];
+  if(p.ki!=null) nodes.push(`<span class="kvitem"><strong>Ki</strong> +${p.ki}</span>`);
+  if(p.main_pct!=null) nodes.push(`<span class="kvitem"><strong>Main</strong> ${p.main_pct}%</span>`);
+  if(p.secondary_total!=null) nodes.push(`<span class="kvitem"><strong>Also belong</strong> ${p.secondary_total}%</span>`);
+  leaderInfo.innerHTML = nodes.join(" ") + `<div class="bar" style="margin-top:6px">${cats.map(c=>`<span class="chip">${c}</span>`).join("")}${sec.length?`<span class="chip" style="opacity:.7">also:</span>`:""}${sec.map(c=>`<span class="chip">${c}</span>`).join("")}</div>`;
+  renderBestLeaderStrip();
+}
+
+/* Slot helpers */
+function getUnitById(id){ return UNITS.find(x=>x.id===id) || null; }
+function currentTeamIds(){
+  const out = [];
+  for(let i=0;i<=5;i++){ if(slots[i].id) out.push(slots[i].id); }
+  return out;
+}
+function duplicateCount(){
+  const ids = currentTeamIds().filter(Boolean);
+  const map = new Map();
+  ids.forEach(id=> map.set(id, (map.get(id)||0)+1));
+  let d=0; map.forEach(v=>{ if(v>1) d+=v-1; });
+  return d;
+}
+function updateSlot(slotIdx, unit){
+  const s = slots[slotIdx];
+  s.id = unit ? unit.id : "";
+  s.img.style.display = unit ? "" : "none";
+  s.img.src = unit?.img || "";
+  s.name.textContent = unit ? unit.name : (slotIdx===0 ? "Leader" : "Empty");
+  if(slotIdx===0){
+    const txt = unit ? (unit.leader_skill||'—').replace(/Key/g,'Ki') : "Pick a leader";
+    s.badge.textContent = unit ? clamp(txt, 90) : "Pick a leader";
+    s.details.style.display = unit ? "" : "none";
+    if(unit) s.details.href = `/unit/${unit.id}`;
+    s.clearBtn && (s.clearBtn.disabled = !unit);
+  }else{
+    if(leader){
+      const boost = unit ? maxBoostForUnit(leader, unit) : 0;
+      s.badge.textContent = unit ? `Boost ${boost}%` : "—";
+      const syn = unit ? synergyWithLeader(leader, unit) : {links:0,cats:0};
+      if(s.syn) s.syn.textContent = `Links ${syn.links} • Cats ${syn.cats}`;
+    }else{
+      s.badge.textContent = unit ? "—" : "—";
+      if(s.syn) s.syn.textContent = "Links 0 • Cats 0";
+    }
+    s.details.style.display = unit ? "" : "none";
+    if(unit) s.details.href = `/unit/${unit.id}`;
+  }
+  computeTeamSummary();
+  renderBestLeaderStrip();
+}
+
+/* Eligible list */
+function unitEligible(u){
+  if(!leaderParsed || !leader) return false;
+  const min = parseInt(minBoostSel.value,10)||0;
+  const boost = maxBoostForUnit(leader, u);
+  if(boost < min) return false;
+  return boost > 0;
+}
+function renderEligible(){
+  if(!leader){
+    cards.innerHTML = `<div class="note">Pick a leader to list eligible units.</div>`;
+    activeCats.innerHTML="";
+    return;
+  }
+  const type = typeSel.value;
+  const rar = raritySel.value;
+  const fav = favOnly.checked;
+  const q = (eligibleQ.value||"").toLowerCase().trim();
+
+  let arr = UNITS.filter(u=>{
+    const okE = unitEligible(u);
+    const okT = !type || u.type===type;
+    const okR = !rar || (u.rarity||"")===rar;
+    const okF = !fav || isFav(u);
+    let okQ = true;
+    if(q){
+      const cats = (u.categories||[]).join(" ").toLowerCase();
+      const links = (u.links||[]).join(" ").toLowerCase();
+      okQ = u.name.toLowerCase().includes(q) || u.id.includes(q) || (u.type||"").toLowerCase().includes(q) || cats.includes(q) || links.includes(q);
+    }
+    return okE && okT && okR && okF && okQ;
+  });
+
+  // decorate
+  const teamIds = new Set(currentTeamIds());
+  arr = arr.map(u=>{
+    const boost = maxBoostForUnit(leader,u);
+    const syn = synergyWithLeader(leader,u);
+    return {u, boost, syn, isAdded: teamIds.has(u.id) || (leader && u.id===leader.id)};
+  });
+
+  // sort
+  const mode = sortSel.value;
+  if(mode==="boost"){ arr.sort((a,b)=> b.boost - a.boost || b.syn.score - a.syn.score || a.u.rarity_rank - b.u.rarity_rank || a.u.name.localeCompare(b.u.name)); }
+  else if(mode==="synergy"){ arr.sort((a,b)=> b.syn.score - a.syn.score || b.boost - a.boost || a.u.rarity_rank - b.u.rarity_rank || a.u.name.localeCompare(b.u.name)); }
+  else if(mode==="rarity"){ arr.sort((a,b)=> a.u.rarity_rank - b.u.rarity_rank || a.u.name.localeCompare(b.u.name)); }
+  else if(mode==="name"){ arr.sort((a,b)=> a.u.name.localeCompare(b.u.name)); }
+  else if(mode==="type"){ arr.sort((a,b)=> (a.u.type||"").localeCompare(b.u.type||"") || (a.u.rarity_rank - b.u.rarity_rank)); }
+
+  // render (no hover leader-skill preview anymore)
+  cards.innerHTML = "";
+  for(const row of arr){
+    const u = row.u;
+    const badge = u.rarity==="LR" ? `<span class="pill"><span class="dot lr"></span> LR</span>` :
+                   u.rarity==="UR" ? `<span class="pill"><span class="dot ur"></span> UR</span>` :
+                                     `<span class="pill"><span class="dot ssr"></span> SSR</span>`;
+    const disabled = row.isAdded;
+    const el = document.createElement("article");
+    el.className="card";
+    el.setAttribute("draggable","true");
+    el.dataset.id = u.id;
+    el.innerHTML = `
+      <div class="img" title="Drag to a slot to add">
+        <img src="${u.img || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt="">
+      </div>
+      <div class="body">
+        <div class="pills"><span class="pill">${u.type||''}</span>${badge}<span class="pill">Boost ${row.boost||0}%</span></div>
+        <div class="ctitle" title="${u.name}">${u.name}</div>
+        <div class="chips" style="margin-top:6px"><span class="chip">Links ${row.syn.links}</span><span class="chip">Cats ${row.syn.cats}</span></div>
+        <div class="cactions" style="margin-top:6px">
+          <button class="button add" data-id="${u.id}" ${disabled?'disabled':''}>${disabled?'Added':'Add to team'}</button>
+          <a class="button" href="/unit/${u.id}" target="_blank">Details ↗</a>
+        </div>
+      </div>
+    `;
+    // drag from picker
+    el.addEventListener("dragstart", (e)=>{ el.classList.add("dragging"); e.dataTransfer.setData("text/plain", u.id); });
+    el.addEventListener("dragend", ()=> el.classList.remove("dragging"));
+    cards.appendChild(el);
+  }
+
+  // active category chips (from leader)
+  const chips = [];
+  const p = leaderParsed;
+  if(p.all_types){ chips.push(`<span class="chip">All Types</span>`); }
+  p.primary.forEach(c=>chips.push(`<span class="chip">${c}</span>`));
+  if(p.secondary && p.secondary.length){
+    chips.push(`<span class="chip" style="opacity:.7">also:</span>`);
+    p.secondary.forEach(c=>chips.push(`<span class="chip">${c}</span>`));
+  }
+  activeCats.innerHTML = chips.join("");
+}
+
+/* interactions - picker -> add buttons */
+cards.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".add");
+  if(!btn) return;
+  const u = getUnitById(btn.dataset.id);
+  addUnitToFirstOpen(u);
+});
+
+/* board: drag & drop */
+function enableDrops(){
+  Object.values(slots).forEach(s=>{
+    const el = s.wrap;
+    el.addEventListener("dragover", (e)=>{ e.preventDefault(); el.classList.add("dragover"); });
+    el.addEventListener("dragleave", ()=> el.classList.remove("dragover"));
+    el.addEventListener("drop", (e)=>{
+      e.preventDefault(); el.classList.remove("dragover");
+      const id = e.dataTransfer.getData("text/plain");
+      const fromSlot = e.dataTransfer.getData("text/slot");
+      if(fromSlot){ // reordering slots
+        const a = parseInt(fromSlot,10), b = parseInt(el.dataset.slot,10);
+        swapSlots(a,b); return;
+      }
+      if(!id) return;
+      const u = getUnitById(id);
+      if(!u) return;
+      placeInSlot(parseInt(el.dataset.slot,10), u);
+    });
+  });
+  // dragging slots to reorder
+  Object.values(slots).forEach(s=>{
+    s.wrap.addEventListener("dragstart", (e)=>{
+      const idx = parseInt(s.wrap.dataset.slot,10);
+      e.dataTransfer.setData("text/slot", String(idx));
+      s.wrap.classList.add("dragging");
+    });
+    s.wrap.addEventListener("dragend", ()=> s.wrap.classList.remove("dragging"));
+  });
+}
+enableDrops();
+
+/* slot controls */
+document.querySelectorAll(".remove").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const i = parseInt(btn.dataset.slot,10);
+    updateSlot(i, null);
+    renderEligible();
+  });
+});
+document.querySelectorAll(".lock").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const i = parseInt(btn.dataset.slot,10);
+    slots[i].locked = !slots[i].locked;
+    btn.classList.toggle("active", slots[i].locked);
+  });
+});
+const clearLeaderBtn = $("#slot0clear");
+if(clearLeaderBtn){
+  clearLeaderBtn.addEventListener("click", ()=>{
+    setLeader(null);
+    updateSlot(0, null);
+    renderEligible();
+  });
+}
+
+/* core actions */
+function placeInSlot(slotIdx, unit){
+  if(slotIdx===0){ setLeader(unit); return; }
+  if(slots[slotIdx].locked){ flashWarn("Slot is locked"); return; }
+  if(noDup.checked){
+    const ids = currentTeamIds().filter(Boolean);
+    if(ids.includes(unit.id)){ flashWarn("Already in team"); return; }
+    if(leader && unit.id===leader.id){ flashWarn("Same as leader"); return; }
+  }
+  updateSlot(slotIdx, unit);
+  renderEligible();
+}
+function addUnitToFirstOpen(unit){
+  for(let i=1;i<=5;i++){
+    if(!slots[i].id && !slots[i].locked){
+      placeInSlot(i, unit); return;
+    }
+  }
+  flashWarn("Team is full or locked");
+}
+function swapSlots(a,b){
+  if(a===b) return;
+  if(slots[a].locked || slots[b].locked){ flashWarn("Locked slot"); return; }
+  const ua = slots[a].id ? getUnitById(slots[a].id) : null;
+  const ub = slots[b].id ? getUnitById(slots[b].id) : null;
+  updateSlot(a, ub);
+  updateSlot(b, ua);
+  renderEligible();
+}
+
+/* feedback */
+function flashWarn(text){
+  const el = document.createElement("div");
+  el.textContent = text;
+  el.style.position="fixed"; el.style.left="50%"; el.style.top="18px"; el.style.transform="translateX(-50%)";
+  el.style.background="#1b2636"; el.style.border="1px solid #2a3b54"; el.style.padding="8px 12px"; el.style.borderRadius="10px";
+  el.style.color="#ffd166"; el.style.zIndex="100";
+  document.body.appendChild(el);
+  setTimeout(()=> el.remove(), 1200);
+}
+
+/* filters & size */
+[sortSel, typeSel, raritySel, favOnly, minBoostSel].forEach(el=> el.addEventListener("change", ()=>{ renderLeaderInfo(); renderEligible(); syncShare(); }));
+eligibleQ.addEventListener("input", ()=> renderEligible());
+clearFilters.addEventListener("click", ()=>{
+  eligibleQ.value=""; typeSel.value=""; raritySel.value=""; favOnly.checked=false; sortSel.value="boost";
+  renderEligible();
+});
+cardSize.addEventListener("change", ()=>{
+  const px = cardSize.value;
+  document.documentElement.style.setProperty('--pickCardW', px+'px');
+});
+
+/* swap mode (click two slots to swap) */
+swapModeBtn.addEventListener("click", ()=>{
+  swapMode = !swapMode;
+  swapModeBtn.classList.toggle("active", swapMode);
+  swapModeBtn.textContent = swapMode ? "✓ Swap (tap two slots)" : "⇄ Swap";
+});
+let firstSwap = null;
+$("#board").addEventListener("click", (e)=>{
+  if(!swapMode) return;
+  const s = e.target.closest(".slot");
+  if(!s) return;
+  const idx = parseInt(s.dataset.slot,10);
+  if(firstSwap==null){ firstSwap = idx; s.style.outline="2px solid rgba(91,209,255,.5)"; }
+  else{
+    const firstEl = document.querySelector(`.slot[data-slot="${firstSwap}"]`);
+    if(firstEl) firstEl.style.outline="";
+    const a = firstSwap, b = idx; firstSwap=null;
+    swapSlots(a,b);
+  }
+});
+
+/* share & export */
+function syncShare(){
+  const p = new URLSearchParams();
+  if(leader) p.set("leader", leader.id);
+  const min = parseInt(minBoostSel.value,10)||0;
+  if(min) p.set("min", String(min));
+  const ids = currentTeamIds().slice(1).filter(Boolean); // only teammates
+  if(ids.length) p.set("team", ids.join(","));
+  history.replaceState(null, "", "?"+p.toString());
+}
+$("#shareTeam").addEventListener("click", ()=>{
+  syncShare(); navigator.clipboard?.writeText(location.href);
+  $("#shareTeam").textContent="Link copied!"; setTimeout(()=>$("#shareTeam").textContent="Copy share link", 1200);
+});
+$("#downloadTeam").addEventListener("click", ()=>{
+  const data = {
+    leader: leader?.id || "",
+    min: parseInt(minBoostSel.value,10)||0,
+    team: currentTeamIds().slice(1).filter(Boolean)
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "dokkan-team.json"; a.click();
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+});
+
+/* presets (localStorage) */
+const PREKEY = "dokkan.team.presets.v3";
+function getPresets(){ try{ return JSON.parse(localStorage.getItem(PREKEY)||"[]"); }catch{ return []; } }
+function setPresets(arr){ localStorage.setItem(PREKEY, JSON.stringify(arr)); }
+function refreshPresetSelect(){
+  const sel = $("#presetSelect");
+  const list = getPresets();
+  sel.innerHTML = list.length ? list.map((p,i)=>`<option value="${i}">${p.name}</option>`).join("") : "";
+  $("#loadPreset").disabled = !list.length;
+  $("#deletePreset").disabled = !list.length;
+}
+$("#savePreset").addEventListener("click", ()=>{
+  const name = ($("#presetName").value||"").trim() || new Date().toLocaleString();
+  const data = {
+    name,
+    leader: leader?.id || "",
+    min: parseInt(minBoostSel.value,10)||0,
+    team: currentTeamIds().slice(1).filter(Boolean)
+  };
+  const list = getPresets(); list.push(data); setPresets(list); refreshPresetSelect();
+  $("#presetName").value=""; flashWarn("Preset saved ✓");
+});
+$("#loadPreset").addEventListener("click", ()=>{
+  const idx = parseInt($("#presetSelect").value||"-1",10); const list = getPresets(); if(idx<0 || !list[idx]) return;
+  const p = list[idx];
+  if(p.leader){ const u = getUnitById(p.leader); if(u) setLeader(u); else setLeader(null); }
+  minBoostSel.value = String(p.min||0);
+  for(let i=1;i<=5;i++){ updateSlot(i,null); }
+  let k=1;
+  (p.team||[]).forEach(id=>{ if(k<=5){ const u=getUnitById(id); if(u) updateSlot(k++, u); }});
+  renderEligible(); computeTeamSummary(); syncShare();
+});
+$("#deletePreset").addEventListener("click", ()=>{
+  const idx = parseInt($("#presetSelect").value||"-1",10); const list = getPresets(); if(idx<0 || !list[idx]) return;
+  list.splice(idx,1); setPresets(list); refreshPresetSelect();
+});
+refreshPresetSelect();
+
+/* leader picker modal */
+pickLeaderBtn.addEventListener("click", ()=>{
+  leaderModal.style.display="block";
+  renderLeaderPicker(); renderModalBestStrip(); leaderQ.focus();
+});
+suggestLeaderBtn.addEventListener("click", ()=>{
+  const top = bestLeaders(1)[0];
+  if(top){ setLeader(top.L); }
+  else{ flashWarn("Add teammates first"); }
+});
+closeLeader.addEventListener("click", ()=> leaderModal.style.display="none");
+leaderQ.addEventListener("input", renderLeaderPicker);
+leaderType.addEventListener("change", renderLeaderPicker);
+leaderFavOnly.addEventListener("change", renderLeaderPicker);
+
+function renderLeaderPicker(){
+  const q = (leaderQ.value||"").toLowerCase().trim();
+  const t = leaderType.value;
+  const fav = leaderFavOnly.checked;
+  const candidates = UNITS.filter(u => (u.leader_skill||"").trim());
+  let arr = candidates.filter(u=>{
+    const okType = t? (u.type===t) : true;
+    const okFav = fav? isFav(u) : true;
+    let okQ = true;
+    if(q){
+      const cats = (u.categories||[]).join(" ").toLowerCase();
+      okQ = u.name.toLowerCase().includes(q) || u.id.includes(q) || (u.type||"").toLowerCase().includes(q) || cats.includes(q);
+    }
+    return okType && okFav && okQ;
+  });
+  arr.sort((a,b)=> a.rarity_rank - b.rarity_rank || a.name.localeCompare(b.name));
+
+  leaderGrid.innerHTML = "";
+  arr.slice(0,120).forEach(u=>{
+    const badge = u.rarity==="LR" ? `<span class="pill">LR</span>` : u.rarity==="UR" ? `<span class="pill">UR</span>` : `<span class="pill">SSR</span>`;
+    const p = parseLeaderSkill(u.leader_skill);
+    const extra = p.secondary_total!=null ? `<span class="chip">also: ${p.secondary_total}%</span>` : "";
+    const el = document.createElement("article");
+    el.className="card";
+    el.innerHTML = `
+      <div class="img"><img src="${u.img || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt=""></div>
+      <div class="body">
+        <div class="pills"><span class="pill">${u.type||''}</span>${badge}<span class="pill">${p.main_pct??'?' }%</span></div>
+        <div class="ctitle">${u.name}</div>
+        <div class="chips" style="margin-top:6px">${(p.primary||[]).slice(0,3).map(c=>`<span class="chip">${c}</span>`).join("")}${extra}</div>
+        <div class="cactions" style="margin-top:6px">
+          <button class="button choose" data-id="${u.id}">Choose Leader</button>
+          <a class="button" href="/unit/${u.id}" target="_blank">Details ↗</a>
+        </div>
+      </div>`;
+    el.querySelector(".choose").addEventListener("click", ()=>{
+      setLeader(u); leaderModal.style.display="none";
+    });
+    leaderGrid.appendChild(el);
+  });
+}
+
+/* auto-fill best (fill empty, unlocked slots by highest boost; tiebreak: synergy, rarity) */
+autoFillBtn.addEventListener("click", ()=>{
+  if(!leader){ flashWarn("Pick a leader first"); return; }
+  const filled = new Set(currentTeamIds().filter(Boolean));
+  const candidates = UNITS
+    .filter(u=> unitEligible(u) && u.id!==leader.id && !filled.has(u.id))
+    .map(u=> ({u, boost:maxBoostForUnit(leader,u), syn:synergyWithLeader(leader,u)}))
+    .sort((a,b)=> b.boost - a.boost || b.syn.score - a.syn.score || a.u.rarity_rank - b.u.rarity_rank);
+
+  for(let i=1;i<=5;i++){
+    if(!slots[i].id && !slots[i].locked){
+      const pick = candidates.shift();
+      if(!pick) break;
+      updateSlot(i, pick.u);
+    }
+  }
+  renderEligible(); computeTeamSummary(); syncShare();
+});
+
+/* team summary */
+function computeTeamSummary(){
+  const ids = currentTeamIds();
+  $("#countMembers").textContent = ids.filter(Boolean).length;
+  // duplicates
+  const d = duplicateCount();
+  const dEl = $("#dups");
+  dEl.textContent = d;
+  dEl.className = d ? "bad" : "ok";
+
+  // shared links across team (pairwise)
+  const members = ids.map(getUnitById).filter(Boolean);
+  let totalLinks = 0, pairs = 0;
+  for(let i=0;i<members.length;i++){
+    for(let j=i+1;j<members.length;j++){
+      totalLinks += pairSharedLinks(members[i], members[j]);
+      pairs++;
+    }
+  }
+  $("#sumLinks").textContent = totalLinks;
+  $("#avgLinks").textContent = pairs ? (Math.round((totalLinks/pairs)*10)/10) : 0;
+}
+
+/* clear team */
+$("#clearTeam").addEventListener("click", ()=>{
+  setLeader(null);
+  updateSlot(0,null);
+  for(let i=1;i<=5;i++){ updateSlot(i,null); slots[i].locked=false; slots[i].lockBtn?.classList.remove("active"); }
+  renderEligible(); computeTeamSummary(); syncShare();
+});
+
+/* remove leader button */
+removeLeaderBtn.addEventListener("click", ()=>{
+  setLeader(null);
+  renderEligible();
+});
+
+/* restore from URL */
+(function restore(){
+  refreshPresetSelect();
+
+  const params = new URLSearchParams(location.search);
+  const lid = params.get("leader");
+  if(lid){
+    const u = getUnitById(lid);
+    if(u) setLeader(u);
+  }
+  const min = parseInt(params.get("min")||"0",10)||0;
+  if(min){ minBoostSel.value = String(min); }
+  const team = params.get("team");
+  if(team){
+    const arr = team.split(",");
+    let idx = 1;
+    for(const id of arr){
+      if(idx>5) break;
+      const u = getUnitById(id);
+      if(u){ updateSlot(idx++, u); }
+    }
+  }
+  renderEligible(); computeTeamSummary(); renderBestLeaderStrip();
+})();
+
+/* picker card size init */
+document.documentElement.style.setProperty('--pickCardW', cardSize.value+'px');
+</script>
+</body>
+</html>

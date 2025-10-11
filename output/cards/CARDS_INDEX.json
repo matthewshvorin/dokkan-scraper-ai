@@ -1,0 +1,1969 @@
+{
+  "1022091": {
+    "folder": "output\\cards\\LR [TEQ] [[Ceremony of Revenge] Super #17] - 1022091",
+    "display_name": "[Ceremony of Revenge] Super #17",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:09:16.249327Z"
+  },
+  "1032051": {
+    "folder": "output\\cards\\UR [AGL] [[Cunning Parasitic Ability] Trunks Possessed (GT)] - 1032051",
+    "display_name": "[Cunning Parasitic Ability] Trunks Possessed (GT)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:21.782012Z"
+  },
+  "1032040": {
+    "folder": "output\\cards\\SSR [AGL] [[Discovery of Saiyan Power] Trunks Possessed (GT)] - 1032040",
+    "display_name": "[Discovery of Saiyan Power] Trunks Possessed (GT)",
+    "rarity": "SSR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:23.080603Z"
+  },
+  "1031961": {
+    "folder": "output\\cards\\UR [STR] [[Newborn Tuffle's Super Power] Super Baby 1] - 1031961",
+    "display_name": "[Newborn Tuffle's Super Power] Super Baby 1",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:24.296633Z"
+  },
+  "4031971": {
+    "folder": "output\\cards\\UR [STR] [[Newborn Tuffle's Super Power] Super Baby 1] - 1031961",
+    "display_name": "[Newborn Tuffle's Super Power] Super Baby 2 (Giant Ape)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "form_4031970_base"
+    ],
+    "saved_at": "2025-10-10T06:09:28.150562Z"
+  },
+  "4031981": {
+    "folder": "output\\cards\\UR [STR] [[Newborn Tuffle's Super Power] Super Baby 1] - 1031961",
+    "display_name": "[Newborn Tuffle's Super Power] Super Baby 2 (Giant Ape)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "form_4031980_base"
+    ],
+    "saved_at": "2025-10-10T06:09:29.331994Z"
+  },
+  "1031950": {
+    "folder": "output\\cards\\SSR [STR] [[Fusion of Tuffle and Saiyan] Super Baby 1] - 1031950",
+    "display_name": "[Fusion of Tuffle and Saiyan] Super Baby 1",
+    "rarity": "SSR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:30.607764Z"
+  },
+  "1023571": {
+    "folder": "output\\cards\\UR [STR] [[Power Developed for Survival] Broly] - 1023571",
+    "display_name": "[Power Developed for Survival] Broly",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:09:31.906998Z"
+  },
+  "1031921": {
+    "folder": "output\\cards\\LR [TEQ] [[Relentlessly Surging Power] Broly (Wrathful)] - 1031921",
+    "display_name": "[Relentlessly Surging Power] Broly (Wrathful)",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:42.514592Z"
+  },
+  "1031911": {
+    "folder": "output\\cards\\UR [TEQ] [[Ferocious Fighting Machine] Broly (Wrathful)] - 1031911",
+    "display_name": "[Ferocious Fighting Machine] Broly (Wrathful)",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:49.831805Z"
+  },
+  "1031900": {
+    "folder": "output\\cards\\SSR [TEQ] [[Ice Sheet-Melting Power] Broly (Wrathful)] - 1031900",
+    "display_name": "[Ice Sheet-Melting Power] Broly (Wrathful)",
+    "rarity": "SSR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:51.060372Z"
+  },
+  "1032031": {
+    "folder": "output\\cards\\UR [INT] [[Indifferent Gifted Fighter] Vegeta (Kid)] - 1032031",
+    "display_name": "[Indifferent Gifted Fighter] Vegeta (Kid)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:52.322713Z"
+  },
+  "1032020": {
+    "folder": "output\\cards\\SSR [INT] [[Ambition Concealed by Loyalty] Vegeta (Kid)] - 1032020",
+    "display_name": "[Ambition Concealed by Loyalty] Vegeta (Kid)",
+    "rarity": "SSR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:09:53.568273Z"
+  },
+  "1024511": {
+    "folder": "output\\cards\\LR [AGL] [[Emperor's Newfound Power] Golden Frieza] - 1024511",
+    "display_name": "[Emperor's Newfound Power] Golden Frieza",
+    "rarity": "LR",
+    "type": "AGL",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:09:54.992524Z"
+  },
+  "1031751": {
+    "folder": "output\\cards\\UR [INT] [[Burning Will in the Freezing Cold] Vegeta] - 1031751",
+    "display_name": "[Burning Will in the Freezing Cold] Vegeta",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:01.091166Z"
+  },
+  "1031740": {
+    "folder": "output\\cards\\SSR [INT] [[Heated Warm-Up] Vegeta] - 1031740",
+    "display_name": "[Heated Warm-Up] Vegeta",
+    "rarity": "SSR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:02.475657Z"
+  },
+  "1031721": {
+    "folder": "output\\cards\\LR [TEQ] [[Stirred Battle Instincts] Golden Frieza + Gogeta] - 1031721",
+    "display_name": "[Stirred Battle Instincts] Golden Frieza + Gogeta",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:04.016184Z"
+  },
+  "4031731": {
+    "folder": "output\\cards\\LR [TEQ] [[Stirred Battle Instincts] Golden Frieza + Gogeta] - 1031721",
+    "display_name": "[Stirred Battle Instincts] Gogeta + Golden Frieza",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "form_4031730_base"
+    ],
+    "saved_at": "2025-10-10T06:10:08.476733Z"
+  },
+  "1031711": {
+    "folder": "output\\cards\\UR [TEQ] [[Countering the Unexpected] Golden Frieza] - 1031711",
+    "display_name": "[Countering the Unexpected] Golden Frieza",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:09.822320Z"
+  },
+  "1031700": {
+    "folder": "output\\cards\\SSR [TEQ] [[Forced into the Fray] Golden Frieza] - 1031700",
+    "display_name": "[Forced into the Fray] Golden Frieza",
+    "rarity": "SSR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:11.278817Z"
+  },
+  "1028201": {
+    "folder": "output\\cards\\UR [TEQ] [[Wolf of the Turtle School] Yamcha] - 1028201",
+    "display_name": "[Wolf of the Turtle School] Yamcha",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:12.534324Z"
+  },
+  "1028091": {
+    "folder": "output\\cards\\UR [TEQ] [[Ambition-Driven Power] Kale] - 1028091",
+    "display_name": "[Ambition-Driven Power] Kale",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:10:13.855387Z"
+  },
+  "1028081": {
+    "folder": "output\\cards\\UR [INT] [[Aptitude Manifested] Caulifla] - 1028081",
+    "display_name": "[Aptitude Manifested] Caulifla",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:10:24.140380Z"
+  },
+  "1024171": {
+    "folder": "output\\cards\\UR [INT] [[Taijoro's Wrath] Annin (Giant Form)] - 1024171",
+    "display_name": "[Taijoro's Wrath] Annin (Giant Form)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:10:34.702646Z"
+  },
+  "4024171": {
+    "folder": "output\\cards\\UR [INT] [[Taijoro's Wrath] Annin (Giant Form)] - 1024171",
+    "display_name": "[Taijoro's Wrath] Annin (Giant Form)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "form_4024170_base"
+    ],
+    "saved_at": "2025-10-10T06:10:46.118686Z"
+  },
+  "1031691": {
+    "folder": "output\\cards\\UR [AGL] [[Strength Worthy of the Name] Videl] - 1031691",
+    "display_name": "[Strength Worthy of the Name] Videl",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:48.462414Z"
+  },
+  "1031680": {
+    "folder": "output\\cards\\SSR [AGL] [[The Promising Top Contender] Videl] - 1031680",
+    "display_name": "[The Promising Top Contender] Videl",
+    "rarity": "SSR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:49.798353Z"
+  },
+  "1031641": {
+    "folder": "output\\cards\\UR [TEQ] [[Dangerous Schemer] Ranfan] - 1031641",
+    "display_name": "[Dangerous Schemer] Ranfan",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:51.056697Z"
+  },
+  "1031630": {
+    "folder": "output\\cards\\SSR [TEQ] [[Mesmerizing Aura] Ranfan] - 1031630",
+    "display_name": "[Mesmerizing Aura] Ranfan",
+    "rarity": "SSR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:10:52.361810Z"
+  },
+  "1024801": {
+    "folder": "output\\cards\\UR [PHY] [[Planetary Invasion Scene] Fasha] - 1024801",
+    "display_name": "[Planetary Invasion Scene] Fasha",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:10:53.659979Z"
+  },
+  "1024751": {
+    "folder": "output\\cards\\UR [INT] [[Cheerful Scouting] Cheelai] - 1024751",
+    "display_name": "[Cheerful Scouting] Cheelai",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:11:04.106661Z"
+  },
+  "1021141": {
+    "folder": "output\\cards\\LR [TEQ] [[Earth-Protecting Flash] Super Saiyan 2 Gohan (Youth)] - 1021141",
+    "display_name": "[Earth-Protecting Flash] Super Saiyan 2 Gohan (Youth)",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:11:14.803721Z"
+  },
+  "1031621": {
+    "folder": "output\\cards\\UR [PHY] [[Power Bestowed by Magic] Spopovich] - 1031621",
+    "display_name": "[Power Bestowed by Magic] Spopovich",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:11:21.360061Z"
+  },
+  "1031610": {
+    "folder": "output\\cards\\SSR [PHY] [[Extraordinary Endurance] Spopovich] - 1031610",
+    "display_name": "[Extraordinary Endurance] Spopovich",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:11:22.572401Z"
+  },
+  "1031591": {
+    "folder": "output\\cards\\LR [INT] [[Spirited New Generation] Super Saiyan Gohan (Teen) + Super Saiyan Trunks (Kid) & Super Saiyan Goten (Kid)] - 1031591",
+    "display_name": "[Spirited New Generation] Super Saiyan Gohan (Teen) + \nSuper Saiyan Trunks (Kid) & Super Saiyan Goten (Kid)",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:11:23.973256Z"
+  },
+  "4031601": {
+    "folder": "output\\cards\\LR [INT] [[Spirited New Generation] Super Saiyan Gohan (Teen) + Super Saiyan Trunks (Kid) & Super Saiyan Goten (Kid)] - 1031591",
+    "display_name": "[Spirited New Generation] Super Saiyan Trunks (Kid) & Super Saiyan Goten (Kid) + \nSuper Saiyan Gohan (Teen)",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "form_4031600_base"
+    ],
+    "saved_at": "2025-10-10T06:11:26.798302Z"
+  },
+  "1031581": {
+    "folder": "output\\cards\\UR [INT] [[Power Nurtured for Peace] Super Saiyan Gohan (Teen)] - 1031581",
+    "display_name": "[Power Nurtured for Peace] Super Saiyan Gohan (Teen)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:11:28.117147Z"
+  },
+  "1031570": {
+    "folder": "output\\cards\\SSR [INT] [[Freshly Set Goals] Super Saiyan Gohan (Teen)] - 1031570",
+    "display_name": "[Freshly Set Goals] Super Saiyan Gohan (Teen)",
+    "rarity": "SSR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:11:29.677225Z"
+  },
+  "1024551": {
+    "folder": "output\\cards\\LR [INT] [[Power of Pride and Hope] Super Saiyan God SS Vegeta & Super Saiyan Trunks (Future)] - 1024551",
+    "display_name": "[Power of Pride and Hope] Super Saiyan God SS Vegeta & \nSuper Saiyan Trunks (Future)",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:11:31.142399Z"
+  },
+  "1020991": {
+    "folder": "output\\cards\\UR [INT] [[Peerless Super Power] Super Saiyan 4 Gogeta] - 1020991",
+    "display_name": "[Peerless Super Power] Super Saiyan 4 Gogeta",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:11:37.606717Z"
+  },
+  "1021881": {
+    "folder": "output\\cards\\LR [INT] [[Destroyers Born of Dragon Balls] Legion of Shadow Dragons] - 1021881",
+    "display_name": "[Destroyers Born of Dragon Balls] Legion of Shadow Dragons",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:11:48.427469Z"
+  },
+  "1023591": {
+    "folder": "output\\cards\\UR [TEQ] [[Merciless Punishment] Syn Shenron] - 1023591",
+    "display_name": "[Merciless Punishment] Syn Shenron",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:11:54.216026Z"
+  },
+  "1012771": {
+    "folder": "output\\cards\\UR [AGL] [[Zealous Offensive] Super Saiyan 3 Goku (GT)] - 1012771",
+    "display_name": "[Zealous Offensive] Super Saiyan 3 Goku (GT)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:12:04.690676Z"
+  },
+  "1010021": {
+    "folder": "output\\cards\\UR [STR] [[Brains and Brawn Combined] Super Saiyan Trunks (GT)] - 1010021",
+    "display_name": "[Brains and Brawn Combined] Super Saiyan Trunks (GT)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:12:15.681563Z"
+  },
+  "1010001": {
+    "folder": "output\\cards\\UR [PHY] [[Talent's in the Blood] Pan (GT)] - 1010001",
+    "display_name": "[Talent's in the Blood] Pan (GT)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:12:26.337909Z"
+  },
+  "1008291": {
+    "folder": "output\\cards\\UR [STR] [[Inklings of Ultimate Power] Super Saiyan 3 Goku (GT) (Golden Giant Ape)] - 1008291",
+    "display_name": "[Inklings of Ultimate Power] Super Saiyan 3 Goku (GT) (Golden Giant Ape)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:12:36.952723Z"
+  },
+  "4008291": {
+    "folder": "output\\cards\\UR [STR] [[Inklings of Ultimate Power] Super Saiyan 3 Goku (GT) (Golden Giant Ape)] - 1008291",
+    "display_name": "[Inklings of Ultimate Power] Super Saiyan 3 Goku (GT) (Golden Giant Ape)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "form_4008290_base"
+    ],
+    "saved_at": "2025-10-10T06:12:49.651433Z"
+  },
+  "1006521": {
+    "folder": "output\\cards\\UR [INT] [[Rampaging Vengeance] Super Baby 2 (Giant Ape)] - 1006521",
+    "display_name": "[Rampaging Vengeance] Super Baby 2 (Giant Ape)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:12:52.223854Z"
+  },
+  "4006521": {
+    "folder": "output\\cards\\UR [INT] [[Rampaging Vengeance] Super Baby 2 (Giant Ape)] - 1006521",
+    "display_name": "[Rampaging Vengeance] Super Baby 2 (Giant Ape)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "form_4006520_base"
+    ],
+    "saved_at": "2025-10-10T06:13:03.950079Z"
+  },
+  "1031821": {
+    "folder": "output\\cards\\LR [STR] [[Shadow Dragon on the Righteous Path] Nuova Shenron] - 1031821",
+    "display_name": "[Shadow Dragon on the Righteous Path] Nuova Shenron",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:06.458210Z"
+  },
+  "1031541": {
+    "folder": "output\\cards\\UR [STR] [[Furious Teenage Girl] Pan (GT)] - 1031541",
+    "display_name": "[Furious Teenage Girl] Pan (GT)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:07.906709Z"
+  },
+  "1031530": {
+    "folder": "output\\cards\\SSR [STR] [[Girl Striving for Victory] Pan (GT)] - 1031530",
+    "display_name": "[Girl Striving for Victory] Pan (GT)",
+    "rarity": "SSR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:09.331892Z"
+  },
+  "1031501": {
+    "folder": "output\\cards\\LR [PHY] [[World Shrouded in Evil Power] Omega Shenron] - 1031501",
+    "display_name": "[World Shrouded in Evil Power] Omega Shenron",
+    "rarity": "LR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:10.707649Z"
+  },
+  "1031491": {
+    "folder": "output\\cards\\UR [PHY] [[Power That Brings Destruction] Omega Shenron] - 1031491",
+    "display_name": "[Power That Brings Destruction] Omega Shenron",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:12.107703Z"
+  },
+  "1031480": {
+    "folder": "output\\cards\\SSR [PHY] [[Culmination of Shadow Dragons] Omega Shenron] - 1031480",
+    "display_name": "[Culmination of Shadow Dragons] Omega Shenron",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:13.432534Z"
+  },
+  "1031471": {
+    "folder": "output\\cards\\LR [AGL] [[Fighter of Ultimate Radiance] Super Saiyan 4 Gogeta] - 1031471",
+    "display_name": "[Fighter of Ultimate Radiance] Super Saiyan 4 Gogeta",
+    "rarity": "LR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:14.737004Z"
+  },
+  "1031461": {
+    "folder": "output\\cards\\UR [AGL] [[Power That Embodies the Warrior Race] Super Saiyan 4 Gogeta] - 1031461",
+    "display_name": "[Power That Embodies the Warrior Race] Super Saiyan 4 Gogeta",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:16.098177Z"
+  },
+  "1031450": {
+    "folder": "output\\cards\\SSR [AGL] [[Super Saiyan 4 Fusion] Super Saiyan 4 Gogeta] - 1031450",
+    "display_name": "[Super Saiyan 4 Fusion] Super Saiyan 4 Gogeta",
+    "rarity": "SSR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:17.385601Z"
+  },
+  "1024661": {
+    "folder": "output\\cards\\LR [INT] [[Dawn of an Ideal World] Fusion Zamasu] - 1024661",
+    "display_name": "[Dawn of an Ideal World] Fusion Zamasu",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:13:18.798758Z"
+  },
+  "1032191": {
+    "folder": "output\\cards\\UR [PHY] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [PHY]] - 1032191",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [PHY]",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:25.160073Z"
+  },
+  "1032181": {
+    "folder": "output\\cards\\UR [STR] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [STR]] - 1032181",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [STR]",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:26.529981Z"
+  },
+  "1032171": {
+    "folder": "output\\cards\\UR [INT] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [INT]] - 1032171",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [INT]",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:30.047857Z"
+  },
+  "1032161": {
+    "folder": "output\\cards\\UR [TEQ] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [TEQ]] - 1032161",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [TEQ]",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:31.503391Z"
+  },
+  "1031811": {
+    "folder": "output\\cards\\UR [PHY] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [PHY]] - 1031811",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [PHY]",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:32.869235Z"
+  },
+  "1031801": {
+    "folder": "output\\cards\\UR [STR] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [STR]] - 1031801",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [STR]",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:34.180118Z"
+  },
+  "1031791": {
+    "folder": "output\\cards\\UR [INT] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [INT]] - 1031791",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [INT]",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:35.541618Z"
+  },
+  "1031781": {
+    "folder": "output\\cards\\UR [TEQ] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [TEQ]] - 1031781",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [TEQ]",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:36.975452Z"
+  },
+  "1031771": {
+    "folder": "output\\cards\\UR [AGL] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [AGL]] - 1031771",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [AGL]",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:38.277082Z"
+  },
+  "1031761": {
+    "folder": "output\\cards\\UR [AGL] [[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [AGL]] - 1031761",
+    "display_name": "[Embodiment of Endless Fury] Goku Black (Super Saiyan Rosé) (Clone) [AGL]",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:39.776232Z"
+  },
+  "1031521": {
+    "folder": "output\\cards\\UR [AGL] [[God of Destruction's Ideals] Champa] - 1031521",
+    "display_name": "[God of Destruction's Ideals] Champa",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:41.141280Z"
+  },
+  "1031510": {
+    "folder": "output\\cards\\SSR [AGL] [[Visitor from Beyond the Universe] Champa] - 1031510",
+    "display_name": "[Visitor from Beyond the Universe] Champa",
+    "rarity": "SSR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:42.401605Z"
+  },
+  "1031431": {
+    "folder": "output\\cards\\LR [STR] [[Terrifying Zero Mortals Plan] Goku Black (Super Saiyan Rosé) + Zamasu] - 1031431",
+    "display_name": "[Terrifying Zero Mortals Plan] Goku Black (Super Saiyan Rosé) + Zamasu",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:43.866249Z"
+  },
+  "4031441": {
+    "folder": "output\\cards\\LR [STR] [[Terrifying Zero Mortals Plan] Goku Black (Super Saiyan Rosé) + Zamasu] - 1031431",
+    "display_name": "[Terrifying Zero Mortals Plan] Zamasu + Goku Black (Super Saiyan Rosé)",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "form_4031440_base"
+    ],
+    "saved_at": "2025-10-10T06:13:46.598644Z"
+  },
+  "1031421": {
+    "folder": "output\\cards\\UR [STR] [[Mortal-Condemning God] Goku Black (Super Saiyan Rosé)] - 1031421",
+    "display_name": "[Mortal-Condemning God] Goku Black (Super Saiyan Rosé)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:47.976144Z"
+  },
+  "1031410": {
+    "folder": "output\\cards\\SSR [STR] [[Awakening Beyond Mortal Intellect] Goku Black (Super Saiyan Rosé)] - 1031410",
+    "display_name": "[Awakening Beyond Mortal Intellect] Goku Black (Super Saiyan Rosé)",
+    "rarity": "SSR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:49.401524Z"
+  },
+  "1031391": {
+    "folder": "output\\cards\\LR [STR] [[Furious Final Battle in the Future] Super Saiyan God SS Goku + Super Saiyan God SS Vegeta] - 1031391",
+    "display_name": "[Furious Final Battle in the Future] Super Saiyan God SS Goku + \nSuper Saiyan God SS Vegeta",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:50.997893Z"
+  },
+  "4031401": {
+    "folder": "output\\cards\\LR [STR] [[Furious Final Battle in the Future] Super Saiyan God SS Goku + Super Saiyan God SS Vegeta] - 1031391",
+    "display_name": "[Furious Final Battle in the Future] Super Saiyan God SS Vegeta + \nSuper Saiyan God SS Goku",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "form_4031400_base"
+    ],
+    "saved_at": "2025-10-10T06:13:55.751433Z"
+  },
+  "1031381": {
+    "folder": "output\\cards\\UR [STR] [[Saiyan Who Confronts Gods] Super Saiyan God SS Goku] - 1031381",
+    "display_name": "[Saiyan Who Confronts Gods] Super Saiyan God SS Goku",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:57.253483Z"
+  },
+  "1031370": {
+    "folder": "output\\cards\\SSR [STR] [[Travels Beyond Time and Space] Super Saiyan God SS Goku] - 1031370",
+    "display_name": "[Travels Beyond Time and Space] Super Saiyan God SS Goku",
+    "rarity": "SSR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:13:58.742354Z"
+  },
+  "1024731": {
+    "folder": "output\\cards\\LR [INT] [[The Last Tri-Beam] Tien] - 1024731",
+    "display_name": "[The Last Tri-Beam] Tien",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:14:00.324729Z"
+  },
+  "1031361": {
+    "folder": "output\\cards\\UR [INT] [[Unassuming Skilled Fighter] Chiaotzu] - 1031361",
+    "display_name": "[Unassuming Skilled Fighter] Chiaotzu",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:14:06.188118Z"
+  },
+  "1031350": {
+    "folder": "output\\cards\\SSR [INT] [[Disruption via Unexpected Moves] Chiaotzu] - 1031350",
+    "display_name": "[Disruption via Unexpected Moves] Chiaotzu",
+    "rarity": "SSR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:14:07.739865Z"
+  },
+  "1025801": {
+    "folder": "output\\cards\\UR [INT] [[Earth's Dominant Elite] Yamcha] - 1025801",
+    "display_name": "[Earth's Dominant Elite] Yamcha",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:14:09.121477Z"
+  },
+  "1031281": {
+    "folder": "output\\cards\\LR [STR] [[Crane School's True Strength] Tien] - 1031281",
+    "display_name": "[Crane School's True Strength] Tien",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:14:20.193731Z"
+  },
+  "1031271": {
+    "folder": "output\\cards\\UR [STR] [[Clash of the Youths] Tien] - 1031271",
+    "display_name": "[Clash of the Youths] Tien",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:14:21.460352Z"
+  },
+  "1031260": {
+    "folder": "output\\cards\\SSR [STR] [[Martial Artist of a New Era] Tien] - 1031260",
+    "display_name": "[Martial Artist of a New Era] Tien",
+    "rarity": "SSR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:14:22.976784Z"
+  },
+  "1023771": {
+    "folder": "output\\cards\\UR [AGL] [[Captain's Ace in the Hole] Captain Ginyu] - 1023771",
+    "display_name": "[Captain's Ace in the Hole] Captain Ginyu",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:14:24.413614Z"
+  },
+  "4023781": {
+    "folder": "output\\cards\\UR [AGL] [[Captain's Ace in the Hole] Captain Ginyu] - 1023771",
+    "display_name": "[Captain's Ace in the Hole] Ginyu (Goku)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "form_4023780_base"
+    ],
+    "saved_at": "2025-10-10T06:14:36.279636Z"
+  },
+  "1023751": {
+    "folder": "output\\cards\\UR [STR] [[Brutal Power and Psychokinesis] Recoome & Guldo] - 1023751",
+    "display_name": "[Brutal Power and Psychokinesis] Recoome & Guldo",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:14:38.815625Z"
+  },
+  "1023731": {
+    "folder": "output\\cards\\UR [INT] [[Red and Blue Light Orbs] Jeice & Burter] - 1023731",
+    "display_name": "[Red and Blue Light Orbs] Jeice & Burter",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:14:49.713439Z"
+  },
+  "1031341": {
+    "folder": "output\\cards\\UR [TEQ] [[Telekinesis of Rage] General Blue] - 1031341",
+    "display_name": "[Telekinesis of Rage] General Blue",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:00.295528Z"
+  },
+  "1031301": {
+    "folder": "output\\cards\\UR [PHY] [[Top-Notch Assassin Skills] Mercenary Tao] - 1031301",
+    "display_name": "[Top-Notch Assassin Skills] Mercenary Tao",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:01.634837Z"
+  },
+  "1031290": {
+    "folder": "output\\cards\\SSR [PHY] [[Terrifying Split-Second Death Notice] Mercenary Tao] - 1031290",
+    "display_name": "[Terrifying Split-Second Death Notice] Mercenary Tao",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:02.919328Z"
+  },
+  "1029230": {
+    "folder": "output\\cards\\SSR [TEQ] [[Dangerous Pursuer] General Blue] - 1029230",
+    "display_name": "[Dangerous Pursuer] General Blue",
+    "rarity": "SSR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:04.566415Z"
+  },
+  "1022831": {
+    "folder": "output\\cards\\UR [TEQ] [[Miracle of Friendship] Caulifla & Kale] - 1022831",
+    "display_name": "[Miracle of Friendship] Caulifla & Kale",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:15:06.096001Z"
+  },
+  "4022841": {
+    "folder": "output\\cards\\UR [TEQ] [[Miracle of Friendship] Caulifla & Kale] - 1022831",
+    "display_name": "[Miracle of Friendship] Super Saiyan 2 Kefla",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "form_4022840_base"
+    ],
+    "saved_at": "2025-10-10T06:15:18.989847Z"
+  },
+  "1031221": {
+    "folder": "output\\cards\\LR [PHY] [[The Perfect Duo] Super Saiyan 2 Caulifla + Super Saiyan 2 Kale] - 1031221",
+    "display_name": "[The Perfect Duo] Super Saiyan 2 Caulifla + Super Saiyan 2 Kale",
+    "rarity": "LR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:21.585102Z"
+  },
+  "4031231": {
+    "folder": "output\\cards\\LR [PHY] [[The Perfect Duo] Super Saiyan 2 Caulifla + Super Saiyan 2 Kale] - 1031221",
+    "display_name": "[The Perfect Duo] Super Saiyan 2 Kale + Super Saiyan 2 Caulifla",
+    "rarity": "LR",
+    "type": "PHY",
+    "variants": [
+      "form_4031230_base"
+    ],
+    "saved_at": "2025-10-10T06:15:24.843710Z"
+  },
+  "1031211": {
+    "folder": "output\\cards\\UR [PHY] [[Heated Saiyan Clash] Super Saiyan 2 Caulifla] - 1031211",
+    "display_name": "[Heated Saiyan Clash] Super Saiyan 2 Caulifla",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:27.510247Z"
+  },
+  "1031200": {
+    "folder": "output\\cards\\SSR [PHY] [[Never-Ending Evolution] Super Saiyan 2 Caulifla] - 1031200",
+    "display_name": "[Never-Ending Evolution] Super Saiyan 2 Caulifla",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:28.780304Z"
+  },
+  "1030991": {
+    "folder": "output\\cards\\UR [TEQ] [[Infinite Malice] Mecha Frieza] - 1030991",
+    "display_name": "[Infinite Malice] Mecha Frieza",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:15:30.175632Z"
+  },
+  "1027691": {
+    "folder": "output\\cards\\UR [PHY] [[Evil Power Unleashed] Boujack] - 1027691",
+    "display_name": "[Evil Power Unleashed] Boujack",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:15:31.629976Z"
+  },
+  "1026841": {
+    "folder": "output\\cards\\UR [INT] [[Power to Withstand Adversity] Super Saiyan Gohan (Future)] - 1026841",
+    "display_name": "[Power to Withstand Adversity] Super Saiyan Gohan (Future)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:15:43.509957Z"
+  },
+  "1022341": {
+    "folder": "output\\cards\\LR [STR] [[Bloodstained Sanctuary] Mercenary Tao] - 1022341",
+    "display_name": "[Bloodstained Sanctuary] Mercenary Tao",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:15:59.096899Z"
+  },
+  "1021111": {
+    "folder": "output\\cards\\UR [STR] [[Life Force Traded for Devastating Power] Tien] - 1021111",
+    "display_name": "[Life Force Traded for Devastating Power] Tien",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:16:07.235902Z"
+  },
+  "1023091": {
+    "folder": "output\\cards\\LR [STR] [[Transcendent Light-Speed Battle Erupts] Hit & Super Saiyan God Goku] - 1023091",
+    "display_name": "[Transcendent Light-Speed Battle Erupts] Hit & Super Saiyan God Goku",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:16:18.486187Z"
+  },
+  "1031181": {
+    "folder": "output\\cards\\UR [TEQ] [[Ceaseless Combat] Super Saiyan God SS Goku (Kaioken)] - 1031181",
+    "display_name": "[Ceaseless Combat] Super Saiyan God SS Goku (Kaioken)",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:27.236467Z"
+  },
+  "4031191": {
+    "folder": "output\\cards\\UR [TEQ] [[Ceaseless Combat] Super Saiyan God SS Goku (Kaioken)] - 1031181",
+    "display_name": "[Ceaseless Combat] Super Saiyan God SS Goku (Kaioken)",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "form_4031190_base"
+    ],
+    "saved_at": "2025-10-10T06:16:30.433940Z"
+  },
+  "1031170": {
+    "folder": "output\\cards\\SSR [TEQ] [[Revealed Ultimate Technique] Super Saiyan God SS Goku (Kaioken)] - 1031170",
+    "display_name": "[Revealed Ultimate Technique] Super Saiyan God SS Goku (Kaioken)",
+    "rarity": "SSR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:32.004321Z"
+  },
+  "1031121": {
+    "folder": "output\\cards\\UR [INT] [[Counterattack in the Form of Improvement] Hit] - 1031121",
+    "display_name": "[Counterattack in the Form of Improvement] Hit",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:33.327679Z"
+  },
+  "4031131": {
+    "folder": "output\\cards\\UR [INT] [[Counterattack in the Form of Improvement] Hit] - 1031121",
+    "display_name": "[Counterattack in the Form of Improvement] Hit",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "form_4031130_base"
+    ],
+    "saved_at": "2025-10-10T06:16:36.068291Z"
+  },
+  "1031110": {
+    "folder": "output\\cards\\SSR [INT] [[Strategy to Become Stronger] Hit] - 1031110",
+    "display_name": "[Strategy to Become Stronger] Hit",
+    "rarity": "SSR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:37.396739Z"
+  },
+  "1031041": {
+    "folder": "output\\cards\\UR [PHY] [[Tough Body with Various Ways of Attacks] Magetta] - 1031041",
+    "display_name": "[Tough Body with Various Ways of Attacks] Magetta",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:38.569703Z"
+  },
+  "1031030": {
+    "folder": "output\\cards\\SSR [PHY] [[Astonishing Burning Power] Magetta] - 1031030",
+    "display_name": "[Astonishing Burning Power] Magetta",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:39.873338Z"
+  },
+  "1031021": {
+    "folder": "output\\cards\\UR [AGL] [[An Actual Ace Up the Sleeve] Piccolo] - 1031021",
+    "display_name": "[An Actual Ace Up the Sleeve] Piccolo",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:41.177200Z"
+  },
+  "1031010": {
+    "folder": "output\\cards\\SSR [AGL] [[Contest of Wits] Piccolo] - 1031010",
+    "display_name": "[Contest of Wits] Piccolo",
+    "rarity": "SSR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:42.737250Z"
+  },
+  "1030971": {
+    "folder": "output\\cards\\LR [PHY] [[Unpredictable Powerful Technique] Paikuhan] - 1030971",
+    "display_name": "[Unpredictable Powerful Technique] Paikuhan",
+    "rarity": "LR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:44.322612Z"
+  },
+  "4030981": {
+    "folder": "output\\cards\\LR [PHY] [[Unpredictable Powerful Technique] Paikuhan] - 1030971",
+    "display_name": "[Unpredictable Powerful Technique] Paikuhan",
+    "rarity": "LR",
+    "type": "PHY",
+    "variants": [
+      "form_4030980_base"
+    ],
+    "saved_at": "2025-10-10T06:16:47.687510Z"
+  },
+  "1030961": {
+    "folder": "output\\cards\\UR [PHY] [[Impressive and Extraordinary Speed] Paikuhan] - 1030961",
+    "display_name": "[Impressive and Extraordinary Speed] Paikuhan",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:48.896407Z"
+  },
+  "1030950": {
+    "folder": "output\\cards\\SSR [PHY] [[The Mighty One of the Otherworld] Paikuhan] - 1030950",
+    "display_name": "[The Mighty One of the Otherworld] Paikuhan",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:16:50.227989Z"
+  },
+  "1021331": {
+    "folder": "output\\cards\\UR [AGL] [[Righteous Otherworld Defense] Paikuhan] - 1021331",
+    "display_name": "[Righteous Otherworld Defense] Paikuhan",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:16:51.448306Z"
+  },
+  "1021291": {
+    "folder": "output\\cards\\UR [TEQ] [[Otherworld in Collapse] Janemba] - 1021291",
+    "display_name": "[Otherworld in Collapse] Janemba",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:17:02.751553Z"
+  },
+  "4021301": {
+    "folder": "output\\cards\\UR [TEQ] [[Otherworld in Collapse] Janemba] - 1021291",
+    "display_name": "[Otherworld in Collapse] Super Janemba",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "form_4021300_base"
+    ],
+    "saved_at": "2025-10-10T06:17:20.526614Z"
+  },
+  "1011041": {
+    "folder": "output\\cards\\UR [STR] [[Blazing Clash] Paikuhan] - 1011041",
+    "display_name": "[Blazing Clash] Paikuhan",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:17:23.229888Z"
+  },
+  "1010661": {
+    "folder": "output\\cards\\UR [PHY] [[Burning to the Last] Super Saiyan Goku (Angel) (Super Kaioken)] - 1010661",
+    "display_name": "[Burning to the Last] Super Saiyan Goku (Angel) (Super Kaioken)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:17:39.833041Z"
+  },
+  "1030681": {
+    "folder": "output\\cards\\UR [INT] [[Stable Combat Power] Vegeta (Mini) (DAIMA)] - 1030681",
+    "display_name": "[Stable Combat Power] Vegeta (Mini) (DAIMA)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:17:51.788096Z"
+  },
+  "1024381": {
+    "folder": "output\\cards\\UR [AGL] [[Ultimate Life Form with Immense Power] Cell (1st Form)] - 1024381",
+    "display_name": "[Ultimate Life Form with Immense Power] Cell (1st Form)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:17:53.660339Z"
+  },
+  "4024391": {
+    "folder": "output\\cards\\UR [AGL] [[Ultimate Life Form with Immense Power] Cell (1st Form)] - 1024381",
+    "display_name": "[Ultimate Life Form with Immense Power] Cell (2nd Form)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "form_4024390_base"
+    ],
+    "saved_at": "2025-10-10T06:18:09.972043Z"
+  },
+  "4024401": {
+    "folder": "output\\cards\\UR [AGL] [[Ultimate Life Form with Immense Power] Cell (1st Form)] - 1024381",
+    "display_name": "[Ultimate Life Form with Immense Power] Cell (Perfect Form)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "form_4024400_base"
+    ],
+    "saved_at": "2025-10-10T06:18:12.645804Z"
+  },
+  "4024411": {
+    "folder": "output\\cards\\UR [AGL] [[Ultimate Life Form with Immense Power] Cell (1st Form)] - 1024381",
+    "display_name": "[Ultimate Life Form with Immense Power] Cell (Perfect Form)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "form_4024410_base"
+    ],
+    "saved_at": "2025-10-10T06:18:15.337215Z"
+  },
+  "1024291": {
+    "folder": "output\\cards\\UR [STR] [[Warriors Entrusted with Earth's Fate] Super Saiyan Goku-Super Saiyan Gohan (Youth)] - 1024291",
+    "display_name": "[Warriors Entrusted with Earth's Fate] Super Saiyan Goku/Super Saiyan Gohan (Youth)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:18:17.859679Z"
+  },
+  "4024301": {
+    "folder": "output\\cards\\UR [STR] [[Warriors Entrusted with Earth's Fate] Super Saiyan Goku-Super Saiyan Gohan (Youth)] - 1024291",
+    "display_name": "[Warriors Entrusted with Earth's Fate] Super Saiyan Gohan (Youth)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "form_4024300_base"
+    ],
+    "saved_at": "2025-10-10T06:18:35.179219Z"
+  },
+  "1024111": {
+    "folder": "output\\cards\\UR [PHY] [[Captivating Dance] Para Para Brothers] - 1024111",
+    "display_name": "[Captivating Dance] Para Para Brothers",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:18:37.827329Z"
+  },
+  "1030941": {
+    "folder": "output\\cards\\UR [STR] [[Final Battle at the Highest Level] Cell (Perfect Form)] - 1030941",
+    "display_name": "[Final Battle at the Highest Level] Cell (Perfect Form)",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:18:48.130063Z"
+  },
+  "1030930": {
+    "folder": "output\\cards\\SSR [STR] [[Highly Anticipated Martial Arts Tournament] Cell (Perfect Form)] - 1030930",
+    "display_name": "[Highly Anticipated Martial Arts Tournament] Cell (Perfect Form)",
+    "rarity": "SSR",
+    "type": "STR",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:18:50.330684Z"
+  },
+  "1030921": {
+    "folder": "output\\cards\\UR [PHY] [[True Strength of Adults] Android #18] - 1030921",
+    "display_name": "[True Strength of Adults] Android #18",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:18:51.610039Z"
+  },
+  "1030910": {
+    "folder": "output\\cards\\SSR [PHY] [[Competing for Money] Android #18] - 1030910",
+    "display_name": "[Competing for Money] Android #18",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:18:53.253590Z"
+  },
+  "1030300": {
+    "folder": "output\\cards\\SSR [TEQ] [[Rapid Offense and Defense] Krillin (Youth)] - 1030300",
+    "display_name": "[Rapid Offense and Defense] Krillin (Youth)",
+    "rarity": "SSR",
+    "type": "TEQ",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:18:54.536912Z"
+  },
+  "1025641": {
+    "folder": "output\\cards\\UR [TEQ] [[Recognized Strength] Gotenks] - 1025641",
+    "display_name": "[Recognized Strength] Gotenks",
+    "rarity": "UR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:18:56.014484Z"
+  },
+  "1024631": {
+    "folder": "output\\cards\\UR [STR] [[Merciless Judgment] Goku Black] - 1024631",
+    "display_name": "[Merciless Judgment] Goku Black",
+    "rarity": "UR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:19:07.569873Z"
+  },
+  "1020041": {
+    "folder": "output\\cards\\UR [PHY] [[Full-Power Breakthrough] Jackie Chun (Max Power)] - 1020041",
+    "display_name": "[Full-Power Breakthrough] Jackie Chun (Max Power)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:19:18.641453Z"
+  },
+  "1029831": {
+    "folder": "output\\cards\\LR [AGL] [[Decisive Showdown] Super Saiyan Bardock] - 1029831",
+    "display_name": "[Decisive Showdown] Super Saiyan Bardock",
+    "rarity": "LR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:19:32.472905Z"
+  },
+  "1025071": {
+    "folder": "output\\cards\\UR [PHY] [[Quest for the Dragon Balls] Goku (Youth)] - 1025071",
+    "display_name": "[Quest for the Dragon Balls] Goku (Youth)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:19:35.371785Z"
+  },
+  "1031101": {
+    "folder": "output\\cards\\UR [INT] [[Impetuous Maiden] Chi-Chi (Youth)] - 1031101",
+    "display_name": "[Impetuous Maiden] Chi-Chi (Youth)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:19:49.371659Z"
+  },
+  "1031090": {
+    "folder": "output\\cards\\SSR [INT] [[Ox King's Daughter] Chi-Chi (Youth)] - 1031090",
+    "display_name": "[Ox King's Daughter] Chi-Chi (Youth)",
+    "rarity": "SSR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:19:51.109653Z"
+  },
+  "1031081": {
+    "folder": "output\\cards\\UR [AGL] [[Exciting and Heart-Pounding Adventure] Goku (Youth)] - 1031081",
+    "display_name": "[Exciting and Heart-Pounding Adventure] Goku (Youth)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:19:52.667268Z"
+  },
+  "1031070": {
+    "folder": "output\\cards\\SSR [AGL] [[The Beginning of the Story] Goku (Youth)] - 1031070",
+    "display_name": "[The Beginning of the Story] Goku (Youth)",
+    "rarity": "SSR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:19:54.009850Z"
+  },
+  "1021941": {
+    "folder": "output\\cards\\UR [INT] [[Battle to Reach the Top] Super Saiyan Vegeta (GT)] - 1021941",
+    "display_name": "[Battle to Reach the Top] Super Saiyan Vegeta (GT)",
+    "rarity": "UR",
+    "type": "INT",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:19:55.535941Z"
+  },
+  "1021921": {
+    "folder": "output\\cards\\UR [PHY] [[Battle to Become the Strongest] Super Saiyan Goku (GT)] - 1021921",
+    "display_name": "[Battle to Become the Strongest] Super Saiyan Goku (GT)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3",
+      "eza_step_4",
+      "eza_step_5",
+      "eza_step_6",
+      "eza_step_7"
+    ],
+    "saved_at": "2025-10-10T06:20:08.907822Z"
+  },
+  "1031061": {
+    "folder": "output\\cards\\UR [PHY] [[Thoroughly Refined Strength] Super Saiyan 3 Vegeta (Mini) (DAIMA)] - 1031061",
+    "display_name": "[Thoroughly Refined Strength] Super Saiyan 3 Vegeta (Mini) (DAIMA)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:20:30.425427Z"
+  },
+  "1031050": {
+    "folder": "output\\cards\\SSR [PHY] [[Evolution Attained through Training] Super Saiyan 3 Vegeta (Mini) (DAIMA)] - 1031050",
+    "display_name": "[Evolution Attained through Training] Super Saiyan 3 Vegeta (Mini) (DAIMA)",
+    "rarity": "SSR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:20:31.970474Z"
+  },
+  "1022421": {
+    "folder": "output\\cards\\LR [PHY] [[Saiyan Warriors with Ultimate Power] Super Saiyan 4 Goku & Super Saiyan 4 Vegeta] - 1022421",
+    "display_name": "[Saiyan Warriors with Ultimate Power] Super Saiyan 4 Goku & Super Saiyan 4 Vegeta",
+    "rarity": "LR",
+    "type": "PHY",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:20:33.509294Z"
+  },
+  "4022431": {
+    "folder": "output\\cards\\LR [PHY] [[Saiyan Warriors with Ultimate Power] Super Saiyan 4 Goku & Super Saiyan 4 Vegeta] - 1022421",
+    "display_name": "[Saiyan Warriors with Ultimate Power] Super Saiyan 4 Gogeta",
+    "rarity": "LR",
+    "type": "PHY",
+    "variants": [
+      "form_4022430_base"
+    ],
+    "saved_at": "2025-10-10T06:20:44.575296Z"
+  },
+  "1022381": {
+    "folder": "output\\cards\\LR [TEQ] [[Divine Warriors with Infinite Power] Super Saiyan God Goku & Super Saiyan God Vegeta] - 1022381",
+    "display_name": "[Divine Warriors with Infinite Power] Super Saiyan God Goku & \nSuper Saiyan God Vegeta",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:20:47.320200Z"
+  },
+  "4022391": {
+    "folder": "output\\cards\\LR [TEQ] [[Divine Warriors with Infinite Power] Super Saiyan God Goku & Super Saiyan God Vegeta] - 1022381",
+    "display_name": "[Divine Warriors with Infinite Power] Super Saiyan God SS Goku & \nSuper Saiyan God SS Vegeta",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "form_4022390_base"
+    ],
+    "saved_at": "2025-10-10T06:20:57.611541Z"
+  },
+  "1030791": {
+    "folder": "output\\cards\\LR [AGL] [[Demon King's Great Wish] Demon King Piccolo (Elder)] - 1030791",
+    "display_name": "[Demon King's Great Wish] Demon King Piccolo (Elder)",
+    "rarity": "LR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:21:00.457129Z"
+  },
+  "4030801": {
+    "folder": "output\\cards\\LR [AGL] [[Demon King's Great Wish] Demon King Piccolo (Elder)] - 1030791",
+    "display_name": "[Demon King's Great Wish] Demon King Piccolo (Elder)",
+    "rarity": "LR",
+    "type": "AGL",
+    "variants": [
+      "form_4030800_base"
+    ],
+    "saved_at": "2025-10-10T06:21:05.238242Z"
+  },
+  "4030811": {
+    "folder": "output\\cards\\LR [AGL] [[Demon King's Great Wish] Demon King Piccolo (Elder)] - 1030791",
+    "display_name": "[Demon King's Great Wish] Demon King Piccolo",
+    "rarity": "LR",
+    "type": "AGL",
+    "variants": [
+      "form_4030810_base"
+    ],
+    "saved_at": "2025-10-10T06:21:06.995312Z"
+  },
+  "1030781": {
+    "folder": "output\\cards\\UR [AGL] [[Strategy to Restore Youth] Demon King Piccolo (Elder)] - 1030781",
+    "display_name": "[Strategy to Restore Youth] Demon King Piccolo (Elder)",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:21:08.388326Z"
+  },
+  "1030671": {
+    "folder": "output\\cards\\UR [PHY] [[Companion from the Old Days] Goku (Mini) (DAIMA)] - 1030671",
+    "display_name": "[Companion from the Old Days] Goku (Mini) (DAIMA)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:21:09.758364Z"
+  },
+  "1030611": {
+    "folder": "output\\cards\\UR [PHY] [[Breathing and Timing in Unison] Trunks (Kid) + Goten (Kid)] - 1030611",
+    "display_name": "[Breathing and Timing in Unison] Trunks (Kid) + Goten (Kid)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:21:11.268889Z"
+  },
+  "4030621": {
+    "folder": "output\\cards\\UR [PHY] [[Breathing and Timing in Unison] Trunks (Kid) + Goten (Kid)] - 1030611",
+    "display_name": "[Breathing and Timing in Unison] Goten (Kid) + Trunks (Kid)",
+    "rarity": "UR",
+    "type": "PHY",
+    "variants": [
+      "form_4030620_base"
+    ],
+    "saved_at": "2025-10-10T06:21:14.008887Z"
+  },
+  "1023621": {
+    "folder": "output\\cards\\LR [STR] [[Battle Against Limits] Goku (Kaioken)] - 1023621",
+    "display_name": "[Battle Against Limits] Goku (Kaioken)",
+    "rarity": "LR",
+    "type": "STR",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:21:15.630637Z"
+  },
+  "1023521": {
+    "folder": "output\\cards\\LR [TEQ] [[Furious Last Resort] Vegeta (Giant Ape)] - 1023521",
+    "display_name": "[Furious Last Resort] Vegeta (Giant Ape)",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "base",
+      "eza_step_1",
+      "eza_step_2",
+      "eza_step_3"
+    ],
+    "saved_at": "2025-10-10T06:21:23.883197Z"
+  },
+  "4023521": {
+    "folder": "output\\cards\\LR [TEQ] [[Furious Last Resort] Vegeta (Giant Ape)] - 1023521",
+    "display_name": "[Furious Last Resort] Vegeta (Giant Ape)",
+    "rarity": "LR",
+    "type": "TEQ",
+    "variants": [
+      "form_4023520_base"
+    ],
+    "saved_at": "2025-10-10T06:21:32.949094Z"
+  },
+  "1030831": {
+    "folder": "output\\cards\\UR [AGL] [[Chaos Brought by the God of Destruction] Beerus] - 1030831",
+    "display_name": "[Chaos Brought by the God of Destruction] Beerus",
+    "rarity": "UR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:21:35.528014Z"
+  },
+  "1030820": {
+    "folder": "output\\cards\\SSR [AGL] [[A Gourmet God of Destruction] Beerus] - 1030820",
+    "display_name": "[A Gourmet God of Destruction] Beerus",
+    "rarity": "SSR",
+    "type": "AGL",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:21:37.342962Z"
+  },
+  "1030531": {
+    "folder": "output\\cards\\LR [INT] [[Universe 7's Final Will to Fight] Frieza (Final Form) (Angel) + Goku] - 1030531",
+    "display_name": "[Universe 7's Final Will to Fight] Frieza (Final Form) (Angel) + Goku",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "base"
+    ],
+    "saved_at": "2025-10-10T06:21:39.066119Z"
+  },
+  "4030541": {
+    "folder": "output\\cards\\LR [INT] [[Universe 7's Final Will to Fight] Frieza (Final Form) (Angel) + Goku] - 1030531",
+    "display_name": "[Universe 7's Final Will to Fight] Goku + Frieza (Final Form) (Angel)",
+    "rarity": "LR",
+    "type": "INT",
+    "variants": [
+      "form_4030540_base"
+    ],
+    "saved_at": "2025-10-10T06:21:42.305429Z"
+  }
+}

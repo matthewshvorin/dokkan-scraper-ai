@@ -93,6 +93,7 @@ USER_AGENT = (
     "Chrome/124.0.0.0 Safari/537.36"
 )
 REQUEST_HEADERS = {"User-Agent": USER_AGENT, "Referer": BASE}
+CATEGORIES_INDEX_PATH = OUTROOT / "CATEGORIES_INDEX.json"
 
 TIMEOUT = 60_000
 SLEEP_BETWEEN_CARDS = 0
@@ -104,7 +105,9 @@ MAX_FAMILY_SIZE = 40    # safety cap for BFS across transformations/variations
 
 # NEW: Skip already-scraped families entirely (uses CARDS_INDEX.json and on-disk folders)
 SKIP_EXISTING = True
-
+STORE_ASSETS_LIST = False                      # drop top-level and per-variant "assets"
+KEEP_ASSET_CATEGORIES = {"card_art", "thumbnail"}
+KEEP_ASSET_LOCALES = {"en"}
 # ---- Seed test ----
 SEED_URLS: List[str] = [
  #"https://dokkaninfo.com/cards/1010441",
@@ -133,7 +136,126 @@ CARD_ID_IN_HREF_RE = re.compile(r"/cards/(\d+)")
 CARD_ID_IN_SRC_RE = re.compile(r"card_(\d+)_", re.IGNORECASE)
 
 TYPE_SET = {"str", "teq", "int", "agl", "phy"}
+RARITY_RANK = {"N":0, "R":1, "SR":2, "SSR":3, "UR":4, "LR":5}
 
+AWAKEN_ROW_SEL = "div.row.d-flex.flex-wrap.border.border-1.card-icon"
+CAT_ID_IN_HREF = re.compile(r"/categories/(\d+)$")
+
+def parse_categories_detailed(soup: BeautifulSoup, page_url: str) -> List[Dict[str, Optional[str]]]:
+    """
+    Returns: [{"id":"50","name":"Inhuman Deeds","asset_rel":"dokkaninfo.com/...png","locale":"en"}, ...]
+    """
+    items: List[Dict[str, Optional[str]]] = []
+    for a in soup.select('a[href^="/categories/"]'):
+        href = a.get("href") or ""
+        m = CAT_ID_IN_HREF.search(href)
+        if not m:
+            continue
+        cid = m.group(1)
+        im = a.find("img")
+        if not im:
+            continue
+        name = (im.get("alt") or im.get("title") or "").strip()
+        src = im.get("src") or ""
+        absu = urljoin(page_url, src)
+        relp = _url_to_asset_rel(absu)
+        rels = str(relp) if relp else None
+        loc = _extract_locale_from_rel(rels) if rels else None
+        items.append({"id": cid, "name": name, "asset_rel": rels, "locale": loc})
+    # de-dup per (id, locale, path)
+    seen = set(); out = []
+    for it in items:
+        key = (it.get("id"), it.get("locale"), it.get("asset_rel"))
+        if key in seen:
+            continue
+        seen.add(key); out.append(it)
+    return out
+
+def load_category_index() -> Dict[str, dict]:
+    if CATEGORIES_INDEX_PATH.exists():
+        try:
+            return json.loads(CATEGORIES_INDEX_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {}
+
+def save_category_index(index: Dict[str, dict]) -> None:
+    CATEGORIES_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
+    CATEGORIES_INDEX_PATH.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def _index_add_category_item(idx: Dict[str, dict], item: Dict[str, Optional[str]]) -> None:
+    """
+    item = {"id": "50", "name": "Inhuman Deeds", "asset_rel": "dokkaninfo.com/...png", "locale": "en"}
+    """
+    cid = str(item.get("id") or "").strip()
+    if not cid:
+        return
+    name = (item.get("name") or "").strip()
+    rel  = item.get("asset_rel") or None
+    loc  = (item.get("locale") or "en").lower()
+
+    node = idx.get(cid) or {"id": cid, "labels": {}, "assets": []}
+    if name:
+        node["labels"][loc] = name
+
+    if rel and rel not in {a.get("path") for a in node["assets"]}:
+        node["assets"].append({"path": rel, "locale": loc})
+
+    # Optional slug for pretty URLs
+    if "slug" not in node and name:
+        node["slug"] = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    idx[cid] = node
+
+def _collect_card_ids_in_row(row: Tag) -> list[str]:
+    ids = []
+    for a in row.select("a.card-icon[href]"):
+        href = a.get("href") or ""
+        m = CARD_ID_IN_HREF_RE.search(href)
+        if m:
+            ids.append(m.group(1))
+    # Keep order but unique
+    out, seen = [], set()
+    for i in ids:
+        if i not in seen:
+            seen.add(i); out.append(i)
+    return out
+
+def parse_awaken_links_from_soup(soup: BeautifulSoup, rarity_hint: Optional[str]) -> dict:
+    """Return {'from': [...], 'to': [...]} using headings when present; fallback by rarity."""
+    res = {"from": [], "to": []}
+    rows = soup.select(AWAKEN_ROW_SEL)
+    if not rows:
+        return res
+
+    def nearby_heading_text(row: Tag) -> str:
+        prev = row.find_previous_sibling("div")
+        txt = (prev.get_text(" ", strip=True).lower() if prev else "")
+        return txt
+
+    for row in rows:
+        ids = _collect_card_ids_in_row(row)
+        if not ids:
+            continue
+        label = nearby_heading_text(row)
+        if "awakened from" in label:
+            res["from"].extend(ids); continue
+        if "awakens to" in label or "dokkan awaken" in label:
+            res["to"].extend(ids); continue
+
+        # Fallback heuristic: LR pages almost always show the "from" strip only.
+        if (rarity_hint or "").upper() == "LR":
+            res["from"].extend(ids)
+        else:
+            # SSR-only pages sometimes show the "to" strip only.
+            res["to"].extend(ids)
+
+    # de-dupe
+    res["from"] = list(dict.fromkeys(res["from"]))
+    res["to"] = list(dict.fromkeys(res["to"]))
+    return res
+
+def _rarity_rank(r: Optional[str]) -> int:
+    return RARITY_RANK.get((r or "").upper(), -1)
 # ------------ Logging -------------
 def setup_logging() -> Path:
     LOGDIR.mkdir(parents=True, exist_ok=True)
@@ -1251,6 +1373,36 @@ def merge_assets_index(dst: Dict[str, List[dict]], src: Dict[str, List[dict]]) -
     return dst
 
 # ------------ Scraping core (builds a single variant dict) -------------
+def _prune_assets_index(idx: dict) -> dict:
+    if not idx: return {}
+    out = {}
+    for cat, items in idx.items():
+        if cat not in KEEP_ASSET_CATEGORIES:
+            continue
+        kept = []
+        for it in items:
+            loc = (it.get("locale") or "en").lower()
+            if KEEP_ASSET_LOCALES and loc not in KEEP_ASSET_LOCALES:
+                continue
+            kept.append(it)
+        if kept:
+            out[cat] = kept
+    return out
+def _prune_assets_index(idx: dict) -> dict:
+    if not idx: return {}
+    out = {}
+    for cat, items in idx.items():
+        if cat not in KEEP_ASSET_CATEGORIES:
+            continue
+        kept = []
+        for it in items:
+            loc = (it.get("locale") or "en").lower()
+            if KEEP_ASSET_LOCALES and loc not in KEEP_ASSET_LOCALES:
+                continue
+            kept.append(it)
+        if kept:
+            out[cat] = kept
+    return out
 
 def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, object]) -> Tuple[Dict[str, object], Dict[str, object]]:
     """
@@ -1307,7 +1459,9 @@ def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, o
     transformation_conditions = _clean_activation(sections.get("Transformation Condition(s)") or [])
     link_skills = _clean_links(sections.get("Link Skills") or [])
 
+    # Categories (names) for compatibility, plus detailed for index
     categories = parse_categories_from_soup(soup)
+    categories_detailed = parse_categories_detailed(soup, page_url)
 
     stats_textual = _parse_stats_textual(sections.get("Stats") or [], page_text)
     stats_dom = _parse_stats_table_dom(soup)
@@ -1319,7 +1473,7 @@ def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, o
     else:
         release_date, tz = _parse_release(page_text)
 
-    # Collect and download images
+    # Collect and download images (we still download all images on page)
     image_urls = []
     seen = set()
     for img in soup.find_all("img"):
@@ -1332,10 +1486,12 @@ def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, o
             image_urls.append(absu)
     assets_rel_paths = download_assets_for_card(image_urls)
     assets_index = build_assets_index(assets_rel_paths)
+    assets_index = _prune_assets_index(assets_index)
 
     rarity = detect_rarity_from_dom(soup, image_urls)
     type_token = detect_type_token_from_dom(soup)
     type_token_upper = type_token.upper() if type_token else None
+    awak = parse_awaken_links_from_soup(soup, rarity_hint=rarity)
 
     h1 = soup.select_one("h1")
     base_display_name = (
@@ -1373,6 +1529,8 @@ def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, o
         "timezone": tz,
         "eza_release_date": eza_rel_dom,
         "obtain_type": parse_obtain_type(soup),
+        "awakening": {"from_ids": awak["from"], "to_ids": awak["to"]},
+        "rarity_rank": _rarity_rank(rarity),
         "kit": {
             "leader_skill": leader_skill,
             "super_attack": {"name": super_name, "effect": super_effect},
@@ -1390,13 +1548,16 @@ def scrape_variant_from_html(page_html: str, page_url: str, variant: Dict[str, o
             "finish_skills": finish_skills,
             "link_skills": link_skills,
             "categories": categories,
+            "categories_detailed": categories_detailed,   # <---- NEW
             "stats": stats,
             "domains": domains,
         },
         "assets": assets_rel_paths,      # list (back-compat)
         "assets_index": assets_index,    # NEW per-variant
     }
-
+    if not STORE_ASSETS_LIST:
+        unit_fields.pop("assets", None)
+        variant_record.pop("assets", None)
     return unit_fields, variant_record
 
 # ------------ Single-folder write/merge -------------
@@ -1456,6 +1617,95 @@ def merge_variant_into_unit_json(folder: Path, unit_fields: Dict[str, object], v
     if not replaced:
         variants.append(variant_record)
     current["variants"] = variants
+
+    # ---------------------------
+    # C) Annotate awakening chains & "fully awakened"
+    # ---------------------------
+
+    # Local rarity mapping + helper for robustness
+    RARITY_RANK = {"N": 0, "R": 1, "SR": 2, "SSR": 3, "UR": 4, "LR": 5}
+
+    def _rarity_rank_of_variant(v: dict) -> int:
+        # Prefer explicit rarity_rank if you stored it during scrape (step B)
+        if isinstance(v.get("rarity_rank"), int):
+            return v["rarity_rank"]
+        # Fallback to textual rarity field
+        r = (v.get("rarity") or "").upper()
+        return RARITY_RANK.get(r, -1)
+
+    # Normalize awakening fields on all variants
+    variants = current.get("variants") or []
+    for v in variants:
+        awk = v.get("awakening") or {}
+        # Ensure structure exists and is lists
+        v["awakening"] = {
+            "from_ids": list(awk.get("from_ids") or []),
+            "to_ids": list(awk.get("to_ids") or []),
+        }
+
+    # Index variants by their form_id (string)
+    var_by_id: Dict[str, dict] = {str(v.get("form_id")): v for v in variants if v.get("form_id")}
+
+    # Collect whether any awakening links exist in this family
+    all_from: set[str] = set()
+    all_to: set[str] = set()
+    for v in variants:
+        all_from.update(str(i) for i in (v.get("awakening", {}).get("from_ids") or []))
+        all_to.update(str(i) for i in (v.get("awakening", {}).get("to_ids") or []))
+    family_has_any_chain = bool(all_from or all_to)
+
+    def _next_ids(fid: str) -> List[str]:
+        """Get the 'awakens to' ids for this form, preferring ones inside this file."""
+        v = var_by_id.get(str(fid)) or {}
+        ids = [str(i) for i in (v.get("awakening", {}).get("to_ids") or [])]
+        internal = [i for i in ids if i in var_by_id]
+        return internal if internal else ids
+
+    def _chain_head(fid: str) -> str:
+        """Follow 'to' links until terminal; on forks, choose highest rarity then highest id."""
+        seen: set[str] = set()
+        cur = str(fid)
+        while True:
+            nxts = _next_ids(cur)
+            if not nxts:
+                return cur
+            # Choose best candidate by rarity, then numeric id
+            def _key(nid: str):
+                v = var_by_id.get(nid)
+                rr = _rarity_rank_of_variant(v) if v else -1
+                try:
+                    num = int(nid)
+                except Exception:
+                    num = -1
+                return (rr, num)
+            nxt = max(nxts, key=_key)
+            if nxt in seen:           # cycle guard
+                return cur
+            seen.add(nxt)
+            cur = nxt
+
+    # Annotate each variant
+    for v in variants:
+        fid = str(v.get("form_id")) if v.get("form_id") is not None else None
+        head = _chain_head(fid) if fid else None
+        v["awaken_chain_head_id"] = head
+        # If no chain data exists at all, treat everything as "fully awakened" for folded views
+        v["is_fully_awakened"] = (fid == head) if family_has_any_chain else True
+
+    current["variants"] = variants
+
+    # ---------------------------
+    # NEW: Update global CATEGORIES_INDEX.json from this variant's detailed categories
+    # ---------------------------
+    try:
+        cat_items = (variant_record.get("kit") or {}).get("categories_detailed") or []
+        if cat_items:
+            cat_index = load_category_index()
+            for it in cat_items:
+                _index_add_category_item(cat_index, it)
+            save_category_index(cat_index)
+    except Exception as e:
+        logging.warning("Failed to update category index: %s", e)
 
     meta_path.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
     return current

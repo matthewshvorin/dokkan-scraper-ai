@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Leader Finder — Dokkan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#0b0f14; --card:#101720; --ink:#e9f2ff; --muted:#9fb0c7; --accent:#5bd1ff; --chip:#182330; --chipb:#223144; --slot:#0e1520;
+}
+:root[data-theme="light"]{
+  --bg:#f7faff; --card:#ffffff; --ink:#0b1623; --muted:#3e526d; --accent:#0d7bd0; --chip:#eef3fb; --chipb:#d9e6f8; --slot:#f2f6ff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:
+    radial-gradient(1200px 800px at 15% -10%, rgba(91,209,255,.10), transparent),
+    radial-gradient(1000px 600px at 100% 0, rgba(155,255,221,.08), transparent),
+    linear-gradient(180deg, #09101a, var(--bg));
+  color:var(--ink); font:14px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial;
+}
+a{color:var(--accent); text-decoration:none}
+.wrap{max-width:1500px; margin:0 auto; padding:24px 16px 64px}
+
+.header{display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap}
+.header h1{font-size:28px; margin:0}
+.btn{font-size:12px; padding:8px 12px; background:#0f151d; border:1px solid #1e2a3a; border-radius:10px; color:#fff; cursor:pointer}
+.btn:hover{ border-color:#38506f }
+:root[data-theme="light"] .btn{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+
+.cols{display:grid; grid-template-columns: 1fr 1.2fr; gap:16px}
+@media (max-width: 1200px){ .cols{ grid-template-columns:1fr } }
+
+.panel{background:var(--card); border:1px solid #1e2a3a; border-radius:12px; padding:12px}
+:root[data-theme="light"] .panel{ border-color:#dbe7ff }
+.h2{margin:0 0 8px; font-size:16px}
+.controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.input, .select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radius:10px; padding:8px 10px}
+:root[data-theme="light"] .input, :root[data-theme="light"] .select{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+.select{cursor:pointer}
+.switch{display:flex; gap:6px; align-items:center; font-size:12px; opacity:.9}
+
+.grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; margin-top:10px}
+.card{background:linear-gradient(180deg, #0f151d, #0b1016); border:1px solid #1b2636; border-radius:14px; overflow:hidden; position:relative; transition:.12s}
+:root[data-theme="light"] .card{ background:#fff; border-color:#dbe7ff }
+.card .img{background:#0c121a}
+:root[data-theme="light"] .card .img{ background:#eef3fb }
+.card .img img{width:100%; height:auto; display:block}
+.card .body{padding:10px}
+.pills{display:flex; gap:6px; flex-wrap:wrap}
+.pill{font-size:11px; background:#0b1118; padding:4px 8px; border:1px solid #1c2838; border-radius:999px; color:#cfe2ff}
+:root[data-theme="light"] .pill{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.ctitle{font-weight:700; margin:4px 0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{background:#0b1118; border:1px solid #1f2b3b; color:#d2e4ff; font-size:12px; padding:5px 9px; border-radius:999px}
+:root[data-theme="light"] .chip{ background:#eef3fb; border-color:#d9e6f8; color:#0b1623 }
+.cactions{display:flex; gap:6px; flex-wrap:wrap}
+.button{font-size:12px; padding:6px 10px; background:#0f151d; border:1px solid #1e2a3a; border-radius:8px; color:#fff; cursor:pointer}
+.button:hover{border-color:#38506f}
+:root[data-theme="light"] .button{ background:#fff; color:#0b1623; border-color:#c7d5ea }
+
+.card.sel{ outline:2px solid rgba(91,209,255,.55) }
+.card.dim{ opacity:.35; filter:grayscale(.3) }
+.badge{position:absolute; top:8px; right:8px; font-size:11px; background:#0b1118; color:#d2e4ff; border:1px solid #1f2b3b; padding:3px 7px; border-radius:999px}
+
+.tray{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+.tag{display:flex; gap:6px; align-items:center; padding:5px 9px; border-radius:999px; background:#0d1724; border:1px solid #223246; color:#d8e8ff; font-size:12px; max-width:280px}
+:root[data-theme="light"] .tag{ background:#fff; border-color:#dbe7ff; color:#0b1623 }
+.tag .x{cursor:pointer; opacity:.8}
+
+.centerTop{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+.note{opacity:.85; font-size:12px}
+.small{font-size:12px; opacity:.9}
+.hr{height:1px; background:linear-gradient(90deg, transparent, #2b3d57 40%, #2b3d57 60%, transparent); margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>👑 Leader Finder</h1>
+    <a class="btn" href="/">← All units</a>
+    <a class="btn" href="/team">🧩 Team Builder</a>
+    <button class="btn" id="themeBtn">🌓 Theme</button>
+  </div>
+
+  <div class="cols">
+    <!-- LEFT: pick units -->
+    <div class="panel">
+      <div class="h2">Pick Units (multi-select)</div>
+      <div class="controls">
+        <input class="input" id="qUnits" placeholder="Search name, ID, type, category…" style="flex:1; min-width:240px" />
+        <label>Type
+          <select class="select" id="tUnits">
+            <option value="">All</option>
+            <option>AGL</option><option>TEQ</option><option>INT</option><option>STR</option><option>PHY</option>
+          </select>
+        </label>
+        <label class="switch">Favorites <input type="checkbox" id="fUnits"></label>
+        <button class="btn" id="clearSel">Clear</button>
+      </div>
+      <div class="tray" id="selectedTray"></div>
+      <div class="grid" id="unitGrid"></div>
+      <div class="small" id="unitHint" style="margin-top:6px; opacity:.75">Tip: Click a card to toggle selection (up to 6). Greyed cards would result in no leaders at current settings.</div>
+    </div>
+
+    <!-- RIGHT: leaders -->
+    <div class="panel">
+      <div class="centerTop">
+        <div class="h2" style="margin:0">Leaders covering all selected</div>
+        <div class="controls">
+          <label>Min Boost</label>
+          <select class="select" id="minBoost">
+            <option value="170" selected>170%+</option>
+            <option value="200">200%+</option>
+            <option value="220">220%+</option>
+            <option value="0">Any</option>
+          </select>
+          <label class="switch"><input type="checkbox" id="includeAllTypes"> Include All-Types</label>
+          <button class="btn" id="shareLink">Copy share link</button>
+        </div>
+      </div>
+
+      <div class="note" id="stateNote">Select 2–6 units to begin.</div>
+      <div class="grid" id="leaderGrid" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const UNITS = {{ units|tojson }};
+const $ = (s,root=document)=>root.querySelector(s);
+const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
+
+/* theme */
+(function(){
+  const root = document.documentElement;
+  const saved = localStorage.getItem("dokkan.theme") || "dark";
+  root.setAttribute("data-theme", saved);
+  $("#themeBtn").addEventListener("click", ()=>{
+    const cur = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+    root.setAttribute("data-theme", cur);
+    localStorage.setItem("dokkan.theme", cur);
+  });
+})();
+
+/* favorites */
+const isFav = u => { try{ return (JSON.parse(localStorage.getItem("dokkan.favs")||"[]")).includes(u.id); }catch{ return false; } };
+
+/* ====== Parsing leader skills (ATK/DEF-aware) ====== */
+function extractKiMax(text){
+  const kis = Array.from(text.matchAll(/Ki\s*\+(\d+)/ig)).map(m=>parseInt(m[1],10));
+  return kis.length ? Math.max(...kis) : null;
+}
+function extractAtkDefPct(segment){
+  // Heuristic: take the highest % that is within ~35 chars of "ATK" or "DEF" or "ATK & DEF" or "HP, ATK & DEF"
+  const cand = Array.from(segment.matchAll(/\+(\d+)%/g)).map(m=>{
+    const pct = parseInt(m[1],10);
+    const i = m.index;
+    const win = segment.slice(Math.max(0,i-40), i+40).toUpperCase();
+    const hasAtkDef = /ATK\s*&\s*DEF|ATK\s*,?\s*DEF|ATK|DEF/.test(win) || /HP\s*,\s*ATK\s*&\s*DEF/.test(win);
+    return {pct, ok: hasAtkDef};
+  }).filter(x=>x.ok).map(x=>x.pct);
+  return cand.length ? Math.max(...cand) : null;
+}
+function parseLeaderSkill(textRaw){
+  const out = {all_types:false, ki:null, primary:[], secondary:[], main_atkdef:null, add_atkdef:null, secondary_total_atkdef:null};
+  if(!textRaw) return out;
+  const t = textRaw.replace(/Key/g,"Ki").replace(/\s+/g,' ').trim();
+  out.all_types = /all types?/i.test(t);
+  out.ki = extractKiMax(t);
+
+  // Split main vs "plus an additional ..."
+  const idx = t.toLowerCase().indexOf("plus an additional");
+  const head = idx>=0 ? t.slice(0,idx) : t;
+  const tail = idx>=0 ? t.slice(idx) : "";
+
+  out.main_atkdef = extractAtkDefPct(head);
+  out.primary = Array.from(head.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
+
+  if(tail){
+    out.secondary = Array.from(tail.matchAll(/"([^"]+)"/g)).map(m=>m[1]);
+    out.add_atkdef = extractAtkDefPct(tail);
+    if(out.main_atkdef!=null && out.add_atkdef!=null){
+      out.secondary_total_atkdef = out.main_atkdef + out.add_atkdef;
+    }
+  }
+  return out;
+}
+
+/* Compute unit's ATK/DEF boost under leader */
+function atkdefBoostForUnit(parsedLeader, unit){
+  if(!parsedLeader) return 0;
+  if(parsedLeader.all_types){
+    return parsedLeader.main_atkdef || 0;
+  }
+  const cats = new Set(unit.categories||[]);
+  const hitPrimary = (parsedLeader.primary||[]).some(c=>cats.has(c));
+  if(!hitPrimary) return 0;
+  let total = parsedLeader.main_atkdef || 0;
+  if(parsedLeader.secondary && parsedLeader.add_atkdef){
+    const hitSec = parsedLeader.secondary.some(c=>cats.has(c));
+    if(hitSec){
+      total = Math.max(total, parsedLeader.secondary_total_atkdef || total);
+    }
+  }
+  return total;
+}
+
+/* Pre-parse all leaders once */
+const PARSED = {};
+UNITS.forEach(u=>{
+  PARSED[u.id] = parseLeaderSkill(u.leader_skill || "");
+});
+
+/* ====== UI State ====== */
+const qUnits=$("#qUnits"), tUnits=$("#tUnits"), fUnits=$("#fUnits");
+const unitGrid=$("#unitGrid"), selectedTray=$("#selectedTray"), unitHint=$("#unitHint");
+const minBoostSel=$("#minBoost"), includeAllTypes=$("#includeAllTypes");
+const leaderGrid=$("#leaderGrid"), stateNote=$("#stateNote"), shareLink=$("#shareLink");
+const clearSel=$("#clearSel");
+const MAX_SELECTED = 5;
+let selected = []; // array of unit IDs
+
+/* Helpers */
+function idToUnit(id){ return UNITS.find(u=>u.id===id) || null; }
+function dedupe(arr){ return Array.from(new Set(arr)); }
+function selectionValid(){ return selected.length>=2; }
+
+/* Unit library render + click-to-select */
+function filterUnits(){
+  const q = (qUnits.value||"").toLowerCase().trim();
+  const t = tUnits.value;
+  const fav = fUnits.checked;
+  return UNITS.filter(u=>{
+    const okT = t ? (u.type===t) : true;
+    const okF = fav ? isFav(u) : true;
+    let okQ = true;
+    if(q){
+      const cats = (u.categories||[]).join(" ").toLowerCase();
+      okQ = u.name.toLowerCase().includes(q) || u.id.includes(q) || (u.type||"").toLowerCase().includes(q) || cats.includes(q);
+    }
+    return okT && okF && okQ;
+  }).sort((a,b)=> a.rarity_rank - b.rarity_rank || a.name.localeCompare(b.name));
+}
+
+function leadersForSelection(ids){
+  const min = parseInt(minBoostSel.value,10)||0;
+  const includeAT = includeAllTypes.checked;
+  const cand = UNITS.filter(u=>{
+    if(!(u.leader_skill||"").trim()) return false;
+    if(!includeAT && PARSED[u.id]?.all_types) return false;
+    return true;
+  });
+  const ok = [];
+  for(const L of cand){
+    const parsed = PARSED[L.id];
+    let allOK = true;
+    const boosts = [];
+    for(const id of ids){
+      const u = idToUnit(id);
+      const b = atkdefBoostForUnit(parsed, u);
+      boosts.push(b);
+      if(!(b>=min && b>0)){ allOK=false; break; }
+    }
+    if(allOK){
+      const main = parsed.main_atkdef || 0;
+      const ki = parsed.ki || 0;
+      const minAcross = boosts.length? Math.min(...boosts) : 0;
+      ok.push({L, main, ki, boosts, minAcross});
+    }
+  }
+  ok.sort((a,b)=>
+    b.minAcross - a.minAcross || b.main - a.main || (a.L.rarity_rank - b.L.rarity_rank) || a.L.name.localeCompare(b.L.name)
+  );
+  return ok;
+}
+
+function renderUnitGrid(){
+  const list = filterUnits();
+  const min = parseInt(minBoostSel.value,10)||0;
+  const includeAT = includeAllTypes.checked;
+  const current = new Set(selected);
+
+  // Pre-compute “would break results” dimming
+  let currentLeaders = selectionValid()? leadersForSelection(selected) : null;
+  unitGrid.innerHTML = "";
+  list.slice(0,200).forEach(u=>{
+    const el = document.createElement("article");
+    el.className = "card";
+    el.dataset.id = u.id;
+    if(current.has(u.id)) el.classList.add("sel");
+
+    // If adding this unit makes leaders empty, dim it
+    if(selectionValid()){
+      const nextSel = current.has(u.id) ? selected.filter(x=>x!==u.id) : dedupe([...selected, u.id]).slice(0,MAX_SELECTED);
+      const bad = nextSel.length>=2 && leadersForSelection(nextSel).length===0;
+      if(!current.has(u.id) && bad) el.classList.add("dim");
+    }
+
+    const rarity = u.rarity || '';
+    el.innerHTML = `
+      <div class="img"><img src="${u.img || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt=""></div>
+      <div class="body">
+        <div class="pills"><span class="pill">${u.type||''}</span><span class="pill">${rarity}</span></div>
+        <div class="ctitle" title="${u.name}">${u.name}</div>
+      </div>
+      ${current.has(u.id) ? '<div class="badge">Selected</div>' : ''}
+    `;
+    unitGrid.appendChild(el);
+  });
+}
+
+function renderSelectedTray(){
+  selectedTray.innerHTML = selected.map(id=>{
+    const u = idToUnit(id);
+    return `<span class="tag" data-id="${u.id}" title="${u.name}">
+      <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${u.name}</span>
+      <span class="x" title="Remove">✕</span>
+    </span>`;
+  }).join("");
+}
+
+/* Leaders grid (clean middle) */
+function renderLeaders(){
+  if(!selectionValid()){
+    stateNote.textContent = selected.length? "Pick at least one more unit." : "Select 2–6 units to begin.";
+    leaderGrid.innerHTML = "";
+    return;
+  }
+  const picks = leadersForSelection(selected);
+  stateNote.textContent = picks.length ? `Showing ${picks.length} leaders` : "No leaders match. Adjust min boost or include All-Types.";
+  leaderGrid.innerHTML = "";
+
+  picks.slice(0,150).forEach(x=>{
+    const u = x.L;
+    const chips = [
+      `<span class="pill">ATK/DEF ${x.main || 0}%</span>`,
+      x.ki ? `<span class="pill">Ki +${x.ki}</span>` : "",
+      PARSED[u.id]?.all_types ? `<span class="pill">All-Types</span>` : ""
+    ].filter(Boolean).join("");
+
+    // build team param (best effort)
+    const teamParam = selected.filter(id=>id!==u.id).join(",");
+
+    const el = document.createElement("article");
+    el.className="card";
+    el.innerHTML = `
+      <div class="img"><img src="${u.img || '/assets/dokkaninfo.com/images/dokkan-info-logo.png'}" alt=""></div>
+      <div class="body">
+        <div class="pills">${chips}</div>
+        <div class="ctitle" title="${u.name}">${u.name}</div>
+        <div class="chips" style="margin-top:6px"><span class="chip">Min across picks: ${x.minAcross}%</span><span class="chip">${selected.length} / ${selected.length} covered</span></div>
+        <div class="cactions" style="margin-top:6px">
+          <a class="button" href="/unit/${u.id}" target="_blank">Details ↗</a>
+          <a class="button" href="/team?leader=${u.id}&min=${parseInt(minBoostSel.value,10)||0}${teamParam?`&team=${teamParam}`:''}" target="_blank">Use as Leader ↗</a>
+        </div>
+      </div>`;
+    leaderGrid.appendChild(el);
+  });
+}
+
+/* Event delegation — stable, no once:true */
+unitGrid.addEventListener("click", (e)=>{
+  const card = e.target.closest(".card");
+  if(!card) return;
+  const id = card.dataset.id;
+  if(selected.includes(id)){
+    selected = selected.filter(x=>x!==id);
+  }else{
+    if(selected.length>=MAX_SELECTED){ return; }
+    selected = dedupe([...selected, id]);
+  }
+  renderSelectedTray();
+  renderUnitGrid();
+  renderLeaders();
+  syncShare();
+});
+
+selectedTray.addEventListener("click", (e)=>{
+  const t = e.target.closest(".tag .x");
+  if(!t) return;
+  const id = t.parentElement.dataset.id;
+  selected = selected.filter(x=>x!==id);
+  renderSelectedTray();
+  renderUnitGrid();
+  renderLeaders();
+  syncShare();
+});
+
+/* filters */
+[qUnits, tUnits, fUnits].forEach(el=> el.addEventListener("input", ()=>{ renderUnitGrid(); }));
+[minBoostSel, includeAllTypes].forEach(el=> el.addEventListener("change", ()=>{
+  renderUnitGrid();
+  renderLeaders();
+  syncShare();
+}));
+clearSel.addEventListener("click", ()=>{
+  selected = [];
+  renderSelectedTray();
+  renderUnitGrid();
+  renderLeaders();
+  syncShare();
+});
+
+/* share */
+function syncShare(){
+  const p = new URLSearchParams();
+  if(selected.length) p.set("sel", selected.join(","));
+  const min = parseInt(minBoostSel.value,10)||0;
+  if(min) p.set("min", String(min));
+  if(includeAllTypes.checked) p.set("alltypes","1");
+  history.replaceState(null, "", "?"+p.toString());
+}
+$("#shareLink").addEventListener("click", ()=>{
+  syncShare();
+  navigator.clipboard?.writeText(location.href);
+  shareLink.textContent="Link copied!";
+  setTimeout(()=> shareLink.textContent="Copy share link", 1200);
+});
+
+/* init + restore */
+(function restore(){
+  const p = new URLSearchParams(location.search);
+  const sel = (p.get("sel")||"").split(",").map(s=>s.trim()).filter(Boolean);
+  const min = parseInt(p.get("min")||"170",10)||170;
+  const all = p.get("alltypes")==="1";
+  selected = sel.filter(idToUnit).slice(0,MAX_SELECTED);
+  minBoostSel.value = String(min);
+  includeAllTypes.checked = !!all;
+})();
+renderSelectedTray();
+renderUnitGrid();
+renderLeaders();
+</script>
+</body>
+</html>
