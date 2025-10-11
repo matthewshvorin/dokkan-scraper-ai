@@ -640,6 +640,14 @@ body{
     linear-gradient(180deg, #09101a, var(--bg));
   color:var(--ink); font:14px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial;
 }
+body.party::before{
+  content:""; position:fixed; inset:-20%; pointer-events:none; z-index:9999; opacity:.18;
+  background:conic-gradient(from 0deg,
+    #5bd1ff, #9bffdd, #ffd166, #8b5cf6, #10b981, #ef4444, #f59e0b, #5bd1ff);
+  mix-blend-mode:screen; filter:blur(6px);
+  animation:spin 12s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
 a{color:var(--accent); text-decoration:none}
 .wrap{max-width:1400px; margin:0 auto; padding:24px 16px 64px}
 
@@ -659,7 +667,11 @@ a{color:var(--accent); text-decoration:none}
 :root[data-theme="light"] .searchbar .k{ background:#eef3fb; border-color:#d9e6f8; color:#3e526d }
 
 /* controls */
-.controls{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:12px 0 18px}
+.controls{
+  display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:12px 0 18px;
+  align-items:start; /* <<< don't stretch panels to equal height */
+}
+.controls .panel{ align-self:start } /* <<< ensure left doesn't match tall right */
 @media (max-width: 1000px){ .controls{ grid-template-columns:1fr } }
 .panel{background:#0f151d; border:1px solid #1e2a3a; border-radius:12px; padding:10px}
 :root[data-theme="light"] .panel{ background:#fff; border-color:#dbe7ff }
@@ -693,6 +705,11 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
 
 /* grid cards */
 .grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(var(--cardw), 1fr)); gap:14px}
+.ghead{
+  grid-column:1/-1; padding:6px 2px; margin-top:2px; letter-spacing:.5px; font-weight:800; opacity:.9;
+  border-bottom:1px dashed #223246;
+}
+:root[data-theme="light"] .ghead{ border-bottom-color:#c7d5ea }
 .card{
   position:relative; border:1px solid #1b2636; border-radius:16px; background:linear-gradient(180deg, #0f151d, #0b1016);
   overflow:hidden; transition: transform .14s ease, box-shadow .14s ease, border-color .14s;
@@ -753,8 +770,9 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
     </div>
     <a class="btn" href="/team">🧩 Team Builder</a>
     <a class="btn" href="/finder">👑 Leader Finder</a>
-    <button class="btn" id="randomBtn">🎲 Random</button>
+    <button class="btn" id="randomBtn" title="Alt-click for LR only">🎲 Random</button>
     <button class="btn" id="themeBtn" title="Toggle theme">🌓 Theme</button>
+    <button class="btn" id="partyBtn" title="Toggle party mode">✨ Party</button>
   </div>
 
   <div class="controls">
@@ -787,6 +805,16 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
             <option value="eza">EZA</option>
             <option value="seza">S-EZA</option>
           </select>
+        </label>
+        <label>Awakening
+          <select id="awakening" title="Fold hides SSR when a UR/LR exists">
+            <option value="fold" selected>Fold Unawakened</option>
+            <option value="full">Fully Awakened Only</option>
+            <option value="all">Show All</option>
+          </select>
+        </label>
+        <label class="switch" style="display:flex; gap:6px; align-items:center">
+          <input type="checkbox" id="groupRarity" checked> Group by rarity
         </label>
         <label class="help">Tip: Shift-click a chip to select <em>only</em> that item.</label>
       </div>
@@ -910,7 +938,7 @@ select{background:#0f151d; color:#e9f2ff; border:1px solid #233246; border-radiu
 const $ = (s,root=document)=>root.querySelector(s);
 const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
 
-/* theme */
+/* theme + party */
 (function(){
   const root = document.documentElement;
   const saved = localStorage.getItem("dokkan.theme") || "dark";
@@ -919,6 +947,9 @@ const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
     const cur = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
     root.setAttribute("data-theme", cur);
     localStorage.setItem("dokkan.theme", cur);
+  });
+  $("#partyBtn").addEventListener("click", ()=>{
+    document.body.classList.toggle("party");
   });
 })();
 
@@ -938,7 +969,7 @@ document.addEventListener("click", (e)=>{
   const id = b.dataset.id;
   let arr = getFavs();
   if(arr.includes(id)) arr = arr.filter(x=>x!==id); else arr.push(id);
-  setFavs(arr); renderFavButtons(); applyFilters();
+  setFavs(arr); renderFavButtons(); applyFilters(); regroup();
 });
 renderFavButtons();
 
@@ -953,6 +984,8 @@ const favFilter = $("#favFilter");
 const clearFilters = $("#clearFilters");
 const shareFilters = $("#shareFilters");
 const artSel = $("#art");
+const awakeningSel = $("#awakening");
+const groupRarity = $("#groupRarity");
 const facetCats = $("#facetCats");
 const facetLinks = $("#facetLinks");
 const activeFilterBar = $("#activeFilterBar");
@@ -992,6 +1025,14 @@ let linkActive = new Set();
 let catMode = localStorage.getItem("dokkan.catmode") || "any";   // "any" | "all"
 let linkMode = localStorage.getItem("dokkan.linkmode") || "any"; // "any" | "all"
 
+// persist awakening/grouping
+(function initAwakAndGroup(){
+  const savedAw = localStorage.getItem("dokkan.awakmode");
+  const savedGrp = localStorage.getItem("dokkan.grouprarity");
+  if(savedAw){ awakeningSel.value = savedAw; }
+  if(savedGrp!=null){ groupRarity.checked = savedGrp==="1"; }
+})();
+
 // set initial seg buttons
 function initSeg(id, mode){
   const box = $(id);
@@ -1018,6 +1059,7 @@ function handleFacetClick(container, set, key){
     }
     renderActiveBar();
     applyFilters();
+    regroup();
     syncShare();
   });
 }
@@ -1033,11 +1075,23 @@ mech.addEventListener("click", (e)=>{
   else{ mechActive.add(v); chip.classList.add("active"); }
   renderActiveBar();
   applyFilters();
+  regroup();
   syncShare();
 });
 favFilter.addEventListener("click", ()=>{
   favFilter.classList.toggle("active");
-  applyFilters(); syncShare();
+  applyFilters(); regroup(); syncShare();
+});
+
+// awakening + grouping
+awakeningSel.addEventListener("change", ()=>{
+  localStorage.setItem("dokkan.awakmode", awakeningSel.value);
+  renderActiveBar();
+  applyFilters(); regroup(); syncShare();
+});
+groupRarity.addEventListener("change", ()=>{
+  localStorage.setItem("dokkan.grouprarity", groupRarity.checked ? "1":"0");
+  regroup(); syncShare();
 });
 
 // seg controls
@@ -1046,14 +1100,14 @@ $("#catMode").addEventListener("click", (e)=>{
   catMode = b.dataset.mode;
   $$(".segbtn", $("#catMode")).forEach(x=>x.classList.toggle("active", x===b));
   localStorage.setItem("dokkan.catmode", catMode);
-  applyFilters(); syncShare();
+  applyFilters(); regroup(); syncShare();
 });
 $("#linkMode").addEventListener("click", (e)=>{
   const b = e.target.closest(".segbtn"); if(!b) return;
   linkMode = b.dataset.mode;
   $$(".segbtn", $("#linkMode")).forEach(x=>x.classList.toggle("active", x===b));
   localStorage.setItem("dokkan.linkmode", linkMode);
-  applyFilters(); syncShare();
+  applyFilters(); regroup(); syncShare();
 });
 
 // clear / share
@@ -1066,9 +1120,11 @@ clearFilters.addEventListener("click", ()=>{
   favFilter.classList.remove("active");
   sortSel.value="newest";
   catMode="any"; linkMode="any";
+  awakeningSel.value="fold";
+  groupRarity.checked=true;
   initSeg("#catMode", catMode); initSeg("#linkMode", linkMode);
   renderActiveBar();
-  applyFilters(); sortCards("newest"); syncShare();
+  applyFilters(); sortCards("newest"); regroup(); syncShare();
 });
 
 shareFilters.addEventListener("click", ()=>{
@@ -1078,6 +1134,27 @@ shareFilters.addEventListener("click", ()=>{
 });
 
 function normalize(s){ return (s||"").toLowerCase().trim(); }
+function nameKeyFromText(n){
+  return normalize(n)
+    .replace(/\[[^\]]*\]/g," ")  // strip [tags]
+    .replace(/\([^)]*\)/g," ")   // strip (notes)
+    .replace(/[-–•☆★◇]/g," ")
+    .replace(/\s+/g," ").trim();
+}
+
+// Build map for folding: best rarity per normalized name across ALL cards
+const FOLD_MAP = (function(){
+  const rank = {"SSR":0,"UR":1,"LR":2};
+  const map = new Map();
+  $$(".card", grid).forEach(el=>{
+    const key = nameKeyFromText(el.dataset.name||"");
+    const r = (el.dataset.rarity||"").toUpperCase();
+    const cur = map.get(key) ?? -1;
+    const val = rank[r] ?? -1;
+    if(val > cur){ map.set(key, val); }
+  });
+  return map;
+})();
 
 // Active filter bar render (removable chips)
 function renderActiveBar(){
@@ -1088,6 +1165,11 @@ function renderActiveBar(){
   if(fType.value){ chips.push({k:"Type", v:fType.value}); }
   if(fRarity.value){ chips.push({k:"Rarity", v:fRarity.value}); }
   if(q.value.trim()){ chips.push({k:"Search", v:q.value.trim()}); }
+  if(awakeningSel.value!=="fold"){ // default is Fold
+    const label = awakeningSel.value==="full" ? "Awakening: Full Only" : "Awakening: All";
+    chips.push({k:"Awakening", v: label});
+  }
+  if(groupRarity.checked){ chips.push({k:"Grouping", v:"Rarity"}); }
 
   if(!chips.length){ activeFilterBar.innerHTML=""; return; }
 
@@ -1107,8 +1189,11 @@ function renderActiveBar(){
     if(kind==="Type"){ fType.value=""; }
     if(kind==="Rarity"){ fRarity.value=""; }
     if(kind==="Search"){ q.value=""; }
+    if(kind==="Awakening"){ awakeningSel.value="fold"; }
+    if(kind==="Grouping"){ groupRarity.checked=false; }
     renderActiveBar();
     applyFilters();
+    regroup();
     syncShare();
   }, {once:true});
 }
@@ -1120,12 +1205,14 @@ function applyFilters(){
   const favOnly = favFilter.classList.contains("active");
   const catArr = Array.from(catActive);
   const linkArr = Array.from(linkActive);
+  const awakMode = awakeningSel.value; // "fold" | "full" | "all"
   let cards = $$(".card", grid);
   let visible = 0;
 
   for(const el of cards){
     const id   = (el.dataset.id||"");
-    const name = normalize(el.dataset.name);
+    const name = el.dataset.name || "";
+    const nkey = nameKeyFromText(name);
     const type = (el.dataset.type||"").toUpperCase();
     const rarity=(el.dataset.rarity||"").toUpperCase();
     const catsStr = normalize(el.dataset.cats);
@@ -1135,7 +1222,7 @@ function applyFilters(){
     let ok = true;
 
     if(txt){
-      ok = name.includes(txt) || id.includes(txt) || type.toLowerCase().includes(txt)
+      ok = normalize(name).includes(txt) || id.includes(txt) || type.toLowerCase().includes(txt)
            || rarity.toLowerCase().includes(txt) || catsStr.includes(txt) || linksStr.includes(txt);
     }
     if(ok && tFilter){ ok = type === tFilter.toUpperCase(); }
@@ -1159,6 +1246,19 @@ function applyFilters(){
     }
     if(ok && favOnly){ ok = isFav(id); }
 
+    // Awakening logic
+    if(ok){
+      if(awakMode==="full"){
+        ok = (rarity==="UR" || rarity==="LR");
+      }else if(awakMode==="fold"){
+        if(rarity==="SSR"){
+          const best = FOLD_MAP.get(nkey) ?? -1; // 0=SSR,1=UR,2=LR
+          ok = !(best>=1); // hide SSR if there's UR/LR counterpart
+        }
+      }
+      // "all" shows everything
+    }
+
     el.style.display = ok ? "" : "none";
     if(ok) visible++;
   }
@@ -1181,14 +1281,19 @@ function sortCards(mode){
 
 [q, sortSel, fType, fRarity].forEach(el=>{
   el.addEventListener('input', ()=>{
-    if(el===sortSel){ sortCards(sortSel.value); }
-    else{ renderActiveBar(); applyFilters(); syncShare(); }
+    if(el===sortSel){ sortCards(sortSel.value); regroup(); }
+    else{ renderActiveBar(); applyFilters(); regroup(); syncShare(); }
   });
 });
 
-// random
-$("#randomBtn").addEventListener("click", ()=>{
-  const cards = $$(".card").filter(c=>c.style.display!=="none");
+// random (Alt-click for LR only)
+$("#randomBtn").addEventListener("click", (e)=>{
+  const onlyLR = e.altKey;
+  const cards = $$(".card").filter(c=>{
+    if(c.style.display==="none") return false;
+    if(onlyLR) return ((c.dataset.rarity||"").toUpperCase()==="LR");
+    return true;
+  });
   if(!cards.length) return;
   const pick = cards[Math.floor(Math.random()*cards.length)];
   window.location.href = "/unit/" + pick.dataset.id;
@@ -1205,6 +1310,8 @@ function syncShare(){
   if(linkActive.size){ p.set("links", Array.from(linkActive).join(",")); p.set("linkm", linkMode); }
   if(favFilter.classList.contains("active")) p.set("fav","1");
   p.set("sort", sortSel.value);
+  if(awakeningSel.value && awakeningSel.value!=="fold") p.set("awak", awakeningSel.value);
+  if(groupRarity.checked===false) p.set("grp","0"); // default is on
   history.replaceState(null, "", "?"+p.toString());
 }
 
@@ -1233,18 +1340,52 @@ function syncShare(){
   }
   if(p.get("fav")==="1") favFilter.classList.add("active");
   if(p.get("sort")) sortSel.value = p.get("sort");
+  const awak = p.get("awak");
+  if(awak){ awakeningSel.value = awak; }
+  const grp = p.get("grp");
+  if(grp==="0"){ groupRarity.checked = false; }
 
   renderActiveBar();
 })();
 
+// rarity grouping (LR → UR → SSR)
+function regroup(){
+  // remove old headers
+  $$(".ghead", grid).forEach(h=>h.remove());
+  if(!groupRarity.checked){ return; }
+  const vis = $$(".card", grid).filter(el=> el.style.display!=="none");
+  const groups = {LR:[], UR:[], SSR:[]};
+  vis.forEach(el=>{
+    const r = (el.dataset.rarity||"").toUpperCase();
+    if(groups[r]) groups[r].push(el); else groups.SSR.push(el); // fallback
+  });
+  const frag = document.createDocumentFragment();
+  ["LR","UR","SSR"].forEach(label=>{
+    const arr = groups[label];
+    if(!arr || !arr.length) return;
+    const h = document.createElement("div");
+    h.className = "ghead"; h.textContent = `${label} (${arr.length})`;
+    frag.appendChild(h);
+    arr.forEach(el=> frag.appendChild(el));
+  });
+  grid.appendChild(frag);
+}
+
 // initial
 sortCards(sortSel.value || "newest");
 applyFilters();
+regroup();
 renderFavButtons();
+
+// keyboard: quick toggles
+document.addEventListener('keydown',(e)=>{
+  if(e.key.toLowerCase()==='g' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); groupRarity.checked=!groupRarity.checked; regroup(); syncShare(); }
+});
 </script>
 </body>
 </html>
 """
+
 
 DETAIL_HTML = r"""<!doctype html>
 <html lang="en" data-theme="dark">
